@@ -1,0 +1,456 @@
+\documentclass[]{article}
+
+\usepackage{amsthm} %qed
+\usepackage[cmex10]{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{color}
+
+
+\newcommand{\BIN}{\begin{bmatrix}}
+\newcommand{\BOUT}{\end{bmatrix}}
+\newcommand{\cred}[1]{\textcolor{red}{#1}}
+\newcommand{\cblue}[1]{\textcolor{blue}{#1}}
+\newcommand\eqbydef{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily def}}}{=}}}
+
+%\newcommand{\mdiff1}[1]{\frac{\partial}{\partial #1}}
+\newcommand{\diff}[2]{\dfrac{\partial #1}{\partial #2}}
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+
+\DeclareMathOperator*{\minimize}{\min.}
+\newcommand{\st}{\mbox{s.t.}}
+
+\setcounter{MaxMatrixCols}{20}
+
+
+\begin{document}
+
+\title{\Large Dedicated optimization for MPC with convex boundedness constraint}
+\author{Adrien Escande}
+
+\maketitle
+
+\section{Overview -- main idea}
+We are considering a problem of the form
+\begin{align}
+  \minimize_{\Phi \in \mathbb{R}^n}\ & \left\| J \Phi \right\|^2 \label{eq:problem}\\
+  \st \ & \sum_{j=0}^{n-1} \frac{a_j}{\sqrt{\Phi_{j+1}} + \sqrt{\Phi}_j} - \alpha \sqrt{\Phi_n} = b \nonumber\\
+        & l_j \leq \Phi_j - \Phi_{j-1} \leq u_j, \quad j=1..n \nonumber\\
+        & \Phi_n^- \leq \Phi_n \leq \Phi_n^+ \nonumber
+\end{align}
+where $\alpha$ is either $0$ or positive and, by convention, $\Phi_0 = 0$. Lower and upper bounds can be equal to denote an equality constraint.
+
+The idea we want to explore here is to pass the equality constraint in the objective with a exact penalty function, and to derive a custom SLQP for solving the problem. The motivation behind this is that the variables live in a zonotope (plus a bound on $\Phi_n$), with a particularly easy form (it is a skewed box).
+
+A SLQP iteration consist in finding an active set guess by solving a LP including a $L_\infty$ trust region, then solving an equality-only QP (EQP) with a spherical trust region. If we can make this two steps efficient, we should be gaining a lot over generic non-linear solver.
+
+
+\section{Linear constraints}
+We focus here on the constraints
+\begin{align*}
+ & l_j \leq x_j - x_{j-1} \leq u_j, \quad j=1..n \label{eq:inequality}\\
+ & x_n^- \leq x_n \leq x_n^+
+\end{align*}
+
+\subsection{Constraint matrix}
+The first set of inequality constraints can be written $l \leq C_Z \leq u$ with
+\begin{equation}
+  C_Z = \BIN  1 &  0 & 0 & \ldots &  0 & 0\\
+             -1 &  1 & 0 & \ldots &  0 & 0\\
+              0 & -1 & 1 &        &  0 & 0\\
+                & \vdots &&\ddots &    & \vdots \\
+              0 &  0 & 0 & \ldots & -1 & 1\BOUT 
+\end{equation}
+This matrix has full rank.
+
+The whole linear constraints writes
+\begin{equation}
+  \BIN l \\ x_n^- \BOUT \leq C x \leq \BIN u \\ x_n^+ \BOUT, \quad \mbox{with}\ C = \BIN C_Z \\ e_n^T\BOUT
+  \label{eq:feasibility}
+\end{equation}
+where $e_n$ is the $n$-th column of the $n\times n$ identity matrix.
+
+\subsection{Expression as a zonope}
+Let's define $H = \left\{x \in \mathbb{R}^n \vert\ l \leq C_Z \leq u\right\}$, 
+\begin{equation}
+L = \BIN 1 & 0 & \ldots & 0 \\ 1 & 1 &\ldots & 0 \\ & & \ddots & \\ 1 & 1 &\ldots & 1\BOUT, \qquad D = \BIN u_1 - l_1 & & 0 \\ & \ddots & \\ 0 & & u_n - l_n\BOUT
+\end{equation}
+and $Z = Ll + LD \left[0,1\right]^n$. Z is a zonotope. We show that $H = Z$.\newline
+TODO: proof
+\newline
+The constraints~(\ref{eq:feasibility}) are thus a zonotope cut by zero to two ``horizontal'' hyperplanes.
+Note that, alternatively, $Z = Ll + L \mathcal{B}$ where $\mathcal{B}$ is the box defined by $l$ and $u$.
+
+\subsection{Nullspace of active constraints}
+Let's $\mathcal{A}$ be an active set and define $C_\mathcal{A}$ as the submatrix of $C$ corresponding to the active constraints.
+Because $C_Z$ is full rank and $e_n^T = \BIN 1 & 1 & \ldots & 1 \BOUT C_Z$ (\emph{i.e.} is a linear combination of \emph{all} lines of $C_Z$), $C_\mathcal{A}$ is always full row rank, except for the obvious case $\mathcal{A} = 1..n+1$ where $C_\mathcal{A}$ is $n+1$ by $n$. This case does not arise in practice.
+
+$\mathcal{A}$ can be described in the following way: starting at the first constraint, count the number $a_0$ of consecutive active constraints (possibly $0$ if the first constraint is not active), then $i_1$ the number of consecutive inactive constraints following the $a_0$ first constraints, $a_1$ the following number of active constraints,~\ldots. $\mathcal{A}$ is then fully described by the sequence $(a_0, i_1, a_1, i_2, a_2, \ldots, i_p, a_p)$, where all $a_k$ and $i_k$ are at least $1$, except for $a_0$ and $a_p$, that can be $0$. We have that $\sum a_k + \sum i_k = n+1$, and we define $n_{\mathcal{A}} = \sum a_k$.
+For example, if $\mathcal{A}_{\mbox{\small ex}} = \left\{1, 2, 6, 7, 8, 10\right\}$, with $n=10$, we get the sequence $(2,3,3,1,1,1,0)$, and $n_{\mathcal{A}} = 6$.
+
+$C_\mathcal{A}$ is a $n_{\mathcal{A}}\times n$ matrix:
+\begin{equation}
+  C_\mathcal{A} = 
+  \BIN C_0 &     &     &     &     &        &     &    \\
+           & 0_{a_1, i_1-1} & C_1 &     &     &        &     &    \\
+           &     &     & 0_{a_2, i_2-1} & C_2 &        &     &    \\
+           &     &     &     &     & \ddots &     &    \\
+           &     &     &     &     &        & 0_{a_p, i_p-1} & C_p\BOUT
+\end{equation}
+with $C_0$, $C_k$ ($k=1..p-1$) and $C_p$ respectively $a_0\times a_0$, $a_k\times (a_k+1)$ and $a_p\times a_p$ matrices with form
+\begin{equation}
+  C_0 = \BIN 1 &        &        &   \\
+            -1 &    1   &        &   \\
+               & \ddots & \ddots &   \\
+               &        &   -1   & 1 \BOUT, \
+  C_k = \BIN-1 &    1   &        &   \\
+               & \ddots & \ddots &   \\
+               &        &   -1   & 1 \BOUT, \
+  C_p = \BIN-1 &    1    &        &   \\
+               & \ddots  & \ddots &   \\
+               &         &   -1   & 1 \\
+               &         &        & 1 \BOUT \nonumber
+\end{equation}
+(note that $C_0$ and $C_p$ can be empty), and the $0_{a,i}$ are $a\times i$ zeros matrices. Continuing the example, we have (with $C_k$'s in red and $0_k$'s in blue)
+\begin{equation}
+%C_{\mathcal{A}_{\mbox{\small ex}}} = \BIN                                           
+   %1 & 0 &   &   &    &    &    &   &    &   \\
+  %-1 & 1 &   &   &    &    &    &   &    &   \\
+     %&   & 0 & 0 & -1 &  1 &  0 & 0 &    &   \\
+     %&   & 0 & 0 &  0 & -1 &  1 & 0 &    &   \\
+     %&   & 0 & 0 &  0 &  0 & -1 & 1 &    &   \\
+     %&   &   &   &    &    &    &   & -1 & 1 \\
+%\BOUT
+C_{\mathcal{A}_{\mbox{\small ex}}} = \BIN                                           
+   \cred{1} & \cred{0} & 0 & 0 &  0 &  0 &  0 & 0 &  0 & 0 \\
+  \cred{-1} & \cred{1} & 0 & 0 &  0 &  0 &  0 & 0 &  0 & 0 \\
+   0 & 0 & \cblue{0} & \cblue{0} & \cred{-1} & \cred{1} & \cred{0} & \cred{0} &  0 & 0 \\
+   0 & 0 & \cblue{0} & \cblue{0} & \cred{0} & \cred{-1} & \cred{1} & \cred{0} &  0 & 0 \\
+   0 & 0 & \cblue{0} & \cblue{0} & \cred{0} & \cred{0} & \cred{-1} & \cred{1} &  0 & 0 \\
+   0 & 0 & 0 & 0 &  0 &  0 &  0 & 0 & \cred{-1} & \cred{1} \\
+\BOUT
+\end{equation}
+We define $1_a$ as the vector of size $a$ filled with ones and
+\begin{equation}
+  N_{\mathcal{A}} = \BIN 
+    0_{a_0,i_1-1} & & & & & \\
+    I_{i_1-1} & & & & & \\
+    & 1_{a_1+1} & & & & \\
+    && I_{i_2-1} & & & \\
+    &&& 1_{a_2+1} & & \\
+    &&&&\ddots & \\
+    &&&&& I_{i_p-1} \\
+    &&&&& 0_{a_p,i_p-1}
+  \BOUT
+\end{equation}
+Noting that $C_k 1_{a_k+1} = 0_{a_k,1}$, we can directly verify that $C_{\mathcal{A}} N_{\mathcal{A}} = 0$. $N_{\mathcal{A}}$ is $n$ by $n-n_{\mathcal{A}}$ and full column rank. It is thus a basis of the nullspace of $C_{\mathcal{A}}$. It can even be made an orthonormal basis by normalizing the columns, \emph{i.e.} replacing $1_{a_k+1}$ by $\dfrac{1}{\sqrt{a_k+1}}1_{a_k+1}$.
+
+With our example,
+\begin{equation}
+N_{\mathcal{A}_{\mbox{\small ex}}} = \BIN              
+  \cred{0} & \cred{0} & 0 & 0 \\
+  \cred{0} & \cred{0} & 0 & 0 \\
+  \cblue{1} & \cblue{0} & 0 & 0 \\
+  \cblue{0} & \cblue{1} & 0 & 0 \\
+  0 & 0 & \cred{1} & 0 \\
+  0 & 0 & \cred{1} & 0 \\
+  0 & 0 & \cred{1} & 0 \\
+  0 & 0 & \cred{1} & 0 \\
+  0 & 0 & 0 & \cred{1} \\
+  0 & 0 & 0 & \cred{1} \\
+\BOUT
+\end{equation}
+Pre- or post-multiplication by $N_{\mathcal{A}}$ can be done very efficiently without ever forming $C_{\mathcal{A}}$ or $N_{\mathcal{A}}$, or actually perform a multiplication.
+
+\subsection{Pseudoinverse of $C_{\mathcal{A}}$}
+Because of the block structure of $C_{\mathcal{A}}$, obtaining the pseudoinverse is a matter of finding the pseudoinverse for each $C_k$. Indeed
+\begin{equation}
+  C_{\mathcal{A}}^+ = \BIN
+    C_0^{-1} & & & & \\
+    & 0_{i_1-1,a_1} & & & \\
+    & C_1^+& & &\\
+    && 0_{i_2-1,a_2} & & & \\
+    && C_2^+&  & &\\
+    &&& \ddots & \\
+    &&&&0_{i_p-1,a_p} \\
+    &&&& C_p^{-1}
+  \BOUT
+\end{equation}
+We have
+\begin{equation}
+  C_0^{-1} = \BIN 
+    1 &   & \\
+    \vdots & \ddots & \\
+    1 & \ldots & 1 \BOUT, \quad 
+  C_p^{-1} = \BIN 
+    -1 & \ldots & -1 & 1 \\
+       & \ddots & \vdots & 1\\
+       &        &  -1   & 1 \\
+       &&& 1 \BOUT
+\end{equation}
+and
+\begin{equation}
+ C_k^+ = \frac{1}{a_k+1} \BIN
+   -a_k & -(a_k-1) & -(a_k-2) & \ldots & -1 \\
+     1  & -(a_k-1) & -(a_k-2) & \ldots & -1 \\
+     1  &    2     & -(a_k-2) & \ldots & -1 \\
+     1  &    2     &    3     & \ddots & \vdots \\
+        & \vdots   &          & \ddots & -1 \\
+     1  &    2     &    3     & \ldots & a_k
+ \BOUT
+\end{equation}
+Again, the multiplication by the pseudoinverse can be done very efficiently.
+
+
+\section{Feasibility}
+\subsection{Linear feasibility and initial point}
+The points verifying the linear constraints are $x = Ll + \sum \lambda_i (u_i-l_i) L_i, \ \lambda \in \left[0,1\right]^n$ (that is $x \in H$), such that $x_n^- \leq x_n \leq x_n^+$, where the $L_i$ are the columns of $L$.\newline
+In $H$, we have $x_n = \sum l_i + \sum \lambda_i (u_i-l_i)$. The minimum and maximum values are obtained exclusively for $\lambda = 0$ and $\lambda = 1_n$.
+
+Let's define $x(\alpha) = Ll + \sum \alpha (u_i-l_i) L_i$. For $\alpha \in \left[0,1\right]$, $x(\alpha) \in H$ and the minimum and maximum values of $x_n$ in $H$ are attained for $\alpha = 0$ and $\alpha = 1$, respectively. $x_n(\alpha)$ is a linear, increasing function of $\alpha$: $x_n(\alpha) = s_l + \alpha s_d$ where $s_l = \sum l_i$ and $s_d = \sum u_i-l_i$. \newline
+We can compute the values of $\alpha^-$ and $\alpha^+$ such that $x_n(\alpha^-) = x_n^-$ and $x_n(\alpha^+) = x_n^+$:
+\begin{align}
+ \alpha^- = \frac{x_n^- - s_l}{s_d} \\
+ \alpha^+ = \frac{x_n^+ - s_l}{s_d}
+\end{align}
+The linear constraints are feasible if the intersection $\left[\alpha^-, \alpha^+\right] \cap \left[0,1\right]$ is not empty. In this case, any $\alpha$ in this intersection yields a feasible point $x(\alpha)$ for the linear constraints. We can chose the middle point $\alpha_m = \frac{\max(\alpha^-,0) + \min(\alpha^+,1)}{2}$.
+
+\subsection{Feasibility for all constraints}
+One way to check the feasibility of the problem~(\ref{eq:problem}) is to solve the following:
+\begin{align}
+  \minimize_x\ & \left\|c(x)\right\|^2 \\
+  \st\ & l \leq C_Z x \leq u\\
+       & x_n^- \leq x_n \leq x_n^+
+\end{align}
+where
+\begin{equation}
+  c(x) = \sum_{j=0}^{n-1} \frac{a_j}{\sqrt{x_{j+1}} + \sqrt{x_j}} - \alpha \sqrt{x_n} = b
+\end{equation}
+This can be done by solving a SQP with a Gauss-Newton approximation of the objective's Hessian matrix. If at the solution $c(x^*) = 0$, the problem is feasible and $x^*$ is a feasible point.
+
+The SQP in itself does not deserve a particular treatment: it can be a simple adaptation of the line-search SQP algorithm found in~\cite{nocedal:book:2006} (Algorithm 18.3), with the initial point taken as described in the previous section (and initial Lagrange multiplier thus set to $0$). Since all constraints are linear, the merit function is simply our objective function and there is no need for a penalty parameter. The only refinement is the use of double sided constraints, so that the KKT conditions checking has to be modified (see~\cite{brossette:phd:2016}, section 4.3.5).
+
+The underlying QP is where the computational savings are done. It is actually a a constrained least square (written at iterate $x^k$, with the usual shortcuts $c_k = c(x_k)$ and $g_k = \nabla_{x}c(x_k)$):
+\begin{align}
+  \minimize_p \ & \left\|g_k^T p + c_k\right\|^2 \\
+  \st \ & l-C_Z x^k \leq C_Z p \leq u-C_Z x^k \\
+        & x_n^- - x^k_n \leq p_n \leq x_n^+ - x^k_n
+\end{align}
+
+At given iteration of this QP, let the active set be $\mathcal{A}$. The corresponding EQP is
+\begin{align}
+  \minimize_p \ & \left\|g_k^T (p+d) + c_k\right\|^2 \\
+  \st \ & C_{\mathcal{A}} d = 0
+\end{align}
+$d$ can be written $d = N_{\mathcal{A}} z$ and the EQP can be transformed simply into $\minimize_z \left\|g_k^T N_{\mathcal{A}}z + c_k + g_k^T p\right\|^2$ whose least norm solution is $z = - (g_k^T N_{\mathcal{A}})^+ (c_k + g_k^T p) = - \dfrac{N_{\mathcal{A}}^T g_k}{\left\|N_{\mathcal{A}}^T g_k\right\|^2}(c_k + g_k^T p)$. Of course, one should make take advantage of the basis $N_{\mathcal{A}}$ described in the previous section.
+
+\emph{Remark}: it is not mandatory to take the least-norm solution here, and one may question this choice when we don't take an orthogonal basis $N_{\mathcal{A}}$, but the pseudo-inverse in this particular case is very cheap to compute and avoid having to consider numerical issues in the choice of the solution.
+
+When needed, the Lagrange multipliers are obtained by solving
+\begin{equation}
+  C_{\mathcal{A}}^T \lambda_{\mathcal{A}} = (g_k^T p +c) g_k
+\end{equation}
+for the multipliers corresponding to active constraints, and taking $\lambda_{\bar{\mathcal{A}}} = 0$ for the others. We can take $\lambda_{\mathcal{A}} = (g_k^T p+c) C_{\mathcal{A}}^{+T}g_k$, using the pseudo inverse of $C_{\mathcal{A}}$ as described in the previous section.
+
+
+\section{Leveraging the cost function form}
+\subsection{Matrix form}
+We will now consider the cost function
+\begin{equation}
+  f(x) = \sum_{i=1}^{n-1} \left(d_j(x_{j+1} - x_j) + d_{j-1}(x_j - x{j-1})\right)^2
+\end{equation}
+with $x_0 = 0$, where $d_i>0$.
+It can be rewritten
+\begin{align*}
+f(x) &= \left\|\BIN -(d_0+d_1)x_1 + d_1 x_2 \\ 
+                    d_1 x_1 -(d_1+d_2) x_2 + d_2 x_3 \\ 
+                    d_2 x_2 -(d_2+d_3) x_3 + d_3 x_4 \\ 
+                    \vdots \\ 
+                    d_{n-2} x_{n-2} -(d_{n-2}+d_{n-1}) x_{n-1} + d_{n-1} x_{n-2} \BOUT\right\|^2 \\
+ &= \left\|\BIN -d_0-d_1 \hspace{-3pt}& d_1 & & & &\\ 
+                d_1 &\hspace{-3pt} -d_1-d_2 \hspace{-3pt}& d_2 & & &\\ 
+                & d_2 & \hspace{-3pt}-d_2-d_3 \hspace{-3pt}& d_3 & & \\ 
+                & & & \ddots &  & \\ 
+                &&& d_{n-2} & -d_{n-2}-d_{n-1} & d_{n-1} \BOUT
+ \BIN x_1 \\ x_2 \\ x_3 \\ \vdots \\x_n \BOUT\right\|^2 \\
+ & \eqbydef \left\|J x\right\|^2
+\end{align*}
+Matrix $J$ has several interesting properties:
+\begin{enumerate}
+	\item it is tridiagonal
+  \item it is upper Hessenberg (upper triangular + sub-diagonal)
+  \item summing the $3$ non-zero elements of a row or a column gives $0$ (when there are 3 such elements).
+  \item it is full row rank
+  \item $J(1:n-1,1:n-1)$ is symmetric.
+\end{enumerate}
+
+\subsection{QR decomposition}
+Because $J$ is tridiagonal, we can very efficiently obtain its QR decomposition (in $O(n)$ whereas for a dense matrix it is $O(n^3)$). To do so use the Hessenberg QR algorithm (see Algorithm 5.2.3 in~\cite{golub:book:1996}) adapted to tridiagonal matrix. We get
+\begin{equation}
+  J = Q R
+\end{equation}
+where $Q$ is an $n-1$ by $n-1$ orthogonal matrix and $R$ is an $n-1$ by $n$ upper triangular matrix. $R$ is actual a band matrix with lower bandwidth $0$ and upper bandwidth $2$. We do not explicitly compute $Q$ but keep it as the sequence of Givens rotations used in the decomposition. \newline
+\emph{Remark}: In our practical cases, the matrix $J$ is well conditioned. It is thus justified to use a non-pivoting scheme.
+
+Later, we will need the QR decomposition of $\BIN g^T \\ J \BOUT$. Given the above decomposition of $J$, we have
+\begin{equation}
+  \BIN g^T \\ J \BOUT = \BIN I & 0 \\ 0 & Q \BOUT \BIN g^T \\ R \BOUT
+\end{equation}
+where the last matrix is upper Hessenberg. We can thus perform cheaply its QR decomposition
+\begin{equation}
+  \BIN g^T \\ J \BOUT = \BIN I & 0 \\ 0 & Q \BOUT \BIN Q_{g,1} \\ Q_{g,2} \BOUT R_g = \BIN Q_{g,1} \\ Q Q_{g,2} \BOUT R_g
+\end{equation}
+It might happen that $g^T$ is linearly dependent in some lines of $J$. This is not a problem for the decomposition, and we just need to check the last element of the diagonal to detect this case.
+
+
+\subsection{Projection on the on $\mathcal{N}(C_\mathcal{A})$}
+Let's consider a slightly refined description of $N_\mathcal{A}$, where we split the vectors $1_{a_i+1}$ into $\BIN 1 & 1_{a_i-1}^T & 1\BOUT$ (the central part can be empty if $a_i = 1$):
+\begin{equation}
+  N_{\mathcal{A}} = \BIN 
+    0_{a_0,i_1-1} & & & & & & & \\
+    I_{i_1-1} & & & & & & &\\
+    & 1 & & & & & &\\
+    & 1_{a_1-1} & & & & & &\\
+    & 1 & & & & & &\\
+    && I_{i_2-1} & & & & &\\
+    &&& 1 & & & &\\
+    &&& 1_{a_2-1} & & & & \\
+    &&& 1 & & & &\\
+    &&&& I_{i_3-1} & & & \\
+    &&&&&\ddots & & \\
+    &&&&&& 1_{a_{p-1}-1} & \\
+    &&&&&& 1 & \\
+    &&&&&&& I_{i_p-1} \\
+    &&&&&&& 0_{a_p,i_p-1}
+  \BOUT
+\end{equation}
+We write $J$ conformably for multiplication as
+\begin{equation*}
+  J = \BIN
+    D_0   & B_0    &          &        &           &        &          &        &           &             &                &            &           \\
+    B_0^T & D_1    & b_1'     &        &           &        &          &        &           &             &                &            &           \\
+          & b_1'^T & \delta_2 & b_2^T  &           &        &          &        &           &             &                &            &           \\
+          &        & b_2      & D_2    & b_2'      &        &          &        &           &             &                &            &           \\
+          &        &          & b_2'^T & \delta_2' & b_3^T  &          &        &           &             &                &            &           \\
+          &        &          &        & b_3       & D_3    & b_3'     &        &           &             &                &            &           \\
+          &        &          &        &           & b_3'^T & \delta_4 & b_4^T  &           &             &                &            &           \\
+          &        &          &        &           &        & b_4      & D_4    & b_4'      &             &                &            &           \\
+          &        &          &        &           &        &          & b_4'^T & \delta_4' & b_5^T       &                &            &           \\
+          &        &          &        &           &        &          &        &           & \ddots      &                &            &           \\ 
+          &        &          &        &           &        &          &        &           & b_{2p-2}'^T & \delta_{2p-2}' & b_{2p-1}^T &           \\
+          &        &          &        &           &        &          &        &           &             & b_{2p-1}       & D_{2p-1}   & b_{2p-1}' \\
+  \BOUT
+\end{equation*}
+where the $\delta$s are scalar, the $D_i$s are square, tridiagonal, symmetric matrices, $B_0$ is a matrix with all elements to 0 but the bottom left one, the $d_i$s are vector whose only non zero element is the first, and the $d_i'$s are vectors whose only non zero element is the last.
+We have
+\begin{align*}
+&J_\mathcal{A} \eqbydef JN_{\mathcal{A}} = \\
+&\BIN
+    B_0    &                      &        &                      &        &                                &            \\
+    D_1    & b_1'                 &        &                      &        &                                &            \\
+    b_1'^T & \delta_2 + b_2^T 1   &        &                      &        &                                &            \\
+           & b_2 + D_2 1 + b_2'   &        &                      &        &                                &            \\
+           & b_2'^T 1 + \delta_2' & b_3^T  &                      &        &                                &            \\
+           & b_3                  & D_3    & b_3'                 &        &                                &            \\
+           &                      & b_3'^T & \delta_4 + b_4^T 1   &        &                                &            \\
+           &                      &        & b_4 + D_4 1 + b_4'   &        &                                &            \\
+           &                      &        & b_4'^T 1 + \delta_4' & b_5^T  &                                &            \\
+           &                      &        &                      & \ddots &                                &            \\
+           &                      &        &                      &        & b_{2p-2}'^T 1 + \delta_{2p-2}' & b_{2p-1}^T \\
+           &                      &        &                      &        & b_{2p-1}                       & D_{2p-1}   \\
+  \BOUT
+\end{align*}
+where we dropped the size of the vectors $1_a$.
+
+Because the property $3$ of $J$, we have $b_{2i} + D_{2i} 1_{a_i-1} + b_{2i}' = 0$ for $i=1..p-1$:
+\begin{align*}
+&J_\mathcal{A} = 
+\BIN
+    B_0    &                      &        &                      &        &                                &            \\
+    D_1    & b_1'                 &        &                      &        &                                &            \\
+    b_1'^T & \delta_2 + b_2^T 1   &        &                      &        &                                &            \\
+           & \cred{0_{a_1-1,1}}   &        &                      &        &                                &            \\
+           & b_2'^T 1 + \delta_2' & b_3^T  &                      &        &                                &            \\
+           & b_3                  & D_3    & b_3'                 &        &                                &            \\
+           &                      & b_3'^T & \delta_4 + b_4^T 1   &        &                                &            \\
+           &                      &        & \cred{0_{a_2-1,1}}   &        &                                &            \\
+           &                      &        & b_4'^T 1 + \delta_4' & b_5^T  &                                &            \\
+           &                      &        &                      & \ddots &                                &            \\
+           &                      &        &                      &        & b_{2p-2}'^T 1 + \delta_{2p-2}' & b_{2p-1}^T \\
+           &                      &        &                      &        & b_{2p-1}                       & D_{2p-1}   \\
+  \BOUT
+\end{align*}
+With this same property, we also have the fact that $\delta_{2j} + b_{2j}^T 1$ is equal to the opposite of the non-zero element of $b_{2j-1}'$ (and the same for $b_{2j}'^T 1 + \delta_{2j}'$ and $b_{2j+j}$).
+We can consider several submatrices:
+\begin{align*}
+  &J_0 = \BIN
+     B_0    &                    \\
+     D_1    & b_1'               \\
+     b_1'^T & \delta_2 + b_2^T 1
+  \BOUT, \
+  J_j = \BIN
+    b_{2j}'^T 1 + \delta_2' & b_{2j+1}^T  &                              \\
+    b_{2j+1}                & D_{2j+1}    & b_{2j+1}'                    \\
+                            & b_{2j+1}'^T & \delta_{2j+2} + b_{2j+2}^T 1 
+  \BOUT, j=1..p-2\\
+  &J_{p-1} = \BIN
+     b_{2p-2}'^T 1 + \delta_{2p-2}' & b_{2p-1}^T \\
+     b_{2p-1}                       & D_{2p-1}   \\
+  \BOUT
+\end{align*}
+
+\subsection{QR decomposition of $J_\mathcal{A}$}
+In this section, we explain how to get cheaply the QR decomposition of $J_\mathcal{A}$. To do so, an intermediate step is to obtain the QR decompositions of the matrices $J_0$, $J_j$ and $J_{p-1}$ that we now describe a bit more in detail. For that we denote by $\BIN e_0,\ldots,e_k\BOUT$ a subpart $\BIN d_{j_0},\ldots,d_{j_0+k}\BOUT$ of the vector $d$ defining $J$. For each description, $j_0$ and $k$ are different and judiciously chosen.
+
+We have 
+\begin{equation*}
+  J_0 = \BIN
+    0_{a_0-1,1} &          &         &                &      \\
+    e_0         &          &         &                &      \\
+   -e_0-e_1     &  e_1     &         &                &      \\
+    e_1         & -e_1-e_2 & e_2     &                &      \\
+                &          & \ddots  &                &      \\
+                &          & e_{k-1} & -e_{k-1} - e_k &  e_k \\
+                &          &         &     e_k        & -e_k
+  \BOUT
+\end{equation*}
+\begin{equation*}
+  J_j = \BIN
+   -e_0     &  e_0     &          &          &                &      \\
+    e_0     & -e_0-e_1 & e_1      &          &                &      \\
+            & e_1      & -e_1-e_2 & e_2      &                &      \\
+            &          &          & \ddots   &                &      \\
+            &          &          & e_{k-1}  & -e_{k-1} - e_k &  e_k \\
+            &          &          &          &     e_k        & -e_k
+  \BOUT
+\end{equation*}
+Note that when $i_{2j}$ is $1$ (and thus $I_{i_{2j}-1}$ is empty), $J_j$ reduces to $\BIN -e_0 & e_0 \\ e_0 & -e_0\BOUT$. Furthermore, $J_j$ is $k+2$ by $k+2$, but has rank $k+1$ (the sum of the rows is $0$). Finally,
+\begin{equation*}
+  J_{p-1} = \BIN
+   -e_0     &  e_0     &          &          &                    &              \\
+    e_0     & -e_0-e_1 & e_1      &          &                    &              \\
+            & e_1      & -e_1-e_2 & e_2      &                    &              \\
+            &          &          & \ddots   &                    &              \\
+            &          &          & e_{k-2}  & -e_{k-2} - e_{k-1} & e_{k-1}      \\
+            &          &          &          &     e_{k-1}        & -e_{k-1}-e_k 
+  \BOUT
+\end{equation*}
+For $J_0$, we will only look for a decomposition
+\begin{equation*}
+  J_0 = \BIN I & 0 \\ 0 & Q_0 \BOUT \BIN 0_{a_0-1,k+1} \\ R_0 \BIN
+\end{equation*}
+apply the QR decomposition to the submatrix starting at $e_0$. This submatrix is a band matrix lower bandwidth $2$ and upper bandwidth $0$ and can be decomposed efficiently using $2k-1$ Givens rotations.
+
+$J_j$ is Hessenberg and tridiagonal. The QR can be obtained with $k+1$ specific Givens rotations. More precisely, let's define
+\begin{equation}
+G_i = \BIN
+  I_{i-1} & & & \\
+    & \frac{\sqrt{i+1}}{i+1} & \frac{\sqrt{i}\sqrt{i+1}}{i+1} & \\
+    & -\frac{\sqrt{i}\sqrt{i+1}}{i+1} & \frac{\sqrt{i+1}}{i+1} & \\
+    & & & I_{k-i+1}
+\BOUT
+It can be verified that the QR decomposition is obtained for $Q_j = G_1 G_2 \ldots G_{k+1}$.
+\end{equation}
+\end{document}
