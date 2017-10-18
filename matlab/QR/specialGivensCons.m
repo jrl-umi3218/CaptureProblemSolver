@@ -3,6 +3,8 @@
 % G is encoded as g (see g2mat)
 % if i is a vector, return a vector of structures.
 function g = specialGivensCons(i,n)
+%we go downward only to be memory efficient: the size of g is fixed after
+%the first iteration
 for k=length(i):-1:1
   j = i(k);
   s.i = j;
