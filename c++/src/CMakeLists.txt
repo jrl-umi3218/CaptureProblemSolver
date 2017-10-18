@@ -1,6 +1,7 @@
 set(BMS_SOURCES
   Givens.cpp
   GivensSequence.cpp
+  LinearConstraints.cpp
   Logger.cpp
   ProblemMatrices.cpp
   QRAlgorithms.cpp)
@@ -11,6 +12,7 @@ set(BMS_HEADERS
   ${BMS_INCLUDE_DIR}/defs.h
   ${BMS_INCLUDE_DIR}/Givens.h
   ${BMS_INCLUDE_DIR}/GivensSequence.h
+  ${BMS_INCLUDE_DIR}/LinearConstraints.h
   ${BMS_INCLUDE_DIR}/Logger.h
   ${BMS_INCLUDE_DIR}/ProblemMatrices.h
   ${BMS_INCLUDE_DIR}/QRAlgorithms.h
