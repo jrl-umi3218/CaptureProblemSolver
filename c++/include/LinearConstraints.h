@@ -41,6 +41,9 @@ namespace bms
 
     Shift shift(const Eigen::VectorXd& x) const;
 
+    Eigen::DenseIndex size() const;
+    Eigen::DenseIndex nullSpaceSize() const;
+
     /** Activate the i-th constraint
       *
       * If a = Activation::None, this effectively deactivate the i-th constraint
@@ -52,6 +55,8 @@ namespace bms
     Activation activationStatus(size_t i) const;
 
     const std::vector<bool>& activeSet() const;
+    /** Index of active constraints*/
+    const std::vector<Eigen::DenseIndex>& activeSetIdx() const;
     Eigen::DenseIndex numberOfActiveConstraints() const;
 
     /** Y = X*N_A */
@@ -59,30 +64,42 @@ namespace bms
     /** Y = N_A X */
     void applyNullSpaceOnTheLeft(MatrixRef Y, const MatrixConstRef& X) const;
 
-    /** Y = C_A * X */
+    /** Y = C * X */
     void mult(MatrixRef Y, const MatrixConstRef& X) const;
-    /** Y = C_A^T * X */
+    /** Y = C^T * X */
     void transposeMult(MatrixRef Y, const MatrixConstRef& X) const;
     /** Y = pinv(C_A^T)*X */
-    void pinvTransposeMult(MatrixRef Y, const MatrixConstRef& X);
+    void pinvTransposeMultAct(MatrixRef Y, const MatrixConstRef& X) const;
+
+    /** fill y such that y(!active) = 0 and y(active) = x*/
+    void expandActive(VectorRef y, const VectorConstRef& x) const;
 
     /** Move the furthest possible on the segment x+ap for 0<=a<=1. Stop at the
       * first constraint encountered and activate it. Returns x+ap.
       */
     Eigen::VectorXd performQPstep(const Eigen::VectorXd& x, const Eigen::VectorXd& p);
 
-    /** The matrix of active constraints. For debugging purposes*/
+    /** Deactivate the constraint with largest lambda violation. */
+    void deactivateMaxLambda(const VectorConstRef& lambda);
+
+    /** The matrix of all constraints. For debugging purposes.*/
     Eigen::MatrixXd matrix() const;
+    /** The matrix C_A of active constraints. For debugging purposes.*/
+    Eigen::MatrixXd matrixAct() const;
+
+    /** Check if x verifies the constraints*/
+    bool checkPrimal(const VectorConstRef& x, double eps = 1e-15) const;
+    /** Check the signs of lambda*/
+    bool checkDual(const VectorConstRef& lambda, double eps = 1e-15) const;
 
   private:
     void computeIdx() const;
+    void computeActIdx() const;
 
     //data
     Eigen::DenseIndex n_;
-    Eigen::VectorXd l_;
-    Eigen::VectorXd u_;
-    double xln_;
-    double xun_;
+    Eigen::VectorXd l_;   //[l;xln]
+    Eigen::VectorXd u_;   //[u;xun]
 
     //active-set management
     Eigen::DenseIndex na_; //number of activated constraint
@@ -90,7 +107,11 @@ namespace bms
     std::vector<bool> activeSet_; //Invariant: activeSet_[i] == (activationStatus_[i] != Activation::None) for all i
 
     //internal intermediate data
-    mutable bool validIdx_;                       // indicate if idx_ is valid
-    mutable std::vector<Eigen::DenseIndex> idx_;  // indices used for the premultiplication by N_A
+    mutable bool validIdx_;                         // indicate if idx_ is valid
+    mutable bool validActIdx_;                      // indicate if idx_ is valid
+    mutable std::vector<Eigen::DenseIndex> idx_;    // indices used for the premultiplication by N_A
+    mutable std::vector<Eigen::DenseIndex> actIdx_; // indices of active constraints, ordered.
+    mutable Eigen::VectorXd Cx_;                    // to store the results of C*x
+    mutable Eigen::VectorXd Cp_;                    // to store the results of C*p
   };
 }

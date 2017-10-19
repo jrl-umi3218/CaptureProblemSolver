@@ -49,6 +49,10 @@ BOOST_AUTO_TEST_CASE(ActivationTest)
   BOOST_CHECK(!act[9]);
   BOOST_CHECK(!act[10]);
 
+  auto actIdx = lc.activeSetIdx();
+  BOOST_CHECK(actIdx[0] == 3);
+  BOOST_CHECK(actIdx[1] == 6);
+  BOOST_CHECK(actIdx[2] == 7);
 
   //activating a non activated constraint
   lc.activate(1, Activation::Lower);
@@ -74,11 +78,27 @@ BOOST_AUTO_TEST_CASE(ActivationTest)
   BOOST_CHECK(!lc.activeSet()[7]);
   BOOST_CHECK(lc.numberOfActiveConstraints() == 2);
 
-  //deactivating a deactivating constraint
+  //deactivating a deactivated constraint
   lc.deactivate(8);
   BOOST_CHECK(lc.activationStatus(8) == Activation::None);
   BOOST_CHECK(!lc.activeSet()[8]);
   BOOST_CHECK(lc.numberOfActiveConstraints() == 2);
+
+  //check that applyNullSpaceOnTheRight correctly computes the active set index
+  MatrixXd Y(1, 8);
+  lc.applyNullSpaceOnTheRight(Y, MatrixXd(1, 10));
+  actIdx = lc.activeSetIdx();
+  BOOST_CHECK(actIdx[0] == 1);
+  BOOST_CHECK(actIdx[1] == 6);
+
+  VectorXd y(11);
+  VectorXd x = VectorXd::Random(2);
+  lc.expandActive(y, x);
+  BOOST_CHECK(y[1] == x[0]);
+  BOOST_CHECK(y[6] == x[1]);
+  BOOST_CHECK(y[0] == 0);
+  BOOST_CHECK((y.array().segment(2, 4) == 0).all());
+  BOOST_CHECK((y.array().tail(4) == 0).all());
 }
 
 BOOST_AUTO_TEST_CASE(NullspaceTest)
@@ -93,7 +113,7 @@ BOOST_AUTO_TEST_CASE(NullspaceTest)
       lc.activate(i, Activation::Lower);
   }
 
-  MatrixXd Ca = lc.matrix();
+  MatrixXd Ca = lc.matrixAct();
   MatrixXd N(20,20-lc.numberOfActiveConstraints());
   lc.applyNullSpaceOnTheRight(N, MatrixXd::Identity(20, 20));
 
@@ -109,6 +129,26 @@ BOOST_AUTO_TEST_CASE(NullspaceTest)
   BOOST_CHECK(y.isApprox(y2, 1e-15));
 }
 
+BOOST_AUTO_TEST_CASE(MultiplicationTest)
+{
+  VectorXd l = -VectorXd::Random(20).cwiseAbs();
+  VectorXd u = VectorXd::Random(20).cwiseAbs();
+  LinearConstraints lc(l, u, -1, 1);
+
+  MatrixXd C = lc.matrix();
+  VectorXd x = VectorXd::Random(20);
+  VectorXd y(21);
+  lc.mult(y, x);
+  VectorXd z = C*x;
+  BOOST_CHECK(y.isApprox(z, 1e-15));
+
+  VectorXd q = VectorXd::Random(21);
+  VectorXd r(20);
+  lc.transposeMult(r, q);
+  VectorXd s = C.transpose()*q;
+  BOOST_CHECK(r.isApprox(s, 1e-15));
+}
+
 BOOST_AUTO_TEST_CASE(PseudoInverseTest)
 {
   VectorXd l = -VectorXd::Random(20).cwiseAbs();
@@ -122,33 +162,33 @@ BOOST_AUTO_TEST_CASE(PseudoInverseTest)
   }
 
   {
-    MatrixXd Ca = lc.matrix();
+    MatrixXd Ca = lc.matrixAct();
     VectorXd b = VectorXd::Random(Ca.cols());
     VectorXd x(Ca.rows());
 
-    lc.pinvTransposeMult(x, b);
+    lc.pinvTransposeMultAct(x, b);
     VectorXd y = Ca.transpose().jacobiSvd(ComputeThinU | ComputeThinV).solve(b);
     BOOST_CHECK(x.isApprox(y, 1e-15));
   }
 
   {
     lc.activate(0, Activation::Lower);
-    MatrixXd Ca = lc.matrix();
+    MatrixXd Ca = lc.matrixAct();
     VectorXd b = VectorXd::Random(Ca.cols());
     VectorXd x(Ca.rows());
 
-    lc.pinvTransposeMult(x, b);
+    lc.pinvTransposeMultAct(x, b);
     VectorXd y = Ca.transpose().jacobiSvd(ComputeThinU | ComputeThinV).solve(b);
     BOOST_CHECK(x.isApprox(y, 1e-15));
   }
 
   {
     lc.activate(20, Activation::Lower);
-    MatrixXd Ca = lc.matrix();
+    MatrixXd Ca = lc.matrixAct();
     VectorXd b = VectorXd::Random(Ca.cols());
     VectorXd x(Ca.rows());
 
-    lc.pinvTransposeMult(x, b);
+    lc.pinvTransposeMultAct(x, b);
     VectorXd y = Ca.transpose().jacobiSvd(ComputeThinU | ComputeThinV).solve(b);
     BOOST_CHECK(x.isApprox(y, 1e-15));
   }
@@ -158,11 +198,11 @@ BOOST_AUTO_TEST_CASE(PseudoInverseTest)
       lc.activate(i, Activation::Lower);
     lc.deactivate(20);
 
-    MatrixXd Ca = lc.matrix();
+    MatrixXd Ca = lc.matrixAct();
     VectorXd b = VectorXd::Random(Ca.cols());
     VectorXd x(Ca.rows());
 
-    lc.pinvTransposeMult(x, b);
+    lc.pinvTransposeMultAct(x, b);
     VectorXd y = Ca.transpose().jacobiSvd(ComputeThinU | ComputeThinV).solve(b);
     BOOST_CHECK(x.isApprox(y, 1e-14));
   }
@@ -172,11 +212,11 @@ BOOST_AUTO_TEST_CASE(PseudoInverseTest)
       lc.activate(i, Activation::Lower);
     lc.deactivate(0);
 
-    MatrixXd Ca = lc.matrix();
+    MatrixXd Ca = lc.matrixAct();
     VectorXd b = VectorXd::Random(Ca.cols());
     VectorXd x(Ca.rows());
 
-    lc.pinvTransposeMult(x, b);
+    lc.pinvTransposeMultAct(x, b);
     VectorXd y = Ca.transpose().jacobiSvd(ComputeThinU | ComputeThinV).solve(b);
     BOOST_CHECK(x.isApprox(y, 1e-14));
   }
