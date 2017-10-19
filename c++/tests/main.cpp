@@ -5,6 +5,7 @@
 #include <iostream>
 #include <chrono>
 
+#include "LeastSquare.h"
 #include "ProblemMatrices.h"
 #include "QRAlgorithms.h"
 
@@ -165,12 +166,43 @@ void QRPerformances(int n, const int N)
   
 }
 
+void LSPerformance(int n, const int N)
+{
+  double d = 0;
+
+  VectorXd l = -VectorXd::Random(n).cwiseAbs();
+  VectorXd u = VectorXd::Random(n).cwiseAbs();
+  LinearConstraints lc(l, u, -1, 1);
+
+  VectorXd j = VectorXd::Random(n);
+  double c = -10;
+
+  LeastSquare ls(n);
+  {
+    auto start_time = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < N; ++i)
+    {
+      lc.resetActivation();
+      ls.solveFeasibility(j,c,lc);
+      d += ls.x()[0];
+    }
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto time = end_time - start_time;
+    std::cout << "LSFeasibility: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+  }
+}
+
 int main()
 {
   //exampleMatrices(10);
-  QRPerformances(10, 10000);
-  QRPerformances(20, 10000);
-  QRPerformances(100, 1000);
+  //QRPerformances(10, 10000);
+  //QRPerformances(20, 10000);
+  //QRPerformances(100, 1000);
+  LSPerformance(10, 1000);
+  LSPerformance(10, 10000);
+  LSPerformance(100, 1000);
+  LSPerformance(200, 1000);
+  LSPerformance(500, 1000);
 
 #ifdef WIN32
   system("pause");

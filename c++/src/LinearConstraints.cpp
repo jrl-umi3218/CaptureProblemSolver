@@ -111,6 +111,15 @@ namespace bms
     validActIdx_ = false;
   }
 
+  void LinearConstraints::resetActivation()
+  {
+    for (size_t i = 0; i < n_; ++i)
+    {
+      if (activationStatus_[i] != Activation::Equal)
+        deactivate(i);
+    }
+  }
+
   Activation LinearConstraints::activationStatus(size_t i) const
   {
     return activationStatus_[i];
@@ -288,25 +297,27 @@ namespace bms
     //a must satisfy [l;xln] <= C(x+a*p) <= [u;xun]
     for (DenseIndex i = 0; i <= n_; ++i)
     {
-      double ai;
-      Activation typei;
-      if (!activeSet_[static_cast<size_t>(i)] && Cp_[i] > 0)
+      if (!activeSet_[static_cast<size_t>(i)])
       {
         assert(std::abs(Cp_[i]) > 1e-12);
-        ai = (u_[i] - Cx_[i]) / Cp_[i];
-        typei = Activation::Upper;
-      }
-      else if (!activeSet_[static_cast<size_t>(i)] && Cp_[i] < 0)
-      {
-        assert(std::abs(Cp_[i]) > 1e-12);
-        ai = (l_[i] - Cx_[i]) / Cp_[i];
-        typei = Activation::Lower;
-      }
-      if (ai < a)
-      {
-        a = ai;
-        iact = i;
-        type = typei;
+        double ai;
+        Activation typei;
+        if (Cp_[i] > 0)
+        {
+          ai = (u_[i] - Cx_[i]) / Cp_[i];
+          typei = Activation::Upper;
+        }
+        else
+        {
+          ai = (l_[i] - Cx_[i]) / Cp_[i];
+          typei = Activation::Lower;
+        }
+        if (ai < a)
+        {
+          a = ai;
+          iact = i;
+          type = typei;
+        }
       }
     }
 

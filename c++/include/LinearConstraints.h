@@ -51,6 +51,8 @@ namespace bms
     void activate(size_t i, Activation a);
     /** Deactivate the i-th constraint*/
     void deactivate(size_t i);
+    /** Deactivate all non-equality constraints*/
+    void resetActivation();
 
     Activation activationStatus(size_t i) const;
 

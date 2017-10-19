@@ -16,6 +16,7 @@ macro(addUnitTest name)
 endmacro(addUnitTest)
 
 addUnitTest(MatrixComputationsTest)
+addUnitTest(LeastSquareTest)
 addUnitTest(LinearConstraintsTest)
 
 set(TESTSOURCES
