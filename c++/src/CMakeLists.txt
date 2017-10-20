@@ -1,5 +1,6 @@
 set(BMS_SOURCES
   BoundenessConstraint.cpp
+  CondensedOrthogonalMatrix.cpp
   Givens.cpp
   GivensSequence.cpp
   LeastSquare.cpp
@@ -14,6 +15,7 @@ set(BMS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 set(BMS_HEADERS
   ${BMS_INCLUDE_DIR}/bms_api.h
   ${BMS_INCLUDE_DIR}/BoundenessConstraint.h
+  ${BMS_INCLUDE_DIR}/CondensedOrthogonalMatrix.h
   ${BMS_INCLUDE_DIR}/defs.h
   ${BMS_INCLUDE_DIR}/Givens.h
   ${BMS_INCLUDE_DIR}/GivensSequence.h

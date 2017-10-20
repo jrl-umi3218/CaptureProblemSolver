@@ -1,3 +1,4 @@
+#include <CondensedOrthogonalMatrix.h>
 #include <Givens.h>
 #include <GivensSequence.h>
 #include <ProblemMatrices.h>
@@ -79,6 +80,52 @@ BOOST_AUTO_TEST_CASE(GivensSequenceTest)
   BOOST_CHECK(M.isApprox(M2, 1e-15));
 }
 
+BOOST_AUTO_TEST_CASE(CondensedOrthogonalMatrixTest)
+{
+  MatrixXd M = MatrixXd::Random(5, 5);
+  MatrixXd M2 = M;
+
+  //Let's make a weird Givens QR algorithm
+  Givens G1(M, 0, 3, 0);
+  G1.applyTo(M);
+  Givens G2(M, 4, 0, 0);
+  G2.applyTo(M);
+  Givens G3(M, 1, 4, 0);
+  G3.applyTo(M);
+  Givens G4(M, 2, 1, 0);
+  G4.applyTo(M);
+  Givens G5(M, 0, 3, 1);
+  G5.applyTo(M);
+  Givens G6(M, 4, 0, 1);
+  G6.applyTo(M);
+  Givens G7(M, 1, 4, 1);
+  G7.applyTo(M);
+  Givens G8(M, 0, 3, 2);
+  G8.applyTo(M);
+  Givens G9(M, 4, 0, 2);
+  G9.applyTo(M);
+  Givens G10(M, 0, 3, 3);
+  G10.applyTo(M);
+  VectorXi idx(5); idx << 0, 1, 0, 0, 3;
+  Transpositions<Dynamic> P(idx);
+  M = P.transpose()*M;
+
+  CondensedOrthogonalMatrix Q(5, 4, 4);
+  Q.Q(0).push_back(G1);
+  Q.Q(0).push_back(G2);
+  Q.Q(0).push_back(G3);
+  Q.Q(0).push_back(G4);
+  Q.Q(1).push_back(G5);
+  Q.Q(1).push_back(G6);
+  Q.Q(1).push_back(G7);
+  Q.Q(2).push_back(G8);
+  Q.Q(2).push_back(G9);
+  Q.Q(3).push_back(G10);
+  Q.P().indices() = idx;
+  Q.applyTo(M2);
+
+  BOOST_CHECK(M.isApprox(M2, 1e-14));
+}
 
 bool isUpperTriangular(const MatrixXd& M)
 {
