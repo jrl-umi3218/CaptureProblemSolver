@@ -129,7 +129,7 @@ namespace bms
   }
 
   Problem::Problem(const RawProblem& pb)
-    : qo_()
+    : lso_(pb.delta)
     , lc_(pb.lmin*pb.delta, pb.lmax*pb.delta, pb.wi_min*pb.wi_min, pb.wi_max*pb.wi_max)
     , bc_(pb.delta, pb.zi / pb.g, pb.dzi / pb.g)
     , raw_(pb)
@@ -138,9 +138,9 @@ namespace bms
     lc_.changeBounds(0, d, d);
   }
 
-  const QuadraticObjective & Problem::objective() const
+  const LeastSquareObjective & Problem::objective() const
   {
-    return qo_;
+    return lso_;
   }
 
   const BoundenessConstraint & Problem::nonLinearConstraint() const

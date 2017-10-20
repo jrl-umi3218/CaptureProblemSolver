@@ -7,17 +7,17 @@ namespace bms
   {
   }
 
-  Givens::Givens(int i, int j, double c, double s)
+  Givens::Givens(Index i, Index j, double c, double s)
     : i_(i), j_(j), Jt_(c,-s)
   {
   }
 
-  Givens::Givens(int i, double c, double s)
+  Givens::Givens(Index i, double c, double s)
     : Givens(i,i+1,c,s)
   {
   }
 
-  void Givens::extend(int incr)
+  void Givens::extend(Index incr)
   {
     i_ += incr;
     j_ += incr;

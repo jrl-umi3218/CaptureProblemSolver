@@ -14,25 +14,27 @@ namespace bms
   class BMS_DLLAPI Givens
   {
   public:
+    using Index = Eigen::DenseIndex;
+
     /** Default value: identity matrix*/
     Givens();
 
     /** Build a Givens rotation G with submatrix G([i,j],[i,j]) = [c s; -s c]
       * (Matlab notations)
       */
-    Givens(int i, int j, double c, double s);
+    Givens(Index i, Index j, double c, double s);
     /** Version with j = i+1. */
-    Givens(int i, double c, double s);
+    Givens(Index i, double c, double s);
 
     /** Build a Givens rotation G such that 
     *                 | M(i,k) |   | x |
     * G([i,j][i,j])^T | M(j,k) | = | 0 |
     */
     template<typename Derived>
-    Givens(const Eigen::MatrixBase<Derived>& M, int i, int j, int k);
+    Givens(const Eigen::MatrixBase<Derived>& M, Index i, Index j, Index k);
     /** Version with j=i+1. */
     template<typename Derived>
-    Givens(const Eigen::MatrixBase<Derived>& M, int i, int k);
+    Givens(const Eigen::MatrixBase<Derived>& M, Index i, Index k);
 
     /** Performs M = G^T M
       *
@@ -59,18 +61,18 @@ namespace bms
       * at row incr of a matrix M. In this case with G' the result of G.extend(incr)
       * G^T S and G'^T M have the same rows changed.
       */
-    void extend(int incr);
+    void extend(Index incr);
 
   private:
-    int i_;
-    int j_;
+    Index i_;
+    Index j_;
     /** We store directily the transpose matrix*/
     Eigen::JacobiRotation<double> Jt_;
   };
 
 
   template<typename Derived>
-  inline Givens::Givens(const Eigen::MatrixBase<Derived>& M, int i, int j, int k)
+  inline Givens::Givens(const Eigen::MatrixBase<Derived>& M, Index i, Index j, Index k)
     : i_(i), j_(j)
   {
     Eigen::JacobiRotation<double> G;
@@ -79,7 +81,7 @@ namespace bms
   }
 
   template<typename Derived>
-  inline Givens::Givens(const Eigen::MatrixBase<Derived>& M, int i, int k)
+  inline Givens::Givens(const Eigen::MatrixBase<Derived>& M, Index i, Index k)
     : Givens(M, i, i + 1, k)
   {
   }

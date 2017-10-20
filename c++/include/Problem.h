@@ -36,12 +36,12 @@ namespace bms
   public:
     Problem(const RawProblem& pb);
 
-    const QuadraticObjective& objective() const;
+    const LeastSquareObjective& objective() const;
     const BoundenessConstraint& nonLinearConstraint() const;
     const LinearConstraints& linearConstraints() const;
 
   private:
-    QuadraticObjective qo_;
+    LeastSquareObjective lso_;
     BoundenessConstraint bc_;
     LinearConstraints lc_;
 
