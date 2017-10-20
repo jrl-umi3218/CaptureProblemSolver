@@ -25,7 +25,7 @@ assert(all(l<=u));
 s = sum(l);
 d = u-l;
 t = sum(d);
-if abs(d) < 1e-15
+if abs(t) < 1e-15
   b = xln<=s && s<=xun;
   x = l;
 else
