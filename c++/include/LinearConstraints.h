@@ -17,6 +17,26 @@ namespace bms
     Equal
   };
 
+  /** An information returned by the search of a feasible point
+    *  - Found: the point was found
+    *  - Infeasible: the constraints are not compatible
+    *  - NumericalWarningXXX: the lower bound on x_n, its upper bound or both
+    *    are numerically redundant with the other constraints. Please consider
+    *    moving them.
+    *  - TooSmallZonotope: the n first constraints define a zonotope too small.
+    *  - TooSmallFeasibilityZone: the feasible zone is too small.
+    */
+  enum class FeasiblePointInfo
+  {
+    Found,
+    Infeasible,
+    NumericalWarningLower,
+    NumericalWarningUpper,
+    NumericalWarningBoth,
+    TooSmallZonotope,
+    TooSmallFeasibilityZone
+  };
+
 
   /** A class to manipulate the linear constraints of the problem.
     * l_i <= x_i-x_{i-1} <= u_i for i=0..n-1  (x_{-1} = 0)
@@ -29,17 +49,32 @@ namespace bms
     /** Intermediate temporary structure for shifting the constraints. See shift*/
     struct Shift
     {
-      LinearConstraints& c;
+      const LinearConstraints& c;
       const Eigen::VectorXd& x;
+      bool feasible;
     };
 
   public:
+    LinearConstraints(int n);
     LinearConstraints(const Eigen::VectorXd& l, const Eigen::VectorXd& u, double xln, double xun);
 
-    /** Build the constraints on p such that on s.x+p verifies the original constraints s.c*/
-    LinearConstraints& operator&= (const Shift& s);
+    /** See shift*/
+    LinearConstraints& operator= (const Shift& s);
 
-    Shift shift(const Eigen::VectorXd& x) const;
+    /** Build the constraints on p such that on s.x+p verifies the original constraints s.c.
+      * If feasible is true, try to correct numerical errors by making:
+      * - l<=0
+      * - u>=0
+      * - l[i] = u[i] = 0 for equality constraints
+      * It is the user responsibility to ensure that x is indeed feasible in this case.
+      */
+    Shift shift(const Eigen::VectorXd& x, bool feasible=false) const;
+
+    const Eigen::VectorXd& l() const;
+    const Eigen::VectorXd& u() const;
+
+    /** Return a feasible point for the constraints*/
+    std::pair<FeasiblePointInfo, Eigen::VectorXd> initialPoint() const;
 
     Eigen::DenseIndex size() const;
     Eigen::DenseIndex nullSpaceSize() const;
@@ -60,6 +95,8 @@ namespace bms
     /** Index of active constraints*/
     const std::vector<Eigen::DenseIndex>& activeSetIdx() const;
     Eigen::DenseIndex numberOfActiveConstraints() const;
+
+    void changeBounds(Eigen::DenseIndex i, double l, double u);
 
     /** Y = X*N_A */
     void applyNullSpaceOnTheRight(MatrixRef Y, const MatrixConstRef& X) const;

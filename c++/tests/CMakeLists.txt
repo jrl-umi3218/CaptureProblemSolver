@@ -7,6 +7,8 @@ if(WIN32)
   add_definitions( -DBOOST_ALL_DYN_LINK )
 endif(WIN32)
 
+add_definitions(-DTESTS_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
 macro(addUnitTest name)
   add_executable(${name} ${name}.cpp ${ARGN})
   target_link_libraries(${name} ${Boost_LIBRARIES} BalanceMPCSolver)
@@ -18,6 +20,7 @@ endmacro(addUnitTest)
 addUnitTest(MatrixComputationsTest)
 addUnitTest(LeastSquareTest)
 addUnitTest(LinearConstraintsTest)
+addUnitTest(ProblemTest)
 
 set(TESTSOURCES
     main.cpp

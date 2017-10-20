@@ -7,10 +7,12 @@
 
 namespace bms
 {
-  enum class LSStatus
+  enum class SolverStatus
   {
     Converge,
     MaxIteration,
+    StepTooSmall,
+    NoLinearlyFeasiblePoint,
     Fail
   };
 
@@ -19,7 +21,7 @@ namespace bms
   public:
     LeastSquare(int n);
 
-    LSStatus solveFeasibility(const VectorConstRef& j, double c, LinearConstraints& lc);
+    SolverStatus solveFeasibility(const VectorConstRef& j, double c, LinearConstraints& lc);
 
     /** Retrieve the solution (after call to solve() or solveFeasibility())*/
     const Eigen::VectorXd& x() const;

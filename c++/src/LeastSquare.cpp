@@ -16,7 +16,7 @@ namespace bms
   {
   }
 
-  LSStatus LeastSquare::solveFeasibility(const VectorConstRef& j, double c, LinearConstraints& lc)
+  SolverStatus LeastSquare::solveFeasibility(const VectorConstRef& j, double c, LinearConstraints& lc)
   {
     assert(j.size() == n_);
     assert(lc.size() == n_);
@@ -42,7 +42,7 @@ namespace bms
         lambdaAct *= -(c + j.dot(x_));
         lc.expandActive(lambda_, lambdaAct);
         if (lc.checkDual(lambda_))
-          return LSStatus::Converge;
+          return SolverStatus::Converge;
         else
           lc.deactivateMaxLambda(lambda_);
       }
@@ -52,7 +52,7 @@ namespace bms
       }
     }
 
-    return LSStatus::MaxIteration;
+    return SolverStatus::MaxIteration;
   }
 
   const Eigen::VectorXd & LeastSquare::x() const

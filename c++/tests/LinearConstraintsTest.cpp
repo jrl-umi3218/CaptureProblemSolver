@@ -221,3 +221,71 @@ BOOST_AUTO_TEST_CASE(PseudoInverseTest)
     BOOST_CHECK(x.isApprox(y, 1e-14));
   }
 }
+
+BOOST_AUTO_TEST_CASE(InitialPoint)
+{
+  // A point exists (0 is feasible)
+  {
+    VectorXd l = -VectorXd::Random(5).cwiseAbs();
+    VectorXd u = VectorXd::Random(5).cwiseAbs();
+    LinearConstraints lc(l, u, -1, 1);
+
+    auto init = lc.initialPoint();
+    BOOST_CHECK(init.first == FeasiblePointInfo::Found);
+    BOOST_CHECK(lc.checkPrimal(init.second));
+  }
+
+  // No feasible point
+  {
+    VectorXd l = -VectorXd::Random(5).cwiseAbs();
+    VectorXd u = VectorXd::Random(5).cwiseAbs();
+    LinearConstraints lc(l, u, 1000, 1010);
+
+    auto init = lc.initialPoint();
+    BOOST_CHECK(init.first == FeasiblePointInfo::Infeasible);
+  }
+
+  // numerical issue with lower bound
+  {
+    VectorXd l = -VectorXd::Random(5).cwiseAbs();
+    VectorXd u = VectorXd::Random(5).cwiseAbs();
+    LinearConstraints lc(l, u, l.sum(), l.sum()+1);
+
+    auto init = lc.initialPoint();
+    BOOST_CHECK(init.first == FeasiblePointInfo::NumericalWarningLower);
+    BOOST_CHECK(lc.checkPrimal(init.second));
+  }
+
+  // numerical issue with upper bound
+  {
+    VectorXd l = -VectorXd::Random(5).cwiseAbs();
+    VectorXd u = VectorXd::Random(5).cwiseAbs();
+    LinearConstraints lc(l, u, u.sum() - 1, u.sum()-1e-12);
+
+    auto init = lc.initialPoint();
+    BOOST_CHECK(init.first == FeasiblePointInfo::NumericalWarningUpper);
+    BOOST_CHECK(lc.checkPrimal(init.second));
+  }
+
+  // numerical issue with both bounds
+  {
+    VectorXd l = -VectorXd::Random(5).cwiseAbs();
+    VectorXd u = VectorXd::Random(5).cwiseAbs();
+    LinearConstraints lc(l, u, l.sum(), u.sum() - 1e-12);
+
+    auto init = lc.initialPoint();
+    BOOST_CHECK(init.first == FeasiblePointInfo::NumericalWarningBoth);
+    BOOST_CHECK(lc.checkPrimal(init.second));
+  }
+
+  // numerical issue with zonotope
+  {
+    VectorXd l = -1e-12* VectorXd::Random(5).cwiseAbs();
+    VectorXd u = 1e-12*VectorXd::Random(5).cwiseAbs();
+    LinearConstraints lc(l, u, -1, 1);
+
+    auto init = lc.initialPoint();
+    BOOST_CHECK(init.first == FeasiblePointInfo::TooSmallZonotope);
+    BOOST_CHECK(lc.checkPrimal(init.second));
+  }
+}

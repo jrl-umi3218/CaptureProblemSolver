@@ -6,8 +6,10 @@
 #include <chrono>
 
 #include "LeastSquare.h"
+#include "Problem.h"
 #include "ProblemMatrices.h"
 #include "QRAlgorithms.h"
+#include "SQP.h"
 
 using namespace Eigen;
 using namespace bms;
@@ -192,17 +194,63 @@ void LSPerformance(int n, const int N)
   }
 }
 
+void readTest(const std::string& filepath)
+{
+  RawProblem raw;
+  std::string base = TESTS_DIR;
+  raw.read(base + "/" + filepath);
+}
+
+void testSQP(const std::string& filepath)
+{
+  RawProblem raw;
+  std::string base = TESTS_DIR;
+  raw.read(base + "/" + filepath);
+  
+  Problem pb(raw);
+  SQP sqp(static_cast<int>(raw.delta.size()));
+
+  sqp.solveFeasibility(pb);
+}
+
+void SQPPerformance(const std::string& filepath, const int N)
+{
+  RawProblem raw;
+  std::string base = TESTS_DIR;
+  raw.read(base + "/" + filepath);
+
+  Problem pb(raw);
+  SQP sqp(static_cast<int>(raw.delta.size()));
+
+  double d = 0;
+  auto start_time = std::chrono::high_resolution_clock::now();
+  for (int i = 0; i < N; ++i)
+  {
+    sqp.solveFeasibility(pb);
+    d += sqp.x()[0];
+  }
+  auto end_time = std::chrono::high_resolution_clock::now();
+  auto time = end_time - start_time;
+  std::cout << "SQPFeasibility: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+  std::cout << d << std::endl;
+}
+
 int main()
 {
   //exampleMatrices(10);
   //QRPerformances(10, 10000);
   //QRPerformances(20, 10000);
   //QRPerformances(100, 1000);
-  LSPerformance(10, 1000);
-  LSPerformance(10, 10000);
-  LSPerformance(100, 1000);
-  LSPerformance(200, 1000);
-  LSPerformance(500, 1000);
+  //LSPerformance(10, 1000);
+  //LSPerformance(10, 10000);
+  //LSPerformance(100, 1000);
+  //LSPerformance(200, 1000);
+  //LSPerformance(500, 1000);
+
+  //readTest("data/Problem01.txt");
+
+  //testSQP("data/Problem01.txt"); 
+  SQPPerformance("data/Problem01.txt",1000);
 
 #ifdef WIN32
   system("pause");

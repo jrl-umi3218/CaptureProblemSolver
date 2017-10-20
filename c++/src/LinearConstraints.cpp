@@ -48,18 +48,23 @@ namespace
 
 namespace bms
 {
-  LinearConstraints::LinearConstraints(const Eigen::VectorXd& l, const Eigen::VectorXd& u, double xln, double xun)
-    : n_(l.size())
-    , l_(l.size()+1)
-    , u_(l.size()+1)
+  LinearConstraints::LinearConstraints(int n)
+    : n_(n)
+    , l_(n+ 1)
+    , u_(n + 1)
     , na_(0)
-    , activationStatus_(l.size()+1, Activation::None)
-    , activeSet_(l.size()+1, false)
+    , activationStatus_(n + 1, Activation::None)
+    , activeSet_(n + 1, false)
     , validIdx_(false)
     , validActIdx_(false)
-    , idx_(l.size(),0)
-    , Cx_(l.size()+1)
-    , Cp_(l.size()+1)
+    , idx_(n, 0)
+    , Cx_(n + 1)
+    , Cp_(n + 1)
+  {
+  }
+
+  LinearConstraints::LinearConstraints(const Eigen::VectorXd& l, const Eigen::VectorXd& u, double xln, double xun)
+    : LinearConstraints(static_cast<int>(l.size()))
   {
     assert(l.size() == u.size());
     assert(((u - l).array() >= 0).all());
@@ -75,6 +80,116 @@ namespace bms
         activate(i, Activation::Equal);
     }
   }
+
+  LinearConstraints& LinearConstraints::operator= (const LinearConstraints::Shift& s)
+  {
+    this->operator=(s.c);
+    auto xm = Ref<const VectorXd>(s.x);
+    mult(Cx_, xm);
+
+    l_ -= Cx_;
+    u_ -= Cx_;
+
+    if (s.feasible)
+    {
+      for (DenseIndex i = 0; i <= n_; ++i)
+      {
+        if (activationStatus_[static_cast<size_t>(i)]==Activation::Equal)
+        {
+          l_[i] = 0.;
+          u_[i] = 0.;
+        }
+        else
+        {
+          l_[i] = std::min(l_[i], 0.);
+          u_[i] = std::max(u_[i], 0.);
+        }
+      }
+    }
+
+    return *this;
+  }
+
+  LinearConstraints::Shift LinearConstraints::shift(const Eigen::VectorXd& x, bool feasible) const
+  {
+    assert(!feasible || checkPrimal(x, 1e-14));
+    return{ *this, x, feasible };
+  }
+
+  const Eigen::VectorXd & LinearConstraints::l() const
+  {
+    return l_;
+  }
+
+  const Eigen::VectorXd & LinearConstraints::u() const
+  {
+    return u_;
+  }
+
+  std::pair<FeasiblePointInfo, VectorXd> LinearConstraints::initialPoint() const
+  {
+    const double eps = 1e-8;
+    std::pair<FeasiblePointInfo, VectorXd> ret;
+    ret.second.resize(n_);
+
+    double s = 0;
+    double t = 0;
+    //s = sum(l), t = sum(u-l)
+    for (DenseIndex i = 0; i < n_; ++i)
+    {
+      s += l_[i];
+      t += u_[i];
+    }
+    t -= s;
+
+    if (std::abs(t) > n_*eps)
+    {
+      double al = (l_[n_] - s) / t;
+      double au = (u_[n_] - s) / t;
+      if (al <= 1 && au >= 0)
+      {
+        double f = (std::max(al, 0.) + std::min(au, 1.)) / 2;
+        ret.second[0] = l_[0] + f*(u_[0] - l_[0]);
+        for (DenseIndex i = 1; i < n_; ++i)
+          ret.second[i] = ret.second[i - 1] + l_[i] + f*(u_[i] - l_[i]);
+
+        if (al > 1 - eps || au < eps)
+          ret.first = FeasiblePointInfo::TooSmallFeasibilityZone;
+        else
+        {
+          if (std::abs(al) < eps)
+          {
+            if (std::abs(au - 1) < eps)
+              ret.first = FeasiblePointInfo::NumericalWarningBoth;
+            else
+              ret.first = FeasiblePointInfo::NumericalWarningLower;
+          }
+          else
+          {
+            if (std::abs(au - 1) < eps)
+              ret.first = FeasiblePointInfo::NumericalWarningUpper;
+            else
+              ret.first = FeasiblePointInfo::Found;
+          }
+        }
+      }
+      else
+        ret.first = FeasiblePointInfo::Infeasible;
+    }
+    else
+    {
+      ret.second[0] = l_[0];
+      for (DenseIndex i = 1; i < n_; ++i)
+        ret.second[i] = ret.second[i - 1] + l_[i];
+      if (l_[n_] <= ret.second[n_ - 1] && ret.second[n_ - 1] <= u_[n_])
+        ret.first = FeasiblePointInfo::TooSmallZonotope;
+      else
+        ret.first = FeasiblePointInfo::Infeasible;
+    }
+
+    return ret;
+  }
+
 
   DenseIndex LinearConstraints::size() const
   {
@@ -113,7 +228,7 @@ namespace bms
 
   void LinearConstraints::resetActivation()
   {
-    for (size_t i = 0; i < n_; ++i)
+    for (size_t i = 0; i < static_cast<size_t>(n_); ++i)
     {
       if (activationStatus_[i] != Activation::Equal)
         deactivate(i);
@@ -140,6 +255,15 @@ namespace bms
   Eigen::DenseIndex LinearConstraints::numberOfActiveConstraints() const
   {
     return na_;
+  }
+
+  void LinearConstraints::changeBounds(DenseIndex i, double l, double u)
+  {
+    assert(i >= 0 && i <= n_);
+    l_[i] = l;
+    u_[i] = u;
+    if (l == u)
+      activate(static_cast<int>(i), Activation::Equal);
   }
 
   void LinearConstraints::applyNullSpaceOnTheRight(MatrixRef Y, const MatrixConstRef& X) const
