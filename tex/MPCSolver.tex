@@ -326,9 +326,9 @@ Let's consider a slightly refined description of $N_\mathcal{A}$, where we split
     &&&&&&& 0_{a_p,i_p-1}
   \BOUT
 \end{equation}
-We write $J$ conformably for multiplication as
-\begin{equation*}
-  J = \BIN
+We write $J$ conformably for multiplication (we study first the begining) as
+\begin{align*}
+  &J =\\ &\BIN
     D_0   & B_0    &          &        &           &        &          &        &           &             &                &            &           \\
     B_0^T & D_1    & b_1'     &        &           &        &          &        &           &             &                &            &           \\
           & b_1'^T & \delta_2 & b_2^T  &           &        &          &        &           &             &                &            &           \\
@@ -339,10 +339,11 @@ We write $J$ conformably for multiplication as
           &        &          &        &           &        & b_4      & D_4    & b_4'      &             &                &            &           \\
           &        &          &        &           &        &          & b_4'^T & \delta_4' & b_5^T       &                &            &           \\
           &        &          &        &           &        &          &        &           & \ddots      &                &            &           \\ 
-          &        &          &        &           &        &          &        &           & b_{2p-2}'^T & \delta_{2p-2}' & b_{2p-1}^T &           \\
-          &        &          &        &           &        &          &        &           &             & b_{2p-1}       & D_{2p-1}   & b_{2p-1}' \\
+          %&        &          &        &           &        &          &        &           & b_{2p-2}'^T & \delta_{2p-2}' & b_{2p-1}^T &           \\
+          %&        &          &        &           &        &          &        &           &             & b_{2p-1}       & D_{2p-1}   & \BIN B_{2p} \hspace{-3pt}&\hspace{-2pt} 0 \BOUT \\
+          %&        &          &        &           &        &          &        &           &             &                & B_{2p}^T   & D_{2p}    \\
   \BOUT
-\end{equation*}
+\end{align*}
 where the $\delta$s are scalar, the $D_i$s are square, tridiagonal, symmetric matrices, $B_0$ is a matrix with all elements to 0 but the bottom left one, the $d_i$s are vector whose only non zero element is the first, and the $d_i'$s are vectors whose only non zero element is the last.
 We have
 \begin{align*}
@@ -358,8 +359,9 @@ We have
            &                      &        & b_4 + D_4 1 + b_4'   &        &                                &            \\
            &                      &        & b_4'^T 1 + \delta_4' & b_5^T  &                                &            \\
            &                      &        &                      & \ddots &                                &            \\
-           &                      &        &                      &        & b_{2p-2}'^T 1 + \delta_{2p-2}' & b_{2p-1}^T \\
-           &                      &        &                      &        & b_{2p-1}                       & D_{2p-1}   \\
+           %&                      &        &                      &        & b_{2p-2}'^T 1 + \delta_{2p-2}' & b_{2p-1}^T \\
+           %&                      &        &                      &        & b_{2p-1}                       & D_{2p-1}   \\
+           %&                      &        &                      &        &                                & B_{2p}^T   \\
   \BOUT
 \end{align*}
 where we dropped the size of the vectors $1_a$.
@@ -378,8 +380,9 @@ Because the property $3$ of $J$, we have $b_{2i} + D_{2i} 1_{a_i-1} + b_{2i}' = 
            &                      &        & \cred{0_{a_2-1,1}}   &        &                                &            \\
            &                      &        & b_4'^T 1 + \delta_4' & b_5^T  &                                &            \\
            &                      &        &                      & \ddots &                                &            \\
-           &                      &        &                      &        & b_{2p-2}'^T 1 + \delta_{2p-2}' & b_{2p-1}^T \\
-           &                      &        &                      &        & b_{2p-1}                       & D_{2p-1}   \\
+           %&                      &        &                      &        & b_{2p-2}'^T 1 + \delta_{2p-2}' & b_{2p-1}^T \\
+           %&                      &        &                      &        & b_{2p-1}                       & D_{2p-1}   \\
+           %&                      &        &                      &        &                                & B_{2p}^T   \\
   \BOUT
 \end{align*}
 With this same property, we also have the fact that $\delta_{2j} + b_{2j}^T 1$ is equal to the opposite of the non-zero element of $b_{2j-1}'$ (and the same for $b_{2j}'^T 1 + \delta_{2j}'$ and $b_{2j+j}$).
@@ -395,11 +398,128 @@ We can consider several submatrices:
     b_{2j+1}                & D_{2j+1}    & b_{2j+1}'                    \\
                             & b_{2j+1}'^T & \delta_{2j+2} + b_{2j+2}^T 1 
   \BOUT, j=1..p-2\\
-  &J_{p-1} = \BIN
-     b_{2p-2}'^T 1 + \delta_{2p-2}' & b_{2p-1}^T \\
-     b_{2p-1}                       & D_{2p-1}   \\
-  \BOUT
+  %&J_{p-1} = \BIN
+  %   b_{2p-2}'^T 1 + \delta_{2p-2}' & b_{2p-1}^T \\
+  %   b_{2p-1}                       & D_{2p-1}   \\
+  %                                  & B_{2p}^T   \\
+  %\BOUT
 \end{align*}
+The study of the end of $J_\mathcal{A}$ is a bit more tedious as we need to separate the cases, depending on the values of $a_p$ and $i_p$.
+\begin{itemize}
+	\item $a_p=0$, $i_p=1$: we have
+  \begin{equation*}
+    J = \BIN & \ddots & & \\
+             & b_{2p-2} & D_{2p-2} & b_{2p-2}' \BOUT, \quad
+    N_\mathcal{A} = \BIN \ddots & \\ & 1 \\ & 1_{a_{p-1}-1} \\ & 1 \BOUT
+  \end{equation*}
+  the last $a_p-1$ rows of $J_\mathcal{A}$ are $0$.
+  \item $a_p = 0$, $i_p=2$:
+  \begin{equation*}
+    J = \BIN & \ddots   &             &                &              \\
+             & b_{2p-2} & D_{2p-2}    & b_{2p-2}'      &              \\
+             &          & b_{2p-2}'^T & \delta_{2p-2}' & \beta_{2p-1} \BOUT, \quad
+    N_\mathcal{A} = \BIN \ddots & & \\ & 1 & \\ & 1_{a_{p-1}-1} & \\ & 1 & \\ & & 1 \BOUT
+  \end{equation*}
+  and
+  \begin{equation*}
+    J_\mathcal{A} = \BIN 0_{a_{p-1}-1,1} & \\ b_{2p-2}'^T 1 + \delta_{2p-2}' & \beta_{2p-1} \BOUT
+  \end{equation*}
+  \item $a_p = 0$, $i_p>2$:
+  \begin{align*}
+    &J = \BIN & \ddots   &             &                &            &           \\
+             & b_{2p-2} & D_{2p-2}    & b_{2p-2}'      &            &           \\
+             &          & b_{2p-2}'^T & \delta_{2p-2}' & b_{2p-1}^T &           \\
+             &          &             & b_{2p-1}       & D_{2p-1}   & b_{2p-1}' \BOUT,\\
+    &N_\mathcal{A} = \BIN \ddots & & & \\ & 1 & & \\ & 1_{a_{p-1}-1} & & \\ & 1 & & \\ & & I_{i_p-2} & \\ & & & 1 \BOUT
+  \end{align*}
+  and
+  \begin{equation*}
+    J_\mathcal{A} = \BIN 0_{a_{p-1}-1,1} & & \\ b_{2p-2}'^T 1 + \delta_{2p-2}' & b_{2p-1}^T \\ b_{2p-1} & D_{2p-1} & b_{2p-1}' \\ \BOUT
+  \end{equation*}
+  \item $a_p = 1$, $i_p=1$:
+  \begin{equation*}
+    J = \BIN & \ddots   &             &                &              \\
+             & b_{2p-2} & D_{2p-2}    & b_{2p-2}'      &              \\
+             &          & b_{2p-2}'^T & \delta_{2p-2}' & \beta_{2p-1} \BOUT, \quad
+    N_\mathcal{A} = \BIN \ddots & \\ & 1 \\ & 1_{a_{p-1}-1} \\ & 1 \\ & 0 \BOUT
+  \end{equation*}
+  and
+  \begin{equation*}
+    J_\mathcal{A} = \BIN 0_{a_{p-1}-1,1} \\ b_{2p-2}'^T 1 + \delta_{2p-2}' \BOUT
+  \end{equation*}
+  \item $a_p = 1$, $i_p=2$:
+  \begin{align*}
+    &J = \BIN & \ddots   &             &                &               &               \\
+              & b_{2p-2} & D_{2p-2}    & b_{2p-2}'      &               &               \\
+              &          & b_{2p-2}'^T & \delta_{2p-2}' & \beta_{2p-1}  &               \\
+              &          &             & \beta_{2p-1}   & \delta_{2p-1} & \beta_{2p-1}' \BOUT,\\
+    &N_\mathcal{A} = \BIN \ddots & & \\ & 1 & \\ & 1_{a_{p-1}-1} & \\ & 1 & \\ & & 1 \\ &  & 0 \BOUT
+  \end{align*}
+  and
+  \begin{equation*}
+    J_\mathcal{A} = \BIN 0_{a_{p-1}-1,1} & \\ b_{2p-2}'^T 1 + \delta_{2p-2}' & \beta_{2p-1} \\ \beta_{2p-1} & \delta_{2p-1} \\ \BOUT
+  \end{equation*}
+  \item $a_p = 1$, $i_p>2$:
+  \begin{align*}
+    &J = \BIN & \ddots   &             &                &             &             &            \\
+              & b_{2p-2} & D_{2p-2}    & b_{2p-2}'      &             &             &            \\
+              &          & b_{2p-2}'^T & \delta_{2p-2}' & b_{2p-1}^T  &             &            \\
+              &          &             & b_{2p-1}       & D_{2p-1}    & b_{2p-1}'   &            \\
+              &          &             &                & b_{2p-1}'^T & \delta_{2p} & \beta_{2p} \BOUT,\\
+    &N_\mathcal{A} = \BIN \ddots & & & \\ & 1 & & \\ & 1_{a_{p-1}-1} & & \\ & 1 & & \\ & & I_{i_p-2} & \\ & & & 1\\ & & & 0 \BOUT
+  \end{align*}
+  and
+  \begin{equation*}
+    J_\mathcal{A} = \BIN 0_{a_{p-1}-1,1}                &             &             \\ 
+                         b_{2p-2}'^T 1 + \delta_{2p-2}' & b_{2p-1}^T  &             \\ 
+                         b_{2p-1}                       & D_{2p-1}    & b_{2p-1}'   \\ 
+                                                        & b_{2p-1}'^T & \delta_{2p} \BOUT
+  \end{equation*}
+  \item $a_p > 1$, $i_p=1$:
+  \begin{equation*}
+    J = \BIN & \ddots   &             &                &          &         \\
+             & b_{2p-2} & D_{2p-2}    & b_{2p-2}'      &          &         \\
+             &          & b_{2p-2}'^T & \delta_{2p-2}' & b_{2p}^T &         \\ 
+             &          &             & b_{2p}         & D_{2p}   & \beta_{2p}' \BOUT, \quad
+    N_\mathcal{A} = \BIN \ddots & \\ & 1 \\ & 1_{a_{p-1}-1} \\ & 1 \\ & 0_{a_p-1,1} \\ & 0 \BOUT
+  \end{equation*}
+  and
+  \begin{equation*}
+    J_\mathcal{A} = \BIN 0_{a_{p-1}-1,1} \\ b_{2p-2}'^T 1 + \delta_{2p-2}' \\  b_{2p} \BOUT
+  \end{equation*}
+  \item $a_p > 1$, $i_p=2$:
+  \begin{align*}
+    &J = \BIN & \ddots   &             &                &               &          & \\
+              & b_{2p-2} & D_{2p-2}    & b_{2p-2}'      &               &          & \\
+              &          & b_{2p-2}'^T & \delta_{2p-2}' & \beta_{2p-1}  &          & \\
+              &          &             & \beta_{2p-1}   & \delta_{2p-1} & b_{2p}^T & \\
+              &          &             &                & b_{2p}        & D_{2p}   & \beta_{2p}' \BOUT,\\
+    &N_\mathcal{A} = \BIN \ddots & & \\ & 1 & \\ & 1_{a_{p-1}-1} & \\ & 1 & \\ & & 1 \\ &  & 0_{a_p-1,1} \\ & & 0\BOUT
+  \end{align*}
+  and
+  \begin{equation*}
+    J_\mathcal{A} = \BIN 0_{a_{p-1}-1,1} & \\ b_{2p-2}'^T 1 + \delta_{2p-2}' & \beta_{2p-1} \\ \beta_{2p-1} & \delta_{2p-1} \\ & b_{2p} \\ \BOUT
+  \end{equation*}
+  \item $a_p > 1$, $i_p>2$:
+  \begin{align*}
+    &J = \BIN & \ddots   &             &                &             &             &          &         \\
+              & b_{2p-2} & D_{2p-2}    & b_{2p-2}'      &             &             &          &         \\
+              &          & b_{2p-2}'^T & \delta_{2p-2}' & b_{2p-1}^T  &             &          &         \\
+              &          &             & b_{2p-1}       & D_{2p-1}    & b_{2p-1}'   &          &         \\
+              &          &             &                & b_{2p-1}'^T & \delta_{2p} & b_{2p}^T &         \\
+              &          &             &                &             & b_{2p}      & D_{2p}    & b_{2p}' \BOUT,\\
+    &N_\mathcal{A} = \BIN \ddots & & & \\ & 1 & & \\ & 1_{a_{p-1}-1} & & \\ & 1 & & \\ & & I_{i_p-2} & \\ & & & 1\\ & & & 0_{a_p-1,1} \\ & & & 0 \BOUT
+  \end{align*}
+  and
+  \begin{equation*}
+    J_\mathcal{A} = \BIN 0_{a_{p-1}-1,1}                &             &             \\ 
+                         b_{2p-2}'^T 1 + \delta_{2p-2}' & b_{2p-1}^T  &             \\ 
+                         b_{2p-1}                       & D_{2p-1}    & b_{2p-1}'   \\ 
+                                                        & b_{2p-1}'^T & \delta_{2p} \\
+                                                        &             & b_{2p}      \BOUT
+  \end{equation*}
+\end{itemize}
+
 
 \subsection{QR decomposition of $J_\mathcal{A}$}
 In this section, we explain how to get cheaply the QR decomposition of $J_\mathcal{A}$. To do so, an intermediate step is to obtain the QR decompositions of the matrices $J_0$, $J_j$ and $J_{p-1}$ that we now describe a bit more in detail. For that we denote by $\BIN e_0,\ldots,e_k\BOUT$ a subpart $\BIN d_{j_0},\ldots,d_{j_0+k}\BOUT$ of the vector $d$ defining $J$. For each description, $j_0$ and $k$ are different and judiciously chosen.
@@ -439,7 +559,7 @@ Note that when $i_{2j}$ is $1$ (and thus $I_{i_{2j}-1}$ is empty), $J_j$ reduces
 \end{equation*}
 For $J_0$, we will only look for a decomposition
 \begin{equation*}
-  J_0 = \BIN I & 0 \\ 0 & Q_0 \BOUT \BIN 0_{a_0-1,k+1} \\ R_0 \BIN
+  J_0 = \BIN I & 0 \\ 0 & Q_0 \BOUT \BIN 0_{a_0-1,k+1} \\ R_0 \BOUT
 \end{equation*}
 apply the QR decomposition to the submatrix starting at $e_0$. This submatrix is a band matrix lower bandwidth $2$ and upper bandwidth $0$ and can be decomposed efficiently using $2k-1$ Givens rotations.
 
@@ -451,6 +571,6 @@ G_i = \BIN
     & -\frac{\sqrt{i}\sqrt{i+1}}{i+1} & \frac{\sqrt{i+1}}{i+1} & \\
     & & & I_{k-i+1}
 \BOUT
-It can be verified that the QR decomposition is obtained for $Q_j = G_1 G_2 \ldots G_{k+1}$.
 \end{equation}
+It can be verified that the QR decomposition is obtained for $Q_j = G_1 G_2 \ldots G_{k+1}$.
 \end{document}
