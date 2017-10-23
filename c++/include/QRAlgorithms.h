@@ -51,19 +51,24 @@ namespace bms
     if (m >= 2 && n >= 2)
     {
       auto p = std::min(m, n) - 2;
+      //auto p = m - 2;
       Q.reserve(Q.size() + p + 1);
       for (Eigen::DenseIndex i = 0; i < p; ++i)
       {
         Q.emplace_back(M, i, i);
         Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 3>(i, i), condensed_t());
       }
-      Q.emplace_back(M, p, p);
-      if (m == n)
-        Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 2>(p, p), condensed_t());
-      else if (m<n)
-        Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 3>(p, p), condensed_t());
-      else //m = n+1
-        Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 1>(p, p), condensed_t());
+      for (Eigen::DenseIndex i = p; i < m - 1; ++i)
+      {
+        Q.emplace_back(M, i, i);
+        if (i+2 == n)
+          Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 2>(i, i), condensed_t());
+        else if (i+3<=n)
+          Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 3>(i, i), condensed_t());
+        else //i+1==n
+          Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 1>(i, i), condensed_t());
+      }
+      
       return abs(M(p + 1, p + 1)) > thresh;
     }
     else
@@ -195,10 +200,10 @@ namespace bms
     {
       switch (endType)
       {
-      case EndType::Case1: R(0, 0) = e[0] * l_[0];  break;
+      case EndType::Case1: R(0, 0) = -e[0] * sqrt(2);  break;
       case EndType::Case2: R(0, 0) = -e[0];  break;
       case EndType::Case3: R(0, 0) = -e[0], R(0, 1) = e[0]; break;
-      case EndType::Case4: R(0, 0) = -e[0] * l_[0]; R(0, 1) = -R(0, 0); break;
+      case EndType::Case4: R(0, 0) = -e[0] * sqrt(2); R(0, 1) = -R(0, 0); break;
       }
     }
     else
@@ -248,6 +253,6 @@ namespace bms
     Q.reserve(Q.size() + M.rows()-1);
     std::copy(G_.begin(), G_.begin() + M.rows() - 1, std::back_inserter(Q));
 
-    return endType != EndType::Case4 && M(n - 1, n - 1) > thresh;
+    return endType != EndType::Case4 && std::abs(M(n - 1, n - 1)) > thresh;
   }
 }

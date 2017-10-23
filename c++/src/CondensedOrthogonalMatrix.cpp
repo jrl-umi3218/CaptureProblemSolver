@@ -4,8 +4,9 @@ using namespace Eigen;
 
 namespace bms
 {
-  CondensedOrthogonalMatrix::CondensedOrthogonalMatrix(int n, int kmax, int pmax)
-    : n_(n)
+  CondensedOrthogonalMatrix::CondensedOrthogonalMatrix(int n, int kmax, int pmax, bool Ptranspose)
+    : ptranspose_(Ptranspose)
+    , n_(n)
     , sequences_(kmax)
     , transpositions_(VectorXi::LinSpaced(n,0,n-1))
   {
@@ -13,11 +14,12 @@ namespace bms
       s.reserve(pmax);
   }
 
-  void CondensedOrthogonalMatrix::reset()
+  void CondensedOrthogonalMatrix::reset(bool Ptranspose)
   {
     for (auto& s : sequences_)
       s.clear();
     transpositions_.indices() = VectorXi::LinSpaced(n_, 0, static_cast<int>(n_) - 1);
+    ptranspose_ = Ptranspose;
   }
 
   Eigen::MatrixXd CondensedOrthogonalMatrix::matrix()

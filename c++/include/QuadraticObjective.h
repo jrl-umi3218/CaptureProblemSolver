@@ -60,7 +60,6 @@ namespace bms
 
     //computation data
     mutable Eigen::VectorXd e_;
-    mutable Eigen::VectorXi transpositionIndices_;
     SpecialQR qr_;
   };
 }

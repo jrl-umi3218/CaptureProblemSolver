@@ -62,18 +62,23 @@ int nact(const std::vector<bool>& act)
 BOOST_AUTO_TEST_CASE(qrTest)
 {
   int n = 12;
-  VectorXd delta = VectorXd::LinSpaced(n, 0.01, 0.23);
+  VectorXd delta = VectorXd::LinSpaced(n, 0.01, 0.02*n-0.01);
   LeastSquareObjective obj(delta);
 
-  for (int i=0; i< (1 << 13)-1; ++i) //because why not ?
+  for (int i=11; i < (1 << (n + 1)) - 1; ++i) //because why not ?
   {
+    //std::cout << i << std::endl;
+    auto act = toVec(i, n + 1);
+    MatrixXd R(n - 1, n-nact(act));
+    CondensedOrthogonalMatrix Q(n-1, n-1, 2*n);
+    obj.qr(R, Q, act);
 
-  auto act = toVec(i, n + 1);
-  MatrixXd R(n - 1, n-nact(act));
-  CondensedOrthogonalMatrix Q(n, n, 2*n);
-  obj.qr(R, Q, act);
-
-  //std::cout << R << std::endl;
-  //system("pause");
+    MatrixXd J = obj.projectedMatrix(act);
+    //std::cout << "R =\n" << R << std::endl;
+    Q.applyTo(J);
+    //std::cout << "J = \n " << J << std::endl;
+    //std::cout << "J-R = \n" << (J - R) << std::endl;
+    //system("pause");
+    BOOST_CHECK(R.isApprox(J, 1e-15));
   }
 }

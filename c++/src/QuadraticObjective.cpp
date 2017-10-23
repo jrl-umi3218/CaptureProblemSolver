@@ -1,6 +1,8 @@
 #include "ProblemMatrices.h"
 #include "QuadraticObjective.h"
 
+#include <iostream>
+
 using namespace Eigen;
 
 namespace bms
@@ -10,7 +12,6 @@ namespace bms
     , delta_(delta)
     , d_(delta.cwiseInverse())
     , e_(delta.size()+1)
-    , transpositionIndices_(delta.size()-1)
     , qr_(delta.size())
   {
   }
@@ -24,14 +25,15 @@ namespace bms
     return qr(R, Q, na, act, shift);
   }
 
-  void LeastSquareObjective::qr(MatrixRef R, CondensedOrthogonalMatrix & Q, Index nact, const std::vector<bool>& act, Index shift) const
+  void LeastSquareObjective::qr(MatrixRef R, CondensedOrthogonalMatrix& Q, Index nact, const std::vector<bool>& act, Index shift) const
   {
     assert(act.size() == n_ + 1);
     assert(R.rows() == n_ - 1 && R.cols() == n_ - nact);
     R.setZero();
+    Q.reset(true);
 
     //permutation management
-    int up = 0;
+    Index up = 0;
     const int reduce = -1;
 
     if (nact == n_) return;
@@ -60,14 +62,28 @@ namespace bms
       switch (ap)
       {
       case 0:
-        if (nact != n_ - 1) qrJj(R.bottomRows(n_ - 1 - startOffset), Q.Q(0), shift, a0, n_ - 1, startType, EndType::Case3);
-        else R(n_ - 2, 0) = d_(n_ - 1);
+        //if (nact != n_ - 1) qrJj(R.bottomRows(n_ - 1 - startOffset), Q.Q(0), shift, a0, n_ - 1, startType, EndType::Case3);
+        if (nact != n_ - 1)
+        {
+          qrJj(R.topRows(n_ - 1 - startOffset), Q.Q(0), shift + startOffset, a0, n_ - 1, startType, EndType::Case3);
+          Q.P().indices().head(n_ - 1 - startOffset).setLinSpaced(startOffset, n_ - 2);
+        }
+        //else R(n_ - 2, 0) = d_(n_ - 1);
+        else
+        {
+          R(0, 0) = d_(n_ - 1);
+          Q.P().indices()[0] = n_ - 2;
+        }
         break;
       case 1:
-        qrJj(R.bottomRows(n_ - 1 - startOffset), Q.Q(0), shift, a0, n_ - 1, startType, EndType::Case2);
+        //qrJj(R.bottomRows(n_ - 1 - startOffset), Q.Q(0), shift, a0, n_ - 1, startType, EndType::Case2);
+        qrJj(R.topRows(n_ - 1 - startOffset), Q.Q(0), shift + startOffset, a0, n_ - 1, startType, EndType::Case2);
+        Q.P().indices().head(n_ - 1 - startOffset).setLinSpaced(startOffset, n_ - 2);
         break;
       default:
-        qrJj(R.middleRows(startOffset, n_ + 1 - ap - startOffset), Q.Q(0), shift, a0, n_ - ap, startType, EndType::Case1);
+        //qrJj(R.middleRows(startOffset, n_ + 1 - ap - startOffset), Q.Q(0), shift, a0, n_ - ap, startType, EndType::Case1);
+        qrJj(R.topRows(n_ + 1 - ap - startOffset), Q.Q(0), shift + startOffset, a0, n_ - ap, startType, EndType::Case1);
+        Q.P().indices().head(n_ + 1 - ap - startOffset).setLinSpaced(startOffset, n_ - ap);
         break;
       }
       return;
@@ -76,17 +92,20 @@ namespace bms
     Index k = a0; //number of constraints visited (initial scan of the end excluded)
     Index i1 = 0; //size of the first block of inactive constraints
     size_t q = 0; //numbers of GivensSequence used
-    Index r = 0; // row at which the matrix is inserted
+    up = startOffset;
     while (k + i1 <= n_ && !act[static_cast<size_t>(k + i1)]) ++i1;
     //buildJj(R.block(startOffset, 0, i1 + addDim, i1), a0, a0 + i1 - 1, startType, EndType::Case4);
-    qrJj(R.block(0, 0, i1 + addDim, i1), Q.Q(q), shift+startOffset, a0, a0 + i1 - 1, startType, EndType::Case4);
+    qrJj(R.block(startOffset - up, 0, i1 + addDim, i1), Q.Q(q), shift + startOffset, a0, a0 + i1 - 1, startType, EndType::Case4);
+    Q.P().indices().head(i1 + addDim).setLinSpaced(startOffset, startOffset + i1 + addDim - 1); //FIXME: we are doing one permutation too many if startType is Case1
     ++q;
+    if (startType == StartType::Case1)  up += 1;
 
     k += i1;
     Index c = i1 - 1;
     Index a1 = 0;
     while (k + a1 <= n_ && act[static_cast<size_t>(k + a1)]) ++a1;
     k += a1;
+    up += a1 - 1;
 
     while (true)
     {
@@ -102,16 +121,27 @@ namespace bms
         assert(ai == ap);
         switch (ai)
         {
-        case 0: qrJj(R.block(k - 1, c, ii - 1, ii), Q.Q(q), shift, n_ + 1 - ii, n_ - 1, StartType::Case3, EndType::Case3); break;
-        case 1: qrJj(R.block(k - 1, c, ii, ii), Q.Q(q), shift, n_ - ii, n_ - 1, StartType::Case3, EndType::Case2); break;
-        default: qrJj(R.block(k - 1, c, ii + 1, ii), Q.Q(q), shift, n_ + 1 - ii - ai, n_ - ai, StartType::Case3, EndType::Case1);  break;
+        case 0: 
+          qrJj(R.block(k - 1 - up, c, ii - 1, ii), Q.Q(q), shift + k - 1, n_ + 1 - ii, n_ - 1, StartType::Case3, EndType::Case3);
+          Q.P().indices().segment(k - 1 - up, ii - 1).setLinSpaced(k - 1, k - 3 + ii);
+          break;
+        case 1: 
+          qrJj(R.block(k - 1 - up, c, ii, ii), Q.Q(q), shift + k - 1, n_ - ii, n_ - 1, StartType::Case3, EndType::Case2);
+          Q.P().indices().segment(k - 1 - up, ii).setLinSpaced(k - 1, k - 2 + ii);
+          break;
+        default: 
+          qrJj(R.block(k - 1 - up, c, ii + 1, ii), Q.Q(q), shift + k - 1, n_ + 1 - ii - ai, n_ - ai, StartType::Case3, EndType::Case1);
+          Q.P().indices().segment(k - 1 - up, ii + 1).setLinSpaced(k - 1, k - 1 + ii);
+          break;
         }
         ++q;
         break;
       }
       else
       {
-        qrJj(R.block(k - 1, c, ii + 1, ii + 1), Q.Q(q), shift, k, k + ii - 1, StartType::Case3, EndType::Case4);
+        qrJj(R.block(k - 1 - up, c, ii + 1, ii + 1), Q.Q(q), shift + k - 1, k, k + ii - 1, StartType::Case3, EndType::Case4);
+        Q.P().indices().segment(k - 1 - up, ii + 1).setLinSpaced(k - 1, k - 1 + ii);
+        up += ai;
         ++q;
         c += ii;
         k += ii + ai;
@@ -297,6 +327,10 @@ namespace bms
       qr_.compute(R, e, Q, endType); 
       break;
     }
+
+    MatrixXd J(R.rows(), R.cols());
+    buildJj(J, dstart, dend, startType, endType);
+    Q.applyTo(J);
     Q.extend(static_cast<int>(extend));
   }
 }

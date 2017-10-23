@@ -5,6 +5,8 @@
 #include <bms_api.h>
 #include <GivensSequence.h>
 
+#include <iostream>
+
 namespace bms
 {
   /** A class representing a product Q1 Q2 ... Qk P where the QI are orthogonal
@@ -19,10 +21,12 @@ namespace bms
   {
   public:
     /** Create an instance preallocating kmax Givens sequences with pmax Givens
-      * rotation each. The represented matrix is nxn*/
-    CondensedOrthogonalMatrix(int n, int kmax, int pmax);
+      * rotation each. The represented matrix is nxn
+      * If Ptranspose is true, P^T is stored instead of P.
+      */
+    CondensedOrthogonalMatrix(int n, int kmax, int pmax, bool Ptranspose = false);
 
-    void reset();
+    void reset(bool Ptranspose = false);
 
     GivensSequence& Q(size_t i);
     Eigen::Transpositions<Eigen::Dynamic>& P();
@@ -42,6 +46,7 @@ namespace bms
     Eigen::MatrixXd matrix();
 
   private:
+    bool ptranspose_;
     Eigen::DenseIndex n_;
     std::vector<GivensSequence> sequences_;
     Eigen::Transpositions<Eigen::Dynamic> transpositions_;
@@ -52,7 +57,10 @@ namespace bms
   {
     for (const auto& Q : sequences_)
       Q.applyTo(M);
-    const_cast<MatrixBase<Derived>&>(M) = transpositions_.transpose()*M;
+    if (ptranspose_)
+      const_cast<MatrixBase<Derived>&>(M) = transpositions_*M;
+    else
+      const_cast<MatrixBase<Derived>&>(M) = transpositions_.transpose()*M;
   }
 
   template<typename Derived>
@@ -60,7 +68,10 @@ namespace bms
   {
     for (const auto& Q : sequences_)
       Q.applyOnTheRightTo(M);
-    const_cast<MatrixBase<Derived>&>(M) = M*transpositions_;
+    if (ptranspose_)
+      const_cast<MatrixBase<Derived>&>(M) = M*transpositions_.transpose();
+    else
+      const_cast<MatrixBase<Derived>&>(M) = M*transpositions_;
   }
 
   inline GivensSequence& CondensedOrthogonalMatrix::Q(size_t i)
