@@ -9,6 +9,7 @@ set(BMS_SOURCES
   Problem.cpp
   ProblemMatrices.cpp
   QRAlgorithms.cpp
+  QuadraticObjective.cpp
   SQP.cpp)
 
 set(BMS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../include)

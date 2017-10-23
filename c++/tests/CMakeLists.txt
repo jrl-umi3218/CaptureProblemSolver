@@ -21,6 +21,7 @@ addUnitTest(MatrixComputationsTest)
 addUnitTest(LeastSquareTest)
 addUnitTest(LinearConstraintsTest)
 addUnitTest(ProblemTest)
+addUnitTest(ObjectiveTest)
 
 set(TESTSOURCES
     main.cpp

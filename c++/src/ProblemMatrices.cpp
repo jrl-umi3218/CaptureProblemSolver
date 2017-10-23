@@ -10,8 +10,8 @@ namespace bms
     MatrixXd J(n - 1, n);
     J.setZero();
     J.diagonal() = -d.head(n - 1) - d.tail(n - 1);
-    J.diagonal<-1>() = -d.segment(1, n - 2);
-    J.diagonal<+1>() = -d.segment(1, n - 1);
+    J.diagonal<-1>() = d.segment(1, n - 2);
+    J.diagonal<+1>() = d.segment(1, n - 1);
 
     return J;
   }

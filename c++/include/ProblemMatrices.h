@@ -11,7 +11,7 @@ namespace bms
     * Mostly for debugging purposes
     */
 
-  /** Build J such that the objective is ||Jx||^2 where d = 1/sqrt(delta) */
+  /** Build J such that the objective is ||Jx||^2 where d = 1/delta */
   BMS_DLLAPI Eigen::MatrixXd buildJ(const Eigen::VectorXd& d);
 
   /** Build J_0 without the initial 0 rows (see doc)*/
