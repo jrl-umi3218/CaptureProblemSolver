@@ -5,6 +5,7 @@
 #include <Eigen/Core>
 
 #include <bms_api.h>
+#include <defs.h>
 #include <Givens.h>
 #include <GivensSequence.h>
 
@@ -59,7 +60,16 @@ namespace bms
     return abs(M(m-1, m-1)) > thresh;
   }
 
-  /** A class that can perform a QR decomposition for matrices with the form
+  /** A class for QR decomposition of matrices with particular form.*/
+  class BMS_DLLAPI SpecialQR
+  {
+  public:
+    /** kmax is the maximum value of k, as described above
+      *
+      */
+    SpecialQR(int kmax);
+
+    /** Perform a QR decomposition for M with the form
     * | -e0    e0                                              |
     * |  e0  -e0-e1   e1                                       |
     * |        e1   -e1-e2  e2                                 |
@@ -70,25 +80,41 @@ namespace bms
     * or a variant with -e_{k-1}-e_k instead of -e_{k-1} for the last element.
     *
     * The matrices are (k+1)x(k+1).
+    *
+    * DEPRECATED
     */
-  class BMS_DLLAPI SpecialQR
-  {
-  public:
-    /** kmax is the maximum value of k, as described above
-      *
-      */
-    SpecialQR(int kmax);
-
     template<typename Derived>
     bool compute(const Eigen::MatrixBase<Derived>& M, GivensSequence& Q, bool variant, double thresh = 1e-15) const;
+
+    /** A class that can perform a QR decomposition for matrices with the form
+    * | -e0    e0                                              |
+    * |  e0  -e0-e1   e1                                       |
+    * |        e1   -e1-e2  e2                                 |
+    * |               ...                                      |
+    * |                     e_{k-2}  -e_{k-2}-e_{k-1}  e_{k-1} |
+    * |                                  e_{k-1}          E    |
+    *
+    * where e depends on a EndType enum value:
+    * - Case1: E= [-e_{k-1}; -e_k] (the matrix is extend by one row)
+    * - Case2: E = -e_{k-1}-e_k
+    * - Case3: E = [-e_{k-1}, -e_k] (the matrix is extend by one column)
+    * - Case4: E = -e_{k-1}
+    *
+    * The matrices are (k+2)x(k+1) for Case1, (k+1)x(k+2) for Case3 and
+    * (k+1)x(k+1) for Case2 and Case4
+    */
+    template<typename Derived>
+    bool compute(const Eigen::MatrixBase<Derived>& M, const VectorConstRef& e, GivensSequence& Q, EndType endType) const;
 
   private:
     GivensSequence G_;
     mutable Eigen::VectorXd e_;
     mutable Eigen::VectorXd c1_;
     mutable Eigen::VectorXd c2_;
-    Eigen::VectorXd d_;
-    Eigen::VectorXd l_;
+    mutable Eigen::VectorXd d_;
+    mutable Eigen::VectorXd l_;
+    const Eigen::VectorXd dprecomp_;
+    const Eigen::VectorXd lprecomp_;
   };
 
   template<typename Derived>
@@ -102,8 +128,8 @@ namespace bms
     auto e = e_.head(n);
     auto c1 = c1_.head(n - 1);
     auto c2 = c2_.head(n - 1);
-    auto d = d_.head(n - 1);
-    auto l = l_.head(n - 1);
+    auto d = dprecomp_.head(n - 1);
+    auto l = lprecomp_.head(n - 1);
 
     double ek = 0;
     if (variant)
@@ -127,5 +153,62 @@ namespace bms
     std::copy(G_.begin(), G_.begin() + (n - 1), std::back_inserter(Q));
 
     return variant;
+  }
+
+  template<typename Derived>
+  inline bool SpecialQR::compute(const Eigen::MatrixBase<Derived>& M, const VectorConstRef& e, GivensSequence & Q, EndType endType) const
+  {
+    auto n = e.size();
+    assert(n <= c1_.size() && "allocated size is not sufficient");
+    assert(endType == EndType::Case1 && M.rows() == n + 1 && M.cols() == n + 0
+        || endType == EndType::Case2 && M.rows() == n + 0 && M.cols() == n + 0
+        || endType == EndType::Case3 && M.rows() == n + 0 && M.cols() == n + 1
+        || endType == EndType::Case4 && M.rows() == n + 1 && M.cols() == n + 1);
+    const_cast<Eigen::MatrixBase<Derived>&>(M).setZero();
+
+    auto c1 = c1_.head(n);
+    auto c2 = c2_.head(n);
+    auto d = d_.head(n);
+    auto l = l_.head(n);
+
+    d = dprecomp_.head(n);
+    l = lprecomp_.head(n);
+    if (endType == EndType::Case2 || endType == EndType::Case3)
+    {
+      d(n - 1) = 0;
+      l(n - 1) = 1 / sqrt(n);
+    }
+
+    c1.array() = (d.array() - 1)*e.array();
+    c2.head(n - 1).array() = d.head(n - 1).array()*e.tail(n - 1).array();
+    c2[n - 1] = 0;
+    c1.array() *= l.array();
+    c2.array() *= l.array();
+
+    switch (endType)
+    {
+    case EndType::Case1:
+    case EndType::Case2:
+      const_cast<Eigen::MatrixBase<Derived>&>(M).diagonal() = c1;
+      const_cast<Eigen::MatrixBase<Derived>&>(M).diagonal<1>() = -c1.head(n - 1) - c2.head(n - 1);
+      const_cast<Eigen::MatrixBase<Derived>&>(M).diagonal<2>() = c2.head(n-2);
+      break;
+    case EndType::Case3:
+      const_cast<Eigen::MatrixBase<Derived>&>(M).diagonal() = c1;
+      const_cast<Eigen::MatrixBase<Derived>&>(M).diagonal<1>() = -c1 - c2;
+      const_cast<Eigen::MatrixBase<Derived>&>(M).diagonal<2>() = c2.head(n-1);
+      break;
+    case EndType::Case4:
+      const_cast<Eigen::MatrixBase<Derived>&>(M).topRows(n).diagonal() = c1;
+      const_cast<Eigen::MatrixBase<Derived>&>(M).topRows(n).diagonal<1>() = -c1 - c2;
+      const_cast<Eigen::MatrixBase<Derived>&>(M).topRows(n).diagonal<2>() = c2.head(n - 1);
+      break;
+    }
+
+    Q.clear();
+    Q.reserve(M.rows()-1);
+    std::copy(G_.begin(), G_.begin() + M.rows() - 1, std::back_inserter(Q));
+
+    return endType != EndType::Case4;
   }
 }

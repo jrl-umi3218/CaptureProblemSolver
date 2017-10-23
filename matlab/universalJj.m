@@ -10,13 +10,12 @@
 % startType:
 % - 1: S=[e(1); -e(1)-e(2)]
 % - 2: S=-e(1)-e(2);
-% - 3: S=-e1;
+% - 3: S=-e(1);
 % stopType:
 % - 1: E=[same;e(k)];
 % - 2: E=same;
 % - 3: E=[same, e(k)];
-% - 4: E=same
-% where same means that the value in place is not changed.
+% - 4: E=-e(k)
 function Jj = universalJj(e,startType,endType)
 n = length(e);
 e = [e(:);0];

@@ -3,6 +3,7 @@
 #include <GivensSequence.h>
 #include <ProblemMatrices.h>
 #include <QRAlgorithms.h>
+#include <QuadraticObjective.h>
 
 #include <iostream>
 
@@ -215,4 +216,54 @@ BOOST_AUTO_TEST_CASE(SpecialQRTest)
   BOOST_CHECK(isBandMatrix(J3, 0, 2));
   BOOST_CHECK(b);
   BOOST_CHECK((Q.matrix(9)*J3).isApprox(J3back, 1e-15));
+}
+
+BOOST_AUTO_TEST_CASE(SpecialQRTestExtended)
+{
+  int n = 8;
+  VectorXd d = VectorXd::Random(n);
+  VectorXd e = d.cwiseInverse();
+
+  SpecialQR qr(n+1);
+  LeastSquareObjective ls(d);
+
+  MatrixXd J1(n + 1, n);
+  MatrixXd R1(n + 1, n);
+  GivensSequence Q1;
+  Q1.reserve(n);
+  ls.buildJj(J1, 0, n-1, StartType::Case3, EndType::Case1);
+  bool b1 = qr.compute(R1, e, Q1, EndType::Case1);
+  BOOST_CHECK(isBandMatrix(R1, 0, 2));
+  BOOST_CHECK(b1);
+  BOOST_CHECK((Q1.matrix(n+1)*R1).isApprox(J1, 1e-15));
+
+  MatrixXd J2(n, n);
+  MatrixXd R2(n, n);
+  GivensSequence Q2;
+  Q2.reserve(n-1);
+  ls.buildJj(J2, 0, n - 1, StartType::Case3, EndType::Case2);
+  bool b2 = qr.compute(R2, e, Q2, EndType::Case2);
+  BOOST_CHECK(isBandMatrix(R2, 0, 2));
+  BOOST_CHECK(b2);
+  BOOST_CHECK((Q2.matrix(n)*R2).isApprox(J2, 1e-15));
+
+  MatrixXd J3(n, n + 1);
+  MatrixXd R3(n, n + 1);
+  GivensSequence Q3;
+  Q3.reserve(n-1);
+  ls.buildJj(J3, 0, n - 1, StartType::Case3, EndType::Case3);
+  bool b3 = qr.compute(R3, e, Q3, EndType::Case3);
+  BOOST_CHECK(isBandMatrix(R3, 0, 2));
+  BOOST_CHECK(b3);
+  BOOST_CHECK((Q3.matrix(n)*R3).isApprox(J3, 1e-15));
+
+  MatrixXd J4(n + 1, n + 1);
+  MatrixXd R4(n + 1, n + 1);
+  GivensSequence Q4;
+  Q4.reserve(n);
+  ls.buildJj(J4, 0, n - 1, StartType::Case3, EndType::Case4);
+  bool b4 = qr.compute(R4, e, Q4, EndType::Case4);
+  BOOST_CHECK(isBandMatrix(R4, 0, 2));
+  BOOST_CHECK(!b4);
+  BOOST_CHECK((Q4.matrix(n + 1)*R4).isApprox(J4, 1e-15));
 }

@@ -8,8 +8,10 @@ namespace bms
     : e_(kmax + 1)
     , c1_(kmax)
     , c2_(kmax)
-    , d_(-VectorXd::LinSpaced(kmax,1,kmax))
-    , l_((ArrayXd::LinSpaced(kmax, 1, kmax).sqrt()*ArrayXd::LinSpaced(kmax, 2, kmax + 1).sqrt()).inverse().matrix())
+    , d_(kmax)
+    , l_(kmax)
+    , dprecomp_(-VectorXd::LinSpaced(kmax,1,kmax))
+    , lprecomp_((ArrayXd::LinSpaced(kmax, 1, kmax).sqrt()*ArrayXd::LinSpaced(kmax, 2, kmax + 1).sqrt()).inverse().matrix())
   {
     G_.reserve(kmax);
     for (int i = 0; i < kmax; ++i)
