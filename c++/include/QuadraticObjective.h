@@ -3,8 +3,9 @@
 #include <Eigen/Core>
 
 #include <bms_api.h>
-#include <defs.h>
 #include <CondensedOrthogonalMatrix.h>
+#include <defs.h>
+#include <QRAlgorithms.h>
 
 namespace bms
 {
@@ -60,5 +61,6 @@ namespace bms
     //computation data
     mutable Eigen::VectorXd e_;
     mutable Eigen::VectorXi transpositionIndices_;
+    SpecialQR qr_;
   };
 }

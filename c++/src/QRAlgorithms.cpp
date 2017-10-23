@@ -4,17 +4,17 @@ using namespace Eigen;
 
 namespace bms
 {
-  SpecialQR::SpecialQR(int kmax)
+  SpecialQR::SpecialQR(DenseIndex kmax)
     : e_(kmax + 1)
     , c1_(kmax)
     , c2_(kmax)
     , d_(kmax)
     , l_(kmax)
-    , dprecomp_(-VectorXd::LinSpaced(kmax,1,kmax))
-    , lprecomp_((ArrayXd::LinSpaced(kmax, 1, kmax).sqrt()*ArrayXd::LinSpaced(kmax, 2, kmax + 1).sqrt()).inverse().matrix())
+    , dprecomp_(-VectorXd::LinSpaced(static_cast<int>(kmax),1, static_cast<int>(kmax)))
+    , lprecomp_((ArrayXd::LinSpaced(static_cast<int>(kmax), 1, static_cast<int>(kmax)).sqrt()*ArrayXd::LinSpaced(static_cast<int>(kmax), 2, static_cast<int>(kmax) + 1).sqrt()).inverse().matrix())
   {
     G_.reserve(kmax);
-    for (int i = 0; i < kmax; ++i)
+    for (DenseIndex i = 0; i < kmax; ++i)
     {
       double c = 1 / sqrt(i + 2.);
       G_.emplace_back(i, c, sqrt(i + 1.)*c);

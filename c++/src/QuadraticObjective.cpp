@@ -11,6 +11,7 @@ namespace bms
     , d_(delta.cwiseInverse())
     , e_(delta.size()+1)
     , transpositionIndices_(delta.size()-1)
+    , qr_(delta.size())
   {
   }
 
@@ -59,23 +60,27 @@ namespace bms
       switch (ap)
       {
       case 0:
-        if (nact != n_ - 1) buildJj(R.bottomRows(n_ - 1 - startOffset), a0, n_ - 1, startType, EndType::Case3);
+        if (nact != n_ - 1) qrJj(R.bottomRows(n_ - 1 - startOffset), Q.Q(0), shift, a0, n_ - 1, startType, EndType::Case3);
         else R(n_ - 2, 0) = d_(n_ - 1);
         break;
       case 1:
-        buildJj(R.bottomRows(n_ - 1 - startOffset), a0, n_ - 1, startType, EndType::Case2);
+        qrJj(R.bottomRows(n_ - 1 - startOffset), Q.Q(0), shift, a0, n_ - 1, startType, EndType::Case2);
         break;
       default:
-        buildJj(R.middleRows(startOffset, n_ + 1 - ap - startOffset), a0, n_ - ap, startType, EndType::Case1);
+        qrJj(R.middleRows(startOffset, n_ + 1 - ap - startOffset), Q.Q(0), shift, a0, n_ - ap, startType, EndType::Case1);
         break;
       }
       return;
     }
 
-    Index k = a0;
-    Index i1 = 0;
+    Index k = a0; //number of constraints visited (initial scan of the end excluded)
+    Index i1 = 0; //size of the first block of inactive constraints
+    size_t q = 0; //numbers of GivensSequence used
+    Index r = 0; // row at which the matrix is inserted
     while (k + i1 <= n_ && !act[static_cast<size_t>(k + i1)]) ++i1;
-    buildJj(R.block(startOffset, 0, i1 + addDim, i1), a0, a0 + i1 - 1, startType, EndType::Case4);
+    //buildJj(R.block(startOffset, 0, i1 + addDim, i1), a0, a0 + i1 - 1, startType, EndType::Case4);
+    qrJj(R.block(0, 0, i1 + addDim, i1), Q.Q(q), shift+startOffset, a0, a0 + i1 - 1, startType, EndType::Case4);
+    ++q;
 
     k += i1;
     Index c = i1 - 1;
@@ -97,15 +102,17 @@ namespace bms
         assert(ai == ap);
         switch (ai)
         {
-        case 0: buildJj(R.block(k - 1, c, ii - 1, ii), n_ + 1 - ii, n_ - 1, StartType::Case3, EndType::Case3); break;
-        case 1: buildJj(R.block(k - 1, c, ii, ii), n_ - ii, n_ - 1, StartType::Case3, EndType::Case2); break;
-        default: buildJj(R.block(k - 1, c, ii + 1, ii), n_ + 1 - ii - ai, n_ - ai, StartType::Case3, EndType::Case1);  break;
+        case 0: qrJj(R.block(k - 1, c, ii - 1, ii), Q.Q(q), shift, n_ + 1 - ii, n_ - 1, StartType::Case3, EndType::Case3); break;
+        case 1: qrJj(R.block(k - 1, c, ii, ii), Q.Q(q), shift, n_ - ii, n_ - 1, StartType::Case3, EndType::Case2); break;
+        default: qrJj(R.block(k - 1, c, ii + 1, ii), Q.Q(q), shift, n_ + 1 - ii - ai, n_ - ai, StartType::Case3, EndType::Case1);  break;
         }
+        ++q;
         break;
       }
       else
       {
-        buildJj(R.block(k - 1, c, ii + 1, ii + 1), k, k + ii - 1, StartType::Case3, EndType::Case4);
+        qrJj(R.block(k - 1, c, ii + 1, ii + 1), Q.Q(q), shift, k, k + ii - 1, StartType::Case3, EndType::Case4);
+        ++q;
         c += ii;
         k += ii + ai;
       }
@@ -263,6 +270,33 @@ namespace bms
 
   void LeastSquareObjective::qrJj(MatrixRef R, GivensSequence& Q, Index extend, Index dstart, Index dend, StartType startType, EndType endType) const
   {
-    buildJj(R, dstart, dend, startType, endType);
+    auto n = dend - dstart + 1;
+    if (n == 0)
+    {
+      Q.clear();
+      assert(R.rows() == 0 && R.cols() == 1);
+      return;
+    }
+    auto e = d_.segment(dstart, n);
+    switch (startType)
+    {
+    case StartType::Case1: 
+      buildJj(R, dstart, dend, startType, endType);
+      tridiagonalQR(R.bottomRows(R.rows() - 1), Q, false);
+      Q.extend(1);
+      if (endType == EndType::Case1) //last line is zero
+        tridiagonalQR(R.topRows(R.rows() - 1), Q, true);
+      else
+        tridiagonalQR(R, Q, true);
+      break;
+    case StartType::Case2: 
+      buildJj(R, dstart, dend, startType, endType);
+      tridiagonalQR(R, Q, true);
+      break;
+    case StartType::Case3: 
+      qr_.compute(R, e, Q, endType); 
+      break;
+    }
+    Q.extend(static_cast<int>(extend));
   }
 }
