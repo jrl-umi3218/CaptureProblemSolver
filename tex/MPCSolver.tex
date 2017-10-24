@@ -42,10 +42,14 @@ We are considering a problem of the form
 \end{align}
 where $\alpha$ is either $0$ or positive and, by convention, $\Phi_0 = 0$. Lower and upper bounds can be equal to denote an equality constraint.
 
-The idea we want to explore here is to pass the equality constraint in the objective with a exact penalty function, and to derive a custom SLQP for solving the problem. The motivation behind this is that the variables live in a zonotope (plus a bound on $\Phi_n$), with a particularly easy form (it is a skewed box).
-
-A SLQP iteration consist in finding an active set guess by solving a LP including a $L_\infty$ trust region, then solving an equality-only QP (EQP) with a spherical trust region. If we can make this two steps efficient, we should be gaining a lot over generic non-linear solver.
-
+The idea we want to explore here is to pass the equality constraint in the objective as a weighted squared norm. Denoting $f$ the function such that the non-linear constraint writes $f(\Phi) = 0$, we thus transform the above problem into
+\begin{align}
+  \minimize_{\Phi \in \mathbb{R}^n}\ & \left\| J \Phi \right\|^2 + w^2 \left\|f\right\|^2\\
+  \st \ & \sum_{j=0}^{n-1} \frac{a_j}{\sqrt{\Phi_{j+1}} + \sqrt{\Phi}_j} - \alpha \sqrt{\Phi_n} = b \nonumber\\
+        & l_j \leq \Phi_j - \Phi_{j-1} \leq u_j, \quad j=1..n \nonumber\\
+        & \Phi_n^- \leq \Phi_n \leq \Phi_n^+ \nonumber
+\end{align}
+This is an inexact method, but by paying attention to the order of operations we can have $w$ high. The above problem is a non-linear least square optimization with linear constraints. It can be solved with a SQP. The idea is that the underlying QP is a linear least square that we can solve much faster that usual by taking advantage of the form of the matrix $J$ and of the constraints.
 
 \section{Linear constraints}
 We focus here on the constraints
