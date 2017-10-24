@@ -4,6 +4,7 @@
 #include <bms_api.h>
 #include <defs.h>
 #include <LinearConstraints.h>
+#include <QuadraticObjective.h>
 
 namespace bms
 {
@@ -21,6 +22,7 @@ namespace bms
   public:
     LeastSquare(int n);
 
+    SolverStatus solve(const LeastSquareObjective& obj, const VectorConstRef& j, double c, LinearConstraints& lc);
     SolverStatus solveFeasibility(const VectorConstRef& j, double c, LinearConstraints& lc);
 
     /** Retrieve the solution (after call to solve() or solveFeasibility())*/
@@ -41,5 +43,12 @@ namespace bms
     Eigen::VectorXd lambda_;
     Eigen::VectorXd lambdaAct_;
     Eigen::VectorXd jN_;
+    Eigen::MatrixXd A_;
+    Eigen::VectorXd b_;
+    Eigen::VectorXd Jx_;
+    Eigen::VectorXd JtJx_;
+    Eigen::VectorXd tmp_;
+    GivensSequence Qg_;
+    CondensedOrthogonalMatrix Q_;
   };
 }

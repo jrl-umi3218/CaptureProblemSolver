@@ -26,6 +26,7 @@ namespace bms
       */
     CondensedOrthogonalMatrix(int n, int kmax, int pmax, bool Ptranspose = false);
 
+    Eigen::DenseIndex size() const;
     void reset(bool Ptranspose = false);
 
     GivensSequence& Q(size_t i);
@@ -53,6 +54,11 @@ namespace bms
     GivensSequence Qh_;
     Eigen::Transpositions<Eigen::Dynamic> transpositions_;
   };
+
+  inline Eigen::DenseIndex CondensedOrthogonalMatrix::size() const
+  {
+    return n_;
+  }
 
   template<typename Derived>
   inline void CondensedOrthogonalMatrix::applyTo(const Eigen::MatrixBase<Derived>& M) const

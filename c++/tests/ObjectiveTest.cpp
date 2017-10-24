@@ -54,6 +54,24 @@ bool isBandMatrix(const MatrixXd& M, DenseIndex p, DenseIndex q, double prec = 1
   return b;
 }
 
+BOOST_AUTO_TEST_CASE(valueTest)
+{
+  VectorXd x = VectorXd::Random(10);
+  VectorXd delta = VectorXd::LinSpaced(10, 0.01, 0.19);
+  LeastSquareObjective obj(delta);
+
+  MatrixXd J = obj.matrix();
+  VectorXd Jx1 = J*x;
+  VectorXd Jx2(9);
+  obj.applyJToTheLeft(Jx2, x);
+  BOOST_CHECK(Jx1.isApprox(Jx2));
+
+  VectorXd JtJx1 = J.transpose()*Jx1;
+  VectorXd JtJx2(10);
+  obj.applyJTransposeToTheLeft(JtJx2, Jx2);
+  BOOST_CHECK(JtJx1.isApprox(JtJx2));
+}
+
 BOOST_AUTO_TEST_CASE(projectedMatrixTest)
 {
   int N = 12;

@@ -1,5 +1,7 @@
 #include "LinearConstraints.h"
 
+#include <iostream>
+
 using namespace Eigen;
 
 
@@ -408,7 +410,7 @@ namespace bms
       y[actIdx_[static_cast<size_t>(i)]] = x[i];
   }
 
-  Eigen::VectorXd LinearConstraints::performQPstep(const Eigen::VectorXd& x, const Eigen::VectorXd& p)
+  Eigen::VectorXd LinearConstraints::performQPstep(const Eigen::VectorXd& x, const Eigen::VectorXd& p, bool* fullstep)
   {
     mult(Cx_, x);  //Cx = C*x
     mult(Cp_, p);  //Cp = C*p
@@ -453,11 +455,19 @@ namespace bms
 
     if (a < 1)
     {
+      //std::cout << "activate " << iact << std::endl;
+      if (fullstep)
+        *fullstep = false;
       activate(iact, type);
       return x + a*p;
     }
     else
+    {
+      //std::cout << "full step of norm " << p.lpNorm<Infinity>() << std::endl;
+      if (fullstep)
+        *fullstep = true;
       return x+p;
+    }
   }
 
   void LinearConstraints::deactivateMaxLambda(const VectorConstRef& lambda)
@@ -466,20 +476,21 @@ namespace bms
       computeActIdx();
     
     double lmax = 0;
-    size_t imax;
+    DenseIndex kmax;
 
     for (size_t i = 0; i < actIdx_.size(); ++i)
     {
       auto k = actIdx_[i];
       switch (activationStatus_[static_cast<size_t>(k)])
       {
-      case Activation::Lower: if (lambda[k] > lmax) { lmax = lambda[k]; imax = i; } break;
-      case Activation::Upper: if (-lambda[k] > lmax) { lmax = -lambda[k]; imax = i; } break;
+      case Activation::Lower: if (lambda[k] > lmax) { lmax = lambda[k]; kmax = k; } break;
+      case Activation::Upper: if (-lambda[k] > lmax) { lmax = -lambda[k]; kmax = k; } break;
       default: break;
       }
     }
 
-    deactivate(imax);
+    //std::cout << "deactivate " << lmax << std::endl;
+    deactivate(static_cast<size_t>(kmax));
   }
 
 

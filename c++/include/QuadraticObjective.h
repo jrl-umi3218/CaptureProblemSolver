@@ -16,6 +16,11 @@ namespace bms
 
     LeastSquareObjective(const Eigen::VectorXd& delta);
 
+    Index size() const;
+
+    void applyJToTheLeft(MatrixRef Y, const MatrixConstRef& X) const;
+    void applyJTransposeToTheLeft(MatrixRef Y, const MatrixConstRef& X) const;
+
     void qr(MatrixRef R, CondensedOrthogonalMatrix& Q, const std::vector<bool>& act, Index shift = 0) const;
     void qr(MatrixRef R, CondensedOrthogonalMatrix& Q, Index nact, const std::vector<bool>& act, Index shift = 0) const;
 

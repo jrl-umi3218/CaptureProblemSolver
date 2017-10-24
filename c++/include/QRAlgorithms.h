@@ -22,7 +22,7 @@ namespace bms
   {
     auto m = M.rows();
     auto n = M.cols();
-    assert(n >= m);
+    assert(n + 1 >= m);
     if (!append)
       Q.clear();
     Q.reserve(Q.size() + m - 1);
@@ -31,7 +31,10 @@ namespace bms
       Q.emplace_back(M, i, i);
       Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).rightCols(n-i));
     }
-    return abs(M(m-1,m-1)) > thresh;
+    if (m<=n)
+      return abs(M(m - 1, m - 1)) > thresh;
+    else
+      return abs(M(n - 1, n - 1)) > thresh;
   }
 
   /** Performs a QR in place of the mxn tridiagonal matrix M. Supposes n>=m-1.

@@ -171,14 +171,19 @@ void QRPerformances(int n, const int N)
 
 void LSPerformance(int n, const int N)
 {
+  std::cout << "LSPerformance, size = " << n << std::endl;
+
   double d = 0;
 
   VectorXd l = -VectorXd::Random(n).cwiseAbs();
   VectorXd u = VectorXd::Random(n).cwiseAbs();
   LinearConstraints lc(l, u, -1, 1);
 
-  VectorXd j = VectorXd::Random(n);
-  double c = -10;
+  VectorXd j = 100*VectorXd::Random(n);
+  double c = -200;
+
+  VectorXd delta = VectorXd::LinSpaced(n, 0.01, 0.02*n-0.01);
+  LeastSquareObjective obj(delta);
 
   LeastSquare ls(n);
   {
@@ -193,6 +198,20 @@ void LSPerformance(int n, const int N)
     auto time = end_time - start_time;
     std::cout << "LSFeasibility: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
   }
+
+  {
+    auto start_time = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < N; ++i)
+    {
+      lc.resetActivation();
+      ls.solve(obj, j, c, lc);
+      d += ls.x()[0];
+    }
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto time = end_time - start_time;
+    std::cout << "LS: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+  }
+  std::cout << d << std::endl;
 }
 
 void QRJAPerformance(int n, const int N)
@@ -234,7 +253,7 @@ void QRJAPerformance(int n, const int N)
     for (int i = 0; i < N; ++i)
     {
       Jcopy = JA;
-      obj.qr(Jcopy, Q, lc.activeSet(), na);
+      obj.qr(Jcopy, Q, na, lc.activeSet());
       acc += Jcopy(0, 0);
     }
     auto end_time = std::chrono::high_resolution_clock::now();
@@ -308,21 +327,21 @@ int main()
   //QRPerformances(20, 10000);
   //QRPerformances(100, 1000);
   //LSPerformance(10, 1000);
-  //LSPerformance(10, 10000);
-  //LSPerformance(100, 1000);
-  //LSPerformance(200, 1000);
-  //LSPerformance(500, 1000);
+  LSPerformance(10, 10000);
+  LSPerformance(100, 1000);
+  LSPerformance(200, 1000);
+  LSPerformance(500, 1000);
 
   //readTest("data/Problem01.txt");
 
   //testSQP("data/Problem01.txt"); 
   //SQPPerformance("data/Problem01.txt",1000);
-  QRJAPerformance(10, 10000);
-  QRJAPerformance(20, 10000);
-  QRJAPerformance(50, 10000);
-  QRJAPerformance(100, 10000);
-  QRJAPerformance(200, 1000);
-  QRJAPerformance(500, 1000);
+  //QRJAPerformance(10, 10000);
+  //QRJAPerformance(20, 10000);
+  //QRJAPerformance(50, 10000);
+  //QRJAPerformance(100, 10000);
+  //QRJAPerformance(200, 1000);
+  //QRJAPerformance(500, 1000);
 
 #ifdef WIN32
   system("pause");
