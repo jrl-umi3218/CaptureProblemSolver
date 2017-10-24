@@ -9,6 +9,7 @@
 #include "Problem.h"
 #include "ProblemMatrices.h"
 #include "QRAlgorithms.h"
+#include "QuadraticObjective.h"
 #include "SQP.h"
 
 using namespace Eigen;
@@ -194,6 +195,71 @@ void LSPerformance(int n, const int N)
   }
 }
 
+void QRJAPerformance(int n, const int N)
+{
+  std::cout << "QRJAPreformance, size = " << n << std::endl;
+  VectorXd d = VectorXd::Random(n).cwiseAbs();
+  LeastSquareObjective obj(d);
+  LinearConstraints lc(n);
+  for (size_t i = 0; i < static_cast<size_t>(n); ++i)
+  {
+    if (rand() > RAND_MAX / 2)
+      lc.activate(i, Activation::Lower);
+  }
+  auto na = lc.numberOfActiveConstraints();
+  MatrixXd J = obj.matrix();
+  MatrixXd JA(n - 1, n - na);
+  lc.applyNullSpaceOnTheRight(JA, J);
+
+  double acc = 0;
+  {
+    HouseholderQR<MatrixXd> qr(n - 1, n - na);
+    MatrixXd Jcopy(n - 1, n - na);
+    auto start_time = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < N; ++i)
+    {
+      Jcopy = JA;
+      qr.compute(Jcopy);
+      acc += qr.matrixQR()(0, 0);
+    }
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto time = end_time - start_time;
+    std::cout << " HouseholderQR " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+  }
+
+  {
+    CondensedOrthogonalMatrix Q(n, n, 2 * n);
+    MatrixXd Jcopy(n - 1, n - na);
+    auto start_time = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < N; ++i)
+    {
+      Jcopy = JA;
+      obj.qr(Jcopy, Q, lc.activeSet(), na);
+      acc += Jcopy(0, 0);
+    }
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto time = end_time - start_time;
+    std::cout << " dedicated QR " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+  }
+
+  {
+    //preallocation
+    MatrixXd Jcopy(n - 1, n - na);
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < N; ++i)
+    {
+      Jcopy = JA;
+      acc += Jcopy(0, 0);
+    }
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto time = end_time - start_time;
+    std::cout << " - copy overhead " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+  }
+
+  std::cout << acc << std::endl;
+}
+
 void readTest(const std::string& filepath)
 {
   RawProblem raw;
@@ -250,7 +316,13 @@ int main()
   //readTest("data/Problem01.txt");
 
   //testSQP("data/Problem01.txt"); 
-  SQPPerformance("data/Problem01.txt",1000);
+  //SQPPerformance("data/Problem01.txt",1000);
+  QRJAPerformance(10, 10000);
+  QRJAPerformance(20, 10000);
+  QRJAPerformance(50, 10000);
+  QRJAPerformance(100, 10000);
+  QRJAPerformance(200, 1000);
+  QRJAPerformance(500, 1000);
 
 #ifdef WIN32
   system("pause");

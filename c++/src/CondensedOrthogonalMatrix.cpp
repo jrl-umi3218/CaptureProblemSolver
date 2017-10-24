@@ -12,12 +12,14 @@ namespace bms
   {
     for (auto& s : sequences_)
       s.reserve(pmax);
+    Qh_.reserve(pmax);
   }
 
   void CondensedOrthogonalMatrix::reset(bool Ptranspose)
   {
     for (auto& s : sequences_)
       s.clear();
+    Qh_.clear();
     transpositions_.indices() = VectorXi::LinSpaced(n_, 0, static_cast<int>(n_) - 1);
     ptranspose_ = Ptranspose;
   }
@@ -25,9 +27,7 @@ namespace bms
   Eigen::MatrixXd CondensedOrthogonalMatrix::matrix()
   {
     MatrixXd M = MatrixXd::Identity(n_, n_);
-    for (const auto& s : sequences_)
-      s.applyOnTheRightTo(M);
-    M = M*transpositions_;
+    this->applyOnTheRightTo(M);
 
     return M;
   }

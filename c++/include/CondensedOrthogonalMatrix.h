@@ -9,8 +9,8 @@
 
 namespace bms
 {
-  /** A class representing a product Q1 Q2 ... Qk P where the QI are orthogonal
-    * matrices and P is a permutation matrix.
+  /** A class representing a product Q1 Q2 ... Qk P Qh where the Qi are 
+    * orthogonal matrices and P is a permutation matrix.
     * The matrices Qi are expressed as a product of Givens rotations G1 ... Gp.
     *
     * The goal of this class is twofold:
@@ -29,6 +29,7 @@ namespace bms
     void reset(bool Ptranspose = false);
 
     GivensSequence& Q(size_t i);
+    GivensSequence& Qh();
     Eigen::Transpositions<Eigen::Dynamic>& P();
 
     /** M = P^T Q_k^T Q_{k-1}^T .... Q_1^T M*/
@@ -49,6 +50,7 @@ namespace bms
     bool ptranspose_;
     Eigen::DenseIndex n_;
     std::vector<GivensSequence> sequences_;
+    GivensSequence Qh_;
     Eigen::Transpositions<Eigen::Dynamic> transpositions_;
   };
 
@@ -61,6 +63,7 @@ namespace bms
       const_cast<MatrixBase<Derived>&>(M) = transpositions_*M;
     else
       const_cast<MatrixBase<Derived>&>(M) = transpositions_.transpose()*M;
+    Qh_.applyTo(M);
   }
 
   template<typename Derived>
@@ -72,11 +75,17 @@ namespace bms
       const_cast<MatrixBase<Derived>&>(M) = M*transpositions_.transpose();
     else
       const_cast<MatrixBase<Derived>&>(M) = M*transpositions_;
+    Qh_.applyOnTheRightTo(M);
   }
 
   inline GivensSequence& CondensedOrthogonalMatrix::Q(size_t i)
   {
     return sequences_[i];
+  }
+
+  inline GivensSequence & CondensedOrthogonalMatrix::Qh()
+  {
+    return Qh_;
   }
 
   inline Eigen::Transpositions<Eigen::Dynamic>& CondensedOrthogonalMatrix::P()

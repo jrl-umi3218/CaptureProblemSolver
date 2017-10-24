@@ -62,28 +62,24 @@ namespace bms
       switch (ap)
       {
       case 0:
-        //if (nact != n_ - 1) qrJj(R.bottomRows(n_ - 1 - startOffset), Q.Q(0), shift, a0, n_ - 1, startType, EndType::Case3);
         if (nact != n_ - 1)
         {
           qrJj(R.topRows(n_ - 1 - startOffset), Q.Q(0), shift + startOffset, a0, n_ - 1, startType, EndType::Case3);
-          Q.P().indices().head(n_ - 1 - startOffset).setLinSpaced(startOffset, n_ - 2);
+          Q.P().indices().head(n_ - 1 - startOffset).setLinSpaced(static_cast<int>(startOffset), static_cast<int>(n_ - 2));
         }
-        //else R(n_ - 2, 0) = d_(n_ - 1);
         else
         {
           R(0, 0) = d_(n_ - 1);
-          Q.P().indices()[0] = n_ - 2;
+          Q.P().indices()[0] = static_cast<int>(n_ - 2);
         }
         break;
       case 1:
-        //qrJj(R.bottomRows(n_ - 1 - startOffset), Q.Q(0), shift, a0, n_ - 1, startType, EndType::Case2);
         qrJj(R.topRows(n_ - 1 - startOffset), Q.Q(0), shift + startOffset, a0, n_ - 1, startType, EndType::Case2);
-        Q.P().indices().head(n_ - 1 - startOffset).setLinSpaced(startOffset, n_ - 2);
+        Q.P().indices().head(n_ - 1 - startOffset).setLinSpaced(static_cast<int>(startOffset), static_cast<int>(n_ - 2));
         break;
       default:
-        //qrJj(R.middleRows(startOffset, n_ + 1 - ap - startOffset), Q.Q(0), shift, a0, n_ - ap, startType, EndType::Case1);
         qrJj(R.topRows(n_ + 1 - ap - startOffset), Q.Q(0), shift + startOffset, a0, n_ - ap, startType, EndType::Case1);
-        Q.P().indices().head(n_ + 1 - ap - startOffset).setLinSpaced(startOffset, n_ - ap);
+        Q.P().indices().head(n_ + 1 - ap - startOffset).setLinSpaced(static_cast<int>(startOffset), static_cast<int>(n_ - ap));
         break;
       }
       return;
@@ -94,9 +90,8 @@ namespace bms
     size_t q = 0; //numbers of GivensSequence used
     up = startOffset;
     while (k + i1 <= n_ && !act[static_cast<size_t>(k + i1)]) ++i1;
-    //buildJj(R.block(startOffset, 0, i1 + addDim, i1), a0, a0 + i1 - 1, startType, EndType::Case4);
     qrJj(R.block(startOffset - up, 0, i1 + addDim, i1), Q.Q(q), shift + startOffset, a0, a0 + i1 - 1, startType, EndType::Case4);
-    Q.P().indices().head(i1 + addDim).setLinSpaced(startOffset, startOffset + i1 + addDim - 1); //FIXME: we are doing one permutation too many if startType is Case1
+    Q.P().indices().head(i1 + addDim).setLinSpaced(static_cast<int>(startOffset), static_cast<int>(startOffset + i1 + addDim - 1)); //FIXME: we are doing one permutation too many if startType is Case1
     ++q;
     if (startType == StartType::Case1)  up += 1;
 
@@ -107,6 +102,8 @@ namespace bms
     k += a1;
     up += a1 - 1;
 
+    Index startHessenberg = k - 2 - up;
+    Index finalSize;
     while (true)
     {
       Index ii = 0;
@@ -123,15 +120,18 @@ namespace bms
         {
         case 0: 
           qrJj(R.block(k - 1 - up, c, ii - 1, ii), Q.Q(q), shift + k - 1, n_ + 1 - ii, n_ - 1, StartType::Case3, EndType::Case3);
-          Q.P().indices().segment(k - 1 - up, ii - 1).setLinSpaced(k - 1, k - 3 + ii);
+          Q.P().indices().segment(k - 1 - up, ii - 1).setLinSpaced(static_cast<int>(k - 1), static_cast<int>(k - 3 + ii));
+          finalSize = k - up + ii - 2;
           break;
         case 1: 
           qrJj(R.block(k - 1 - up, c, ii, ii), Q.Q(q), shift + k - 1, n_ - ii, n_ - 1, StartType::Case3, EndType::Case2);
-          Q.P().indices().segment(k - 1 - up, ii).setLinSpaced(k - 1, k - 2 + ii);
+          Q.P().indices().segment(k - 1 - up, ii).setLinSpaced(static_cast<int>(k - 1), static_cast<int>(k - 2 + ii));
+          finalSize = k - up + ii - 1;
           break;
         default: 
           qrJj(R.block(k - 1 - up, c, ii + 1, ii), Q.Q(q), shift + k - 1, n_ + 1 - ii - ai, n_ - ai, StartType::Case3, EndType::Case1);
-          Q.P().indices().segment(k - 1 - up, ii + 1).setLinSpaced(k - 1, k - 1 + ii);
+          Q.P().indices().segment(k - 1 - up, ii + 1).setLinSpaced(static_cast<int>(k - 1), static_cast<int>(k - 1 + ii));
+          finalSize = k - up + ii - 1;
           break;
         }
         ++q;
@@ -140,13 +140,18 @@ namespace bms
       else
       {
         qrJj(R.block(k - 1 - up, c, ii + 1, ii + 1), Q.Q(q), shift + k - 1, k, k + ii - 1, StartType::Case3, EndType::Case4);
-        Q.P().indices().segment(k - 1 - up, ii + 1).setLinSpaced(k - 1, k - 1 + ii);
+        Q.P().indices().segment(k - 1 - up, ii + 1).setLinSpaced(static_cast<int>(k - 1), static_cast<int>(k - 1 + ii));
         up += ai;
         ++q;
         c += ii;
         k += ii + ai;
       }
     }
+
+    //at this point, we still have a (partially) Hessenberg matrix, so we need a last pass to get a triangular matrix
+    if (finalSize>startHessenberg+1)
+      tridiagonalQR(R.block(startHessenberg, startHessenberg, finalSize - startHessenberg, R.cols() - startHessenberg), Q.Qh());
+    Q.Qh().extend(static_cast<int>(shift + startHessenberg));
   }
 
   Eigen::MatrixXd LeastSquareObjective::matrix() const
@@ -328,9 +333,6 @@ namespace bms
       break;
     }
 
-    MatrixXd J(R.rows(), R.cols());
-    buildJj(J, dstart, dend, startType, endType);
-    Q.applyTo(J);
     Q.extend(static_cast<int>(extend));
   }
 }
