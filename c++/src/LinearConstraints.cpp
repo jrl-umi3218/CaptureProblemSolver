@@ -247,6 +247,31 @@ namespace bms
     return activeSet_;
   }
 
+  const std::vector<Activation>& LinearConstraints::activationStatus() const
+  {
+    return activationStatus_;
+  }
+
+  void LinearConstraints::setActivationStatus(const std::vector<Activation>& act)
+  {
+    assert(act.size() == activationStatus_.size());
+    for (size_t i = 0; i < act.size(); ++i)
+    {
+      if (activationStatus_[i] != Activation::Equal)
+      {
+        if (act[i] != Activation::Equal)
+          activate(i, act[i]);
+        else
+          throw std::runtime_error("You can't activate constraint as equality. This is defined by the value of the bounds.");
+      }
+      else
+      {
+        if (act[i] != Activation::Equal)
+          throw std::runtime_error("You can't change the status of an equality constraint. This is defined by the value of the bounds.");
+      }
+    }
+  }
+
   const std::vector<Eigen::DenseIndex>& LinearConstraints::activeSetIdx() const
   {
     if (!validActIdx_)

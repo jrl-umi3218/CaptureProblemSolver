@@ -18,6 +18,7 @@ namespace bms
 
     Index size() const;
 
+    double value(const VectorConstRef& x) const;
     void applyJToTheLeft(MatrixRef Y, const MatrixConstRef& X) const;
     void applyJTransposeToTheLeft(MatrixRef Y, const MatrixConstRef& X) const;
 

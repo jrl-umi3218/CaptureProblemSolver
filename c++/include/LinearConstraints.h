@@ -92,6 +92,8 @@ namespace bms
     Activation activationStatus(size_t i) const;
 
     const std::vector<bool>& activeSet() const;
+    const std::vector<Activation>& activationStatus() const;
+    void setActivationStatus(const std::vector<Activation>& act);
     /** Index of active constraints*/
     const std::vector<Eigen::DenseIndex>& activeSetIdx() const;
     Eigen::DenseIndex numberOfActiveConstraints() const;

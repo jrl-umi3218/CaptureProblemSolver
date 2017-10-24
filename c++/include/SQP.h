@@ -5,6 +5,7 @@
 #include <bms_api.h>
 #include <LeastSquare.h>
 #include <Problem.h>
+#include <QuadraticObjective.h>
 
 namespace bms
 {
@@ -13,13 +14,15 @@ namespace bms
   public:
     SQP(int n);
 
+    SolverStatus solve(const Problem& pb);
     SolverStatus solveFeasibility(const Problem& pb);
 
     const Eigen::VectorXd& x() const;
     const Eigen::VectorXd& lambda() const;
 
   private:
-    bool checkKKTFeasibility(const Eigen::VectorXd& x, const Eigen::VectorXd& lambda, double f, const Eigen::VectorXd& g, const LinearConstraints& lc) const;
+    bool checkKKT(const Eigen::VectorXd& x, const Eigen::VectorXd& lambda, double f, const Eigen::VectorXd& g, 
+                  const LinearConstraints& lc, const LeastSquareObjective* const obj = nullptr) const;
 
     Eigen::DenseIndex n_;
     LeastSquare ls_;
@@ -40,6 +43,11 @@ namespace bms
     Eigen::VectorXd lambda_;
     mutable Eigen::VectorXd Cx_;
     mutable Eigen::VectorXd Cl_;
+    mutable Eigen::VectorXd Jx_;
+    mutable Eigen::VectorXd JtJx_;
+    mutable Eigen::VectorXd Jp_;
     mutable Eigen::VectorXd gradL_;
+    std::vector<Activation> currentActiveSet_;
+    std::vector<Activation> previousActiveSet_;
   };
 }

@@ -62,11 +62,12 @@ BOOST_AUTO_TEST_CASE(LeastSquareTest)
 
   VectorXd delta = VectorXd::LinSpaced(10, 0.01, 0.19);
   LeastSquareObjective obj(delta);
+  VectorXd Jx0 = VectorXd::Zero(9);
   MatrixXd J = obj.matrix();
 
   LeastSquare ls(10);
 
-  auto s = ls.solve(obj, j, c, lc);
+  auto s = ls.solve(obj, Jx0, j, c, lc);
 
   auto x = ls.x();
   auto lambda = ls.lambda();

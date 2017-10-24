@@ -22,7 +22,7 @@ namespace bms
   public:
     LeastSquare(int n);
 
-    SolverStatus solve(const LeastSquareObjective& obj, const VectorConstRef& j, double c, LinearConstraints& lc);
+    SolverStatus solve(const LeastSquareObjective& obj, const VectorConstRef& Jx0, const VectorConstRef& j, double c, LinearConstraints& lc);
     SolverStatus solveFeasibility(const VectorConstRef& j, double c, LinearConstraints& lc);
 
     /** Retrieve the solution (after call to solve() or solveFeasibility())*/

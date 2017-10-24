@@ -21,6 +21,19 @@ namespace bms
     return n_;
   }
 
+  double LeastSquareObjective::value(const VectorConstRef& x) const
+  {
+    assert(x.size() == n_);
+    double vi = d_[1] * x[1] - (d_[0] + d_[1])*x[0];
+    double v = vi*vi;
+    for (Index i = 1; i < n_ - 1; ++i)
+    {
+      vi = d_[i] * x[i - 1] - (d_[i] + d_[i + 1])*x[i] + d_[i + 1] * x[i + 1];
+      v += vi*vi;
+    }
+    return v/2;
+  }
+
   void LeastSquareObjective::applyJToTheLeft(MatrixRef Y, const MatrixConstRef& X) const
   {
     assert(X.rows() == n_);

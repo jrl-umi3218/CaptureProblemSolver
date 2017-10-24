@@ -184,6 +184,7 @@ void LSPerformance(int n, const int N)
 
   VectorXd delta = VectorXd::LinSpaced(n, 0.01, 0.02*n-0.01);
   LeastSquareObjective obj(delta);
+  VectorXd Jx0 = VectorXd::Zero(n - 1);
 
   LeastSquare ls(n);
   {
@@ -204,7 +205,7 @@ void LSPerformance(int n, const int N)
     for (int i = 0; i < N; ++i)
     {
       lc.resetActivation();
-      ls.solve(obj, j, c, lc);
+      ls.solve(obj, Jx0, j, c, lc);
       d += ls.x()[0];
     }
     auto end_time = std::chrono::high_resolution_clock::now();
@@ -286,7 +287,7 @@ void readTest(const std::string& filepath)
   raw.read(base + "/" + filepath);
 }
 
-void testSQP(const std::string& filepath)
+void testSQPFeas(const std::string& filepath)
 {
   RawProblem raw;
   std::string base = TESTS_DIR;
@@ -296,6 +297,27 @@ void testSQP(const std::string& filepath)
   SQP sqp(static_cast<int>(raw.delta.size()));
 
   sqp.solveFeasibility(pb);
+}
+
+void testSQP(const std::string& filepath)
+{
+  RawProblem raw;
+  std::string base = TESTS_DIR;
+  raw.read(base + "/" + filepath);
+
+  Problem pb(raw);
+  SQP sqp(static_cast<int>(raw.delta.size()));
+
+  sqp.solve(pb);
+  std::cout << "  x = " << sqp.x().transpose() << std::endl;
+  std::cout << "Phi = " << raw.Phi_.tail(raw.Phi_.size()-1).transpose() << std::endl;
+  
+  double fx;
+  double fphi;
+  pb.nonLinearConstraint().compute(fx, sqp.x());
+  pb.nonLinearConstraint().compute(fphi, raw.Phi_.tail(raw.Phi_.size() - 1));
+  std::cout << "  f(x) = " << fx << std::endl;
+  std::cout << "f(Phi) = " << fphi << std::endl;
 }
 
 void SQPPerformance(const std::string& filepath, const int N)
@@ -308,15 +330,28 @@ void SQPPerformance(const std::string& filepath, const int N)
   SQP sqp(static_cast<int>(raw.delta.size()));
 
   double d = 0;
-  auto start_time = std::chrono::high_resolution_clock::now();
-  for (int i = 0; i < N; ++i)
   {
-    sqp.solveFeasibility(pb);
-    d += sqp.x()[0];
+    auto start_time = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < N; ++i)
+    {
+      sqp.solveFeasibility(pb);
+      d += sqp.x()[0];
+    }
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto time = end_time - start_time;
+    std::cout << "SQPFeasibility: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
   }
-  auto end_time = std::chrono::high_resolution_clock::now();
-  auto time = end_time - start_time;
-  std::cout << "SQPFeasibility: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+  {
+    auto start_time = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < N; ++i)
+    {
+      sqp.solve(pb);
+      d += sqp.x()[0];
+    }
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto time = end_time - start_time;
+    std::cout << "SQP: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+  }
   std::cout << d << std::endl;
 }
 
@@ -327,15 +362,17 @@ int main()
   //QRPerformances(20, 10000);
   //QRPerformances(100, 1000);
   //LSPerformance(10, 1000);
-  LSPerformance(10, 10000);
-  LSPerformance(100, 1000);
-  LSPerformance(200, 1000);
-  LSPerformance(500, 1000);
+  //LSPerformance(10, 10000);
+  //LSPerformance(100, 1000);
+  //LSPerformance(200, 1000);
+  //LSPerformance(500, 1000);
 
   //readTest("data/Problem01.txt");
 
-  //testSQP("data/Problem01.txt"); 
-  //SQPPerformance("data/Problem01.txt",1000);
+  //testSQP("data/Problem03.txt"); 
+  SQPPerformance("data/Problem01.txt", 1000);
+  SQPPerformance("data/Problem02.txt", 1000);
+  SQPPerformance("data/Problem03.txt", 1000);
   //QRJAPerformance(10, 10000);
   //QRJAPerformance(20, 10000);
   //QRJAPerformance(50, 10000);

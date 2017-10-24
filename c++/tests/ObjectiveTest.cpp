@@ -64,7 +64,9 @@ BOOST_AUTO_TEST_CASE(valueTest)
   VectorXd Jx1 = J*x;
   VectorXd Jx2(9);
   obj.applyJToTheLeft(Jx2, x);
+  double v = obj.value(x);
   BOOST_CHECK(Jx1.isApprox(Jx2));
+  BOOST_CHECK(std::abs(v - 0.5*Jx1.squaredNorm()) < 1e-15);
 
   VectorXd JtJx1 = J.transpose()*Jx1;
   VectorXd JtJx2(10);

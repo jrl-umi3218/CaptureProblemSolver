@@ -26,10 +26,11 @@ namespace bms
     Qg_.reserve(n);
   }
 
-  SolverStatus LeastSquare::solve(const LeastSquareObjective& obj, const VectorConstRef& j, double c, LinearConstraints& lc)
+  SolverStatus LeastSquare::solve(const LeastSquareObjective& obj, const VectorConstRef& Jx0, const VectorConstRef& j, double c, LinearConstraints& lc)
   {
     assert(j.size() == n_);
     assert(obj.size() == n_);
+    assert(Jx0.size() == n_ - 1);
     assert(lc.size() == n_);
 
     x_.setZero();
@@ -52,12 +53,15 @@ namespace bms
         obj.qr(A.bottomRows(n_ - 1), Q_, lc.numberOfActiveConstraints(), lc.activeSet(), 1);
         //Compute b
         obj.applyJToTheLeft(b_.tail(n_ - 1), x_);
+        b_.tail(n_ - 1) += Jx0;
         b_[0] = c + j.dot(x_);
         //QR of A (A is upper Hessenberg
         bool fullRank = hessenbergQR(A.topLeftCorner(std::min(n_, nz + 1), nz), Qg_, false, 1e-12);
+        //std::cout << "A= \n" << A << std::endl;
         //z = A^-1 b
         Q_.applyTo(b_);
         Qg_.applyTo(b_);
+        //std::cout << "b = " << b_.transpose() << std::endl; 
         if (fullRank)
         {
           z = -b_.head(nz);
@@ -76,8 +80,9 @@ namespace bms
 
       if (p_.lpNorm<Infinity>() < 1e-12)  //FIXME: hard coded threshold?
       {
-        //compute Lagrange multipliers for the active constraints: -C_A^+T(A^T(Ax+[c;0]))
+        //compute Lagrange multipliers for the active constraints: -C_A^+T(A^T(Ax+[c;Jx0]))
         obj.applyJToTheLeft(Jx_, x_);
+        Jx_ += Jx0;
         obj.applyJTransposeToTheLeft(JtJx_, Jx_);
         tmp_ = -JtJx_ - (c + j.dot(x_))*j;
         auto lambdaAct = lambdaAct_.head(lc.numberOfActiveConstraints());
