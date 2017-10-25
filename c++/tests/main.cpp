@@ -306,6 +306,8 @@ void testSQP(const std::string& filepath)
   raw.read(base + "/" + filepath);
 
   Problem pb(raw);
+  if (raw.delta.size() <= 15)
+    pb.objective().precompute(1);
   SQP sqp(static_cast<int>(raw.delta.size()));
 
   sqp.solve(pb);
@@ -327,20 +329,22 @@ void SQPPerformance(const std::string& filepath, const int N)
   raw.read(base + "/" + filepath);
 
   Problem pb(raw);
+  if (raw.delta.size() <= 15)
+    pb.objective().precompute(1);
   SQP sqp(static_cast<int>(raw.delta.size()));
 
   double d = 0;
-  {
-    auto start_time = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < N; ++i)
-    {
-      sqp.solveFeasibility(pb);
-      d += sqp.x()[0];
-    }
-    auto end_time = std::chrono::high_resolution_clock::now();
-    auto time = end_time - start_time;
-    std::cout << "SQPFeasibility: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
-  }
+  //{
+  //  auto start_time = std::chrono::high_resolution_clock::now();
+  //  for (int i = 0; i < N; ++i)
+  //  {
+  //    sqp.solveFeasibility(pb);
+  //    d += sqp.x()[0];
+  //  }
+  //  auto end_time = std::chrono::high_resolution_clock::now();
+  //  auto time = end_time - start_time;
+  //  std::cout << "SQPFeasibility: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+  //}
   {
     auto start_time = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < N; ++i)
@@ -369,10 +373,10 @@ int main()
 
   //readTest("data/Problem01.txt");
 
-  //testSQP("data/Problem03.txt"); 
-  SQPPerformance("data/Problem01.txt", 1000);
-  SQPPerformance("data/Problem02.txt", 1000);
-  SQPPerformance("data/Problem03.txt", 1000);
+  //testSQP("data/Problem01.txt"); 
+  SQPPerformance("data/Problem01.txt", 25000);
+  SQPPerformance("data/Problem02.txt", 25000);
+  SQPPerformance("data/Problem03.txt", 25000);
   //QRJAPerformance(10, 10000);
   //QRJAPerformance(20, 10000);
   //QRJAPerformance(50, 10000);

@@ -435,7 +435,7 @@ namespace bms
       y[actIdx_[static_cast<size_t>(i)]] = x[i];
   }
 
-  Eigen::VectorXd LinearConstraints::performQPstep(const Eigen::VectorXd& x, const Eigen::VectorXd& p, bool* fullstep)
+  void LinearConstraints::performQPstep(VectorXd& x, const VectorXd& p, bool* fullstep)
   {
     mult(Cx_, x);  //Cx = C*x
     mult(Cp_, p);  //Cp = C*p
@@ -484,14 +484,14 @@ namespace bms
       if (fullstep)
         *fullstep = false;
       activate(iact, type);
-      return x + a*p;
+      x += a*p;
     }
     else
     {
       //std::cout << "full step of norm " << p.lpNorm<Infinity>() << std::endl;
       if (fullstep)
         *fullstep = true;
-      return x+p;
+      x += p;
     }
   }
 

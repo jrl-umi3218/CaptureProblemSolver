@@ -19,8 +19,19 @@ namespace bms
     Index size() const;
 
     double value(const VectorConstRef& x) const;
-    void applyJToTheLeft(MatrixRef Y, const MatrixConstRef& X) const;
-    void applyJTransposeToTheLeft(MatrixRef Y, const MatrixConstRef& X) const;
+    /** Y = J X
+      * Note that the constness of Y is a trick to allow the compiler to accept 
+      * temporary views (like block). The constness is not honored.
+      */
+    template<typename Derived1, typename Derived2>
+    void applyJToTheLeft(const Eigen::MatrixBase<Derived1>& Y, const Eigen::MatrixBase<Derived2>& X) const;
+    /** Y = J^T X
+    * Note that the constness of Y is a trick to allow the compiler to accept
+    * temporary views (like block). The constness is not honored.
+    */
+    template<typename Derived1, typename Derived2>
+    void applyJTransposeToTheLeft(const Eigen::MatrixBase<Derived1>& Y, const Eigen::MatrixBase<Derived2>& X) const;
+
 
     void qr(MatrixRef R, CondensedOrthogonalMatrix& Q, const std::vector<bool>& act, Index shift = 0) const;
     void qr(MatrixRef R, CondensedOrthogonalMatrix& Q, Index nact, const std::vector<bool>& act, Index shift = 0) const;
@@ -59,13 +70,60 @@ namespace bms
       */
     void qrJj(MatrixRef R, GivensSequence& Q, Index extend, Index dstart, Index dend, StartType startType, EndType endType) const;
 
+    /** Precompute the decompositions for all the possible active set value.*/
+    void precompute(Index shift);
+
   private:
+    struct Precomputation
+    {
+      Eigen::MatrixXd R;
+      CondensedOrthogonalMatrix Q;
+    };
+
+    void qrComputation(MatrixRef R, CondensedOrthogonalMatrix& Q, const std::vector<bool>& act, Index shift = 0) const;
+    void qrComputation(MatrixRef R, CondensedOrthogonalMatrix& Q, Index nact, const std::vector<bool>& act, Index shift = 0) const;
+
     Eigen::DenseIndex n_;
     Eigen::VectorXd delta_;
     Eigen::VectorXd d_;     // 1/delta
+    bool precomputed_;
 
     //computation data
     mutable Eigen::VectorXd e_;
     SpecialQR qr_;
+
+    //precomputations
+    std::vector<Precomputation> precomputations_;
   };
+
+
+  template<typename Derived1, typename Derived2>
+  inline void LeastSquareObjective::applyJToTheLeft(const Eigen::MatrixBase<Derived1>& Y_, const Eigen::MatrixBase<Derived2>& X) const
+  {
+    Eigen::MatrixBase<Derived1>& Y = const_cast<Eigen::MatrixBase<Derived1>&>(Y_);
+
+    assert(X.rows() == n_);
+    assert(Y.rows() == n_ - 1 && Y.cols() == X.cols());
+
+    Y.row(0) = d_[1] * X.row(1) - (d_[0] + d_[1])*X.row(0);
+    for (Index i = 1; i < n_ - 1; ++i)
+      Y.row(i) = d_[i] * X.row(i - 1) - (d_[i] + d_[i + 1])*X.row(i) + d_[i + 1] * X.row(i + 1);
+  }
+
+
+  template<typename Derived1, typename Derived2>
+  inline void LeastSquareObjective::applyJTransposeToTheLeft(const Eigen::MatrixBase<Derived1>& Y_, const Eigen::MatrixBase<Derived2>& X) const
+  {
+    Eigen::MatrixBase<Derived1>& Y = const_cast<Eigen::MatrixBase<Derived1>&>(Y_);
+
+
+    assert(X.rows() == n_ - 1);
+    assert(Y.rows() == n_ && Y.cols() == X.cols());
+
+    Y.row(0) = d_[1] * X.row(1) - (d_[0] + d_[1])*X.row(0);
+    for (Index i = 1; i < n_ - 2; ++i)
+      Y.row(i) = d_[i] * X.row(i - 1) - (d_[i] + d_[i + 1])*X.row(i) + d_[i + 1] * X.row(i + 1);
+    Y.row(n_ - 2) = d_[n_ - 2] * X.row(n_ - 3) - (d_[n_ - 2] + d_[n_ - 1])*X.row(n_ - 2);
+    Y.row(n_ - 1) = d_[n_ - 1] * X.row(n_ - 2);
+  }
 }

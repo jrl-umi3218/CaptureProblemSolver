@@ -116,12 +116,12 @@ namespace bms
     void expandActive(VectorRef y, const VectorConstRef& x) const;
 
     /** Move the furthest possible on the segment x+ap for 0<=a<=1. Stop at the
-      * first constraint encountered and activate it. Returns x+ap.
+      * first constraint encountered and activate it. Changes x to x+ap.
       *
       * If fullstep is passed by the user, set it to true when a full step is
       * performed, false otherwise
       */
-    Eigen::VectorXd performQPstep(const Eigen::VectorXd& x, const Eigen::VectorXd& p, bool* fullstep = nullptr);
+    void performQPstep(Eigen::VectorXd& x, const Eigen::VectorXd& p, bool* fullstep = nullptr);
 
     /** Deactivate the constraint with largest lambda violation. */
     void deactivateMaxLambda(const VectorConstRef& lambda);

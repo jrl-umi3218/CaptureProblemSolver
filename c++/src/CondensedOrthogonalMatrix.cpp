@@ -24,6 +24,16 @@ namespace bms
     ptranspose_ = Ptranspose;
   }
 
+  void CondensedOrthogonalMatrix::resize(int n, int kmax, int pmax)
+  {
+    n_ = n;
+    sequences_.resize(kmax);
+    for (auto& s : sequences_)
+      s.reserve(pmax);
+    Qh_.reserve(pmax);
+    transpositions_.indices() = VectorXi::LinSpaced(n, 0, n - 1);
+  }
+
   Eigen::MatrixXd CondensedOrthogonalMatrix::matrix()
   {
     MatrixXd M = MatrixXd::Identity(n_, n_);

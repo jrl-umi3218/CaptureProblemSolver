@@ -100,7 +100,7 @@ namespace bms
       }
       else
       {
-        x_ = lc.performQPstep(x_, p_, &skip);
+        lc.performQPstep(x_, p_, &skip);
       }
     }
 
@@ -139,7 +139,7 @@ namespace bms
       }
       else
       {
-        x_ = lc.performQPstep(x_, p_);
+        lc.performQPstep(x_, p_);
       }
     }
 

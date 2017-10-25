@@ -5,6 +5,37 @@
 
 using namespace Eigen;
 
+
+namespace
+{
+  //binary form of i
+  std::vector<bool> toVec(int i, int nbits)
+  {
+    std::vector<bool> b;
+    for (int j = nbits - 1; j >= 0; --j)
+    {
+      int a = static_cast<int>(i / (1 << j));
+      b.push_back(a != 0);
+      i -= a*(1 << j);
+    }
+    return b;
+  }
+
+  size_t fromVec(const std::vector<bool>& v)
+  {
+    size_t b = 1;
+    size_t r = 0;
+    size_t n = v.size();
+    for (size_t i = 1; i <= n; ++i)
+    {
+      if (v[n-i])
+        r += b;
+      b *= 2;
+    }
+    return r;
+  }
+}
+
 namespace bms
 {
   LeastSquareObjective::LeastSquareObjective(const VectorXd& delta)
@@ -13,6 +44,7 @@ namespace bms
     , d_(delta.cwiseInverse())
     , e_(delta.size()+1)
     , qr_(delta.size())
+    , precomputed_(false)
   {
   }
 
@@ -34,35 +66,31 @@ namespace bms
     return v/2;
   }
 
-  void LeastSquareObjective::applyJToTheLeft(MatrixRef Y, const MatrixConstRef& X) const
+  void LeastSquareObjective::qr(MatrixRef R, CondensedOrthogonalMatrix& Q, const std::vector<bool>& act, Index shift) const
   {
-    assert(X.rows() == n_);
-    assert(Y.rows() == n_ - 1 && Y.cols() == X.cols());
+    assert(act.size() == n_ + 1);
+    assert(Q.size() == n_ - 1 + shift);
+    Q.reset(true);
 
-    Y.row(0) = d_[1] * X.row(1) - (d_[0] + d_[1])*X.row(0);
-    for (Index i = 1; i < n_ - 1; ++i)
-      Y.row(i) = d_[i] * X.row(i - 1) - (d_[i] + d_[i + 1])*X.row(i) + d_[i + 1] * X.row(i + 1);
+    if (precomputed_)
+    {
+      size_t i = fromVec(act);
+      R = precomputations_[i].R;
+      Q = precomputations_[i].Q;
+    }
+    else
+      qrComputation(R, Q, act, shift);
   }
-
-  void LeastSquareObjective::applyJTransposeToTheLeft(MatrixRef Y, const MatrixConstRef& X) const
-  {
-    assert(X.rows() == n_ - 1);
-    assert(Y.rows() == n_ && Y.cols() == X.cols());
-
-    Y.row(0) = d_[1] * X.row(1) - (d_[0] + d_[1])*X.row(0);
-    for (Index i = 1; i < n_ - 2; ++i)
-      Y.row(i) = d_[i] * X.row(i - 1) - (d_[i] + d_[i + 1])*X.row(i) + d_[i + 1] * X.row(i + 1);
-    Y.row(n_ - 2) = d_[n_ - 2] * X.row(n_ - 3) - (d_[n_ - 2] + d_[n_ - 1])*X.row(n_ - 2);
-    Y.row(n_ - 1) = d_[n_ - 1] * X.row(n_ - 2);
-  }
-
-  void LeastSquareObjective::qr(MatrixRef R, CondensedOrthogonalMatrix & Q, const std::vector<bool>& act, Index shift) const
+  
+  void LeastSquareObjective::qrComputation(MatrixRef R, CondensedOrthogonalMatrix& Q, const std::vector<bool>& act, Index shift) const
   {
     int na = 0;
     for (auto b : act)
       na += b;
 
-    return qr(R, Q, na, act, shift);
+    assert(R.rows() == n_ - 1 && R.cols() == n_ - na);
+
+    return qrComputation(R, Q, na, act, shift);
   }
 
   void LeastSquareObjective::qr(MatrixRef R, CondensedOrthogonalMatrix& Q, Index nact, const std::vector<bool>& act, Index shift) const
@@ -70,9 +98,21 @@ namespace bms
     assert(act.size() == n_ + 1);
     assert(R.rows() == n_ - 1 && R.cols() == n_ - nact);
     assert(Q.size() == n_ - 1 + shift);
-    R.setZero();
     Q.reset(true);
 
+    if (precomputed_)
+    {
+      size_t i = fromVec(act);
+      R = precomputations_[i].R;
+      Q = precomputations_[i].Q;
+    }
+    else
+      qrComputation(R, Q, nact, act, shift);
+  }
+  
+  void LeastSquareObjective::qrComputation(MatrixRef R, CondensedOrthogonalMatrix& Q, Index nact, const std::vector<bool>& act, Index shift) const
+  {
+    R.setZero();
     //permutation management
     Index up = 0;
     const int reduce = -1;
@@ -193,6 +233,39 @@ namespace bms
     if (finalSize>startHessenberg+1)
       tridiagonalQR(R.block(startHessenberg, startHessenberg, finalSize - startHessenberg, R.cols() - startHessenberg), Q.Qh());
     Q.Qh().extend(static_cast<int>(shift + startHessenberg));
+  }
+
+  void LeastSquareObjective::precompute(Index shift)
+  {
+    if (!precomputed_)
+    {
+      int n = static_cast<int>(n_);
+      precomputations_.resize(1 << (n + 1));
+      CondensedOrthogonalMatrix Qi(n, n, 2 * n_, true);
+      for (int i = 0; i < (1 << (n_ + 1)) - 1; ++i)
+      {
+        Qi.reset(true);
+        auto act = toVec(i, n + 1);
+        int na = 0;
+        for (auto b : act)
+          na += b;
+
+        auto& P = precomputations_[i];
+        P.R.resize(n_ - 1, n_ - na);
+        qrComputation(P.R, Qi, na, act, shift);
+        P.Q.resize(n, 0, 0);
+        P.Q.reset(true);
+        for (const auto& q : Qi.Q())
+        {
+          if (q.size() > 0)
+            P.Q.Q().push_back(q);
+        }
+        P.Q.P() = Qi.P();
+        P.Q.Qh() = Qi.Qh();
+        P.Q.P() = Qi.P();
+      }
+    }
+    precomputed_ = true;
   }
 
   Eigen::MatrixXd LeastSquareObjective::matrix() const

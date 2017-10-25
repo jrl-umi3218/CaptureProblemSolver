@@ -138,17 +138,32 @@ namespace bms
     lc_.changeBounds(0, d, d);
   }
 
-  const LeastSquareObjective & Problem::objective() const
+  const LeastSquareObjective& Problem::objective() const
   {
     return lso_;
   }
 
-  const BoundenessConstraint & Problem::nonLinearConstraint() const
+  LeastSquareObjective& Problem::objective()
+  {
+    return lso_;
+  }
+
+  const BoundenessConstraint& Problem::nonLinearConstraint() const
   {
     return bc_;
   }
 
-  const LinearConstraints & Problem::linearConstraints() const
+  BoundenessConstraint& Problem::nonLinearConstraint()
+  {
+    return bc_;
+  }
+
+  const LinearConstraints& Problem::linearConstraints() const
+  {
+    return lc_;
+  }
+
+  LinearConstraints& Problem::linearConstraints()
   {
     return lc_;
   }

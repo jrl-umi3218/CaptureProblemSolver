@@ -26,9 +26,14 @@ namespace bms
       */
     CondensedOrthogonalMatrix(int n, int kmax, int pmax, bool Ptranspose = false);
 
+    /**Empty version*/
+    CondensedOrthogonalMatrix() {}
+
     Eigen::DenseIndex size() const;
     void reset(bool Ptranspose = false);
+    void resize(int n, int kmax, int pmax);
 
+    std::vector<GivensSequence>& Q();
     GivensSequence& Q(size_t i);
     GivensSequence& Qh();
     Eigen::Transpositions<Eigen::Dynamic>& P();
@@ -82,6 +87,11 @@ namespace bms
     else
       const_cast<MatrixBase<Derived>&>(M) = M*transpositions_;
     Qh_.applyOnTheRightTo(M);
+  }
+
+  inline std::vector<GivensSequence>& CondensedOrthogonalMatrix::Q()
+  {
+    return sequences_;
   }
 
   inline GivensSequence& CondensedOrthogonalMatrix::Q(size_t i)

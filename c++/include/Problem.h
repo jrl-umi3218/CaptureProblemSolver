@@ -37,8 +37,11 @@ namespace bms
     Problem(const RawProblem& pb);
 
     const LeastSquareObjective& objective() const;
+    LeastSquareObjective& objective();
     const BoundenessConstraint& nonLinearConstraint() const;
+    BoundenessConstraint& nonLinearConstraint();
     const LinearConstraints& linearConstraints() const;
+    LinearConstraints& linearConstraints();
 
   private:
     LeastSquareObjective lso_;
