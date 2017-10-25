@@ -329,6 +329,7 @@ void SQPPerformance(const std::string& filepath, const int N)
   raw.read(base + "/" + filepath);
 
   Problem pb(raw);
+  Problem pb2(raw);
   if (raw.delta.size() <= 15)
     pb.objective().precompute(1);
   SQP sqp(static_cast<int>(raw.delta.size()));
@@ -373,7 +374,9 @@ int main()
 
   //readTest("data/Problem01.txt");
 
-  //testSQP("data/Problem01.txt"); 
+  //testSQP("data/Problem01.txt");
+  //testSQP("data/Problem02.txt");
+  //testSQP("data/Problem03.txt");
   SQPPerformance("data/Problem01.txt", 25000);
   SQPPerformance("data/Problem02.txt", 25000);
   SQPPerformance("data/Problem03.txt", 25000);

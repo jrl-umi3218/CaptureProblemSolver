@@ -101,14 +101,17 @@ namespace bms
     void changeBounds(Eigen::DenseIndex i, double l, double u);
 
     /** Y = X*N_A */
-    void applyNullSpaceOnTheRight(MatrixRef Y, const MatrixConstRef& X) const;
+    template<typename Derived1, typename Derived2>
+    void applyNullSpaceOnTheRight(const Eigen::MatrixBase<Derived1>& Y, const Eigen::MatrixBase<Derived2>& X) const;
     /** Y = N_A X */
     void applyNullSpaceOnTheLeft(MatrixRef Y, const MatrixConstRef& X) const;
 
     /** Y = C * X */
-    void mult(MatrixRef Y, const MatrixConstRef& X) const;
+    template<typename Derived1, typename Derived2>
+    void mult(const Eigen::MatrixBase<Derived1>& Y, const Eigen::MatrixBase<Derived2>& X) const;
     /** Y = C^T * X */
-    void transposeMult(MatrixRef Y, const MatrixConstRef& X) const;
+    template<typename Derived1, typename Derived2>
+    void transposeMult(const Eigen::MatrixBase<Derived1>& Y, const Eigen::MatrixBase<Derived2>& X) const;
     /** Y = pinv(C_A^T)*X */
     void pinvTransposeMultAct(MatrixRef Y, const MatrixConstRef& X) const;
 
@@ -158,4 +161,78 @@ namespace bms
     mutable Eigen::VectorXd Cx_;                    // to store the results of C*x
     mutable Eigen::VectorXd Cp_;                    // to store the results of C*p
   };
+
+  template<typename Derived1, typename Derived2>
+  inline void LinearConstraints::applyNullSpaceOnTheRight(const Eigen::MatrixBase<Derived1>& Y_, const Eigen::MatrixBase<Derived2>& X) const
+  {
+    Eigen::MatrixBase<Derived1>& Y = const_cast<Eigen::MatrixBase<Derived1>&>(Y_);
+    assert(X.cols() == n_);
+    assert(Y.rows() == X.rows() && Y.cols() == n_ - na_);
+
+    DenseIndex c = -1;
+    DenseIndex k = 0;
+    std::fill(idx_.begin(), idx_.end(), -1);
+    actIdx_.resize(na_);
+
+    //skip the first group of activated constraints
+    while (k < n_ && activeSet_[static_cast<size_t>(k)])
+    {
+      actIdx_[static_cast<size_t>(k)] = k;
+      ++k;
+    }
+
+    size_t ca = static_cast<size_t>(k);
+    auto i = k;
+    for (; i < n_; ++i)
+    {
+      if (activeSet_[static_cast<size_t>(i)])
+      {
+        Y.col(c) += X.col(i);
+        actIdx_[ca] = i;
+        ++ca;
+      }
+      else
+      {
+        ++c;
+        if (c >= n_ - na_)
+          break;
+        Y.col(c) = X.col(i);
+      }
+      idx_[static_cast<size_t>(i)] = c;
+    }
+    for (++i; i < n_; ++i)
+    {
+      actIdx_[ca] = i;
+      ++ca;
+    }
+    if (activeSet_.back())
+      actIdx_[ca] = n_;
+
+    validIdx_ = true;
+    validActIdx_ = true;
+  }
+
+  template<typename Derived1, typename Derived2>
+  inline void LinearConstraints::mult(const Eigen::MatrixBase<Derived1>& Y_, const Eigen::MatrixBase<Derived2>& X) const
+  {
+    Eigen::MatrixBase<Derived1>& Y = const_cast<Eigen::MatrixBase<Derived1>&>(Y_);
+    assert(X.rows() == n_);
+    assert(Y.rows() == n_ + 1 && Y.cols() == X.cols());
+
+    Y.topRows(n_) = X;
+    Y.middleRows(1, n_ - 1) -= X.topRows(n_ - 1);
+    Y.bottomRows<1>() = X.bottomRows<1>();
+  }
+
+  template<typename Derived1, typename Derived2>
+  inline void LinearConstraints::transposeMult(const Eigen::MatrixBase<Derived1>& Y_, const Eigen::MatrixBase<Derived2>& X) const
+  {
+    Eigen::MatrixBase<Derived1>& Y = const_cast<Eigen::MatrixBase<Derived1>&>(Y_);
+    assert(X.rows() == n_ + 1);
+    assert(Y.rows() == n_ && Y.cols() == X.cols());
+
+    Y = X.topRows(n_);
+    Y.topRows(n_ - 1) -= X.middleRows(1, n_ - 1);
+    Y.bottomRows<1>() += X.bottomRows<1>();
+  }
 }

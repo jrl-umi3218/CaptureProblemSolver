@@ -7,8 +7,10 @@ using namespace Eigen;
 
 namespace
 {
-  void applyFirst(bms::MatrixRef Y, const bms::MatrixConstRef& X, DenseIndex k)
+  template<typename Derived1, typename Derived2>
+  void applyFirst(const MatrixBase<Derived1>& Y_, const MatrixBase<Derived2>& X, DenseIndex k)
   {
+    Eigen::MatrixBase<Derived1>& Y = const_cast<Eigen::MatrixBase<Derived1>&>(Y_);
     assert(Y.rows() == k && Y.cols() == X.cols());
     Y.setZero();
     Y.row(k - 1) = X.row(k - 1);
@@ -16,8 +18,10 @@ namespace
       Y.row(i) = Y.row(i + 1) + X.row(i);
   }
 
-  void applyLast(bms::MatrixRef Y, const bms::MatrixConstRef& X, DenseIndex k)
+  template<typename Derived1, typename Derived2>
+  void applyLast(const MatrixBase<Derived1>& Y_, const MatrixBase<Derived2>& X, DenseIndex k)
   {
+    Eigen::MatrixBase<Derived1>& Y = const_cast<Eigen::MatrixBase<Derived1>&>(Y_);
     assert(Y.rows() == k && Y.cols() == X.cols());
     if (k == 1)
       Y = X.bottomRows<1>();
@@ -31,8 +35,10 @@ namespace
     }
   }
 
-  void apply(bms::MatrixRef Y, const bms::MatrixConstRef& X, DenseIndex s, DenseIndex k)
+  template<typename Derived1, typename Derived2>
+  void apply(const MatrixBase<Derived1>& Y_, const MatrixBase<Derived2>& X, DenseIndex s, DenseIndex k)
   {
+    Eigen::MatrixBase<Derived1>& Y = const_cast<Eigen::MatrixBase<Derived1>&>(Y_);
     assert(Y.rows() == k - 1 && Y.cols() == X.cols());
     double d = 1. / k;
     for (DenseIndex i = 0; i < k - 1; ++i)
@@ -86,8 +92,8 @@ namespace bms
   LinearConstraints& LinearConstraints::operator= (const LinearConstraints::Shift& s)
   {
     this->operator=(s.c);
-    auto xm = Ref<const VectorXd>(s.x);
-    mult(Cx_, xm);
+    //auto xm = Ref<const VectorXd>(s.x);
+    mult(Cx_, s.x);
 
     l_ -= Cx_;
     u_ -= Cx_;
@@ -293,54 +299,6 @@ namespace bms
       activate(static_cast<int>(i), Activation::Equal);
   }
 
-  void LinearConstraints::applyNullSpaceOnTheRight(MatrixRef Y, const MatrixConstRef& X) const
-  {
-    assert(X.cols() == n_);
-    assert(Y.rows() == X.rows() && Y.cols() == n_ - na_);
-
-    DenseIndex c = -1;
-    DenseIndex k = 0;
-    std::fill(idx_.begin(), idx_.end(), -1);
-    actIdx_.resize(na_);
-
-    //skip the first group of activated constraints
-    while (k < n_ && activeSet_[static_cast<size_t>(k)])
-    {
-      actIdx_[static_cast<size_t>(k)] = k;
-      ++k;
-    }
-
-    size_t ca = static_cast<size_t>(k);
-    auto i = k;
-    for (; i < n_; ++i)
-    {
-      if (activeSet_[static_cast<size_t>(i)])
-      {
-        Y.col(c) += X.col(i);
-        actIdx_[ca] = i;
-        ++ca;
-      }
-      else
-      {
-        ++c;
-        if (c >= n_ - na_)
-          break;
-        Y.col(c) = X.col(i);
-      }
-      idx_[static_cast<size_t>(i)] = c;
-    }
-    for (++i; i < n_; ++i)
-    {
-      actIdx_[ca] = i;
-      ++ca;
-    }
-    if (activeSet_.back())
-      actIdx_[ca] = n_;
-
-    validIdx_ = true;
-    validActIdx_ = true;
-  }
-
   void LinearConstraints::applyNullSpaceOnTheLeft(MatrixRef Y, const MatrixConstRef& X) const
   {
     assert(X.rows() == n_ - na_);
@@ -357,26 +315,6 @@ namespace bms
       else
         Y.row(i).setZero();
     }
-  }
-
-  void LinearConstraints::mult(MatrixRef Y, const MatrixConstRef& X) const
-  {
-    assert(X.rows() == n_);
-    assert(Y.rows() == n_ + 1 && Y.cols() == X.cols());
-
-    Y.topRows(n_) = X;
-    Y.middleRows(1, n_ - 1) -= X.topRows(n_ - 1);
-    Y.bottomRows<1>() = X.bottomRows<1>();
-  }
-
-  void LinearConstraints::transposeMult(MatrixRef Y, const MatrixConstRef& X) const
-  {
-    assert(X.rows() == n_ + 1);
-    assert(Y.rows() == n_ && Y.cols() == X.cols());
-
-    Y = X.topRows(n_);
-    Y.topRows(n_ - 1) -= X.middleRows(1, n_ - 1);
-    Y.bottomRows<1>() += X.bottomRows<1>();
   }
 
   void LinearConstraints::pinvTransposeMultAct(MatrixRef Y, const MatrixConstRef& X) const
