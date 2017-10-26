@@ -357,6 +357,18 @@ void SQPPerformance(const std::string& filepath, const int N)
     auto time = end_time - start_time;
     std::cout << "SQP: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
   }
+
+  //{
+  //  auto start_time = std::chrono::high_resolution_clock::now();
+  //  for (int i = 0; i < N; ++i)
+  //  {
+  //    sqp.solve(pb2);
+  //    d += sqp.x()[0];
+  //  }
+  //  auto end_time = std::chrono::high_resolution_clock::now();
+  //  auto time = end_time - start_time;
+  //  std::cout << "SQP, no precomp: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+  //}
   std::cout << d << std::endl;
 }
 

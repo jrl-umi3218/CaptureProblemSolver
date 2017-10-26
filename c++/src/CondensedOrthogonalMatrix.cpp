@@ -9,6 +9,7 @@ namespace bms
     , n_(n)
     , sequences_(kmax)
     , transpositions_(VectorXi::LinSpaced(n,0,n-1))
+    , identityTransposition_(VectorXi::LinSpaced(n, 0, n - 1))
   {
     for (auto& s : sequences_)
       s.reserve(pmax);
@@ -20,7 +21,7 @@ namespace bms
     for (auto& s : sequences_)
       s.clear();
     Qh_.clear();
-    transpositions_.indices() = VectorXi::LinSpaced(n_, 0, static_cast<int>(n_) - 1);
+    transpositions_.indices() = identityTransposition_;
     ptranspose_ = Ptranspose;
   }
 
@@ -32,6 +33,7 @@ namespace bms
       s.reserve(pmax);
     Qh_.reserve(pmax);
     transpositions_.indices() = VectorXi::LinSpaced(n, 0, n - 1);
+    identityTransposition_ = VectorXi::LinSpaced(n, 0, n - 1);
   }
 
   Eigen::MatrixXd CondensedOrthogonalMatrix::matrix()

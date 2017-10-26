@@ -76,7 +76,7 @@ namespace bms
     {
       size_t i = fromVec(act);
       R = precomputations_[i].R;
-      Q = precomputations_[i].Q;
+      Q.copyNoAlloc(precomputations_[i].Q);
     }
     else
       qrComputation(R, Q, act, shift);
@@ -104,7 +104,7 @@ namespace bms
     {
       size_t i = fromVec(act);
       R = precomputations_[i].R;
-      Q = precomputations_[i].Q;
+      Q.copyNoAlloc(precomputations_[i].Q);
     }
     else
       qrComputation(R, Q, nact, act, shift);
