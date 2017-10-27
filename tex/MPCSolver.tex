@@ -18,6 +18,7 @@
 %\newcommand{\mdiff1}[1]{\frac{\partial}{\partial #1}}
 \newcommand{\diff}[2]{\dfrac{\partial #1}{\partial #2}}
 \newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\SC}[1]{\begin{flushleft}{\color{red} SC: #1}\end{flushleft}}
 
 \DeclareMathOperator*{\minimize}{\min.}
 \newcommand{\st}{\mbox{s.t.}}
@@ -45,11 +46,18 @@ where $\alpha$ is either $0$ or positive and, by convention, $\Phi_0 = 0$. Lower
 The idea we want to explore here is to pass the equality constraint in the objective as a weighted squared norm. Denoting $f$ the function such that the non-linear constraint writes $f(\Phi) = 0$, we thus transform the above problem into
 \begin{align}
   \minimize_{\Phi \in \mathbb{R}^n}\ & \left\| J \Phi \right\|^2 + w^2 \left\|f\right\|^2\\
-  \st \ & \sum_{j=0}^{n-1} \frac{a_j}{\sqrt{\Phi_{j+1}} + \sqrt{\Phi}_j} - \alpha \sqrt{\Phi_n} = b \nonumber\\
+  \st \ 
+    % & \sum_{j=0}^{n-1} \frac{a_j}{\sqrt{\Phi_{j+1}} + \sqrt{\Phi}_j} - \alpha \sqrt{\Phi_n} = b \nonumber\\
         & l_j \leq \Phi_j - \Phi_{j-1} \leq u_j, \quad j=1..n \nonumber\\
         & \Phi_n^- \leq \Phi_n \leq \Phi_n^+ \nonumber
 \end{align}
-This is an inexact method, but by paying attention to the order of operations we can have $w$ high. The above problem is a non-linear least square optimization with linear constraints. It can be solved with a SQP. The idea is that the underlying QP is a linear least square that we can solve much faster that usual by taking advantage of the form of the matrix $J$ and of the constraints.
+\SC{commented the nonlinear equality constraint}
+This is an inexact method, but by paying attention to the order of operations
+we can have $w$ high. The above problem is a non-linear least square
+optimization with linear constraints. It can be solved with an SQP. The idea is
+that the underlying QP is a linear least square that we can solve much faster
+than usual by taking advantage of the form of the matrix $J$ and of the
+constraints.
 
 \section{Linear constraints}
 We focus here on the constraints
