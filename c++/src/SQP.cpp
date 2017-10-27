@@ -43,9 +43,27 @@ namespace bms
 
     //feasible (x,lambda)
     FeasiblePointInfo fpi;
-    std::tie(fpi, x_) = lc.initialPoint();
+    std::tie(fpi, x_) = lc.initialPoint(true);
     if (fpi != FeasiblePointInfo::Found) //FIXME: we can be more precise here
-      return SolverStatus::NoLinearlyFeasiblePoint;
+    {
+      //attempt to find a point without the active set
+      std::tie(fpi, x_) = lc.initialPoint(false);
+      if (fpi != FeasiblePointInfo::Found)
+        return SolverStatus::NoLinearlyFeasiblePoint;
+      else
+      {
+        //reset the active sets
+        for (size_t i = 0; i < currentActiveSet_.size(); ++i)
+        {
+          if (lc.activationStatus(i) != Activation::Equal)
+          {
+            currentActiveSet_[i] = Activation::None;
+            previousActiveSet_[i] = Activation::None;
+          }
+        }
+
+      }
+    }
     lambda_.setZero();
 
     //main loop
@@ -161,6 +179,11 @@ namespace bms
   const Eigen::VectorXd & SQP::lambda() const
   {
     return lambda_;
+  }
+
+  const std::vector<Activation>& SQP::activeSet() const
+  {
+    return currentActiveSet_;
   }
 
   bool SQP::checkKKT(const Eigen::VectorXd& x, const Eigen::VectorXd& lambda, double f, const Eigen::VectorXd& g, 

@@ -19,7 +19,8 @@ namespace bms
 
   /** An information returned by the search of a feasible point
     *  - Found: the point was found
-    *  - Infeasible: the constraints are not compatible
+    *  - Infeasible: the constraints are not compatible (may be due to active 
+    *    constraints if they are taken into account)
     *  - NumericalWarningXXX: the lower bound on x_n, its upper bound or both
     *    are numerically redundant with the other constraints. Please consider
     *    moving them.
@@ -73,8 +74,11 @@ namespace bms
     const Eigen::VectorXd& l() const;
     const Eigen::VectorXd& u() const;
 
-    /** Return a feasible point for the constraints*/
-    std::pair<FeasiblePointInfo, Eigen::VectorXd> initialPoint() const;
+    /** Return a feasible point for the constraints.
+      *
+      * If takeActivationIntoAccount is true, the point is on the activated constraints
+      */
+    std::pair<FeasiblePointInfo, Eigen::VectorXd> initialPoint(bool takeActivationIntoAccount = false) const;
 
     Eigen::DenseIndex size() const;
     Eigen::DenseIndex nullSpaceSize() const;
@@ -160,6 +164,8 @@ namespace bms
     mutable std::vector<Eigen::DenseIndex> actIdx_; // indices of active constraints, ordered.
     mutable Eigen::VectorXd Cx_;                    // to store the results of C*x
     mutable Eigen::VectorXd Cp_;                    // to store the results of C*p
+    mutable Eigen::VectorXd actl_;                  // lower bounds when taking into account the activation, for computing the initial point
+    mutable Eigen::VectorXd actu_;                  // upper bounds when taking into account the activation, for computing the initial point
   };
 
   template<typename Derived1, typename Derived2>

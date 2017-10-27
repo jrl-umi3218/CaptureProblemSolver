@@ -19,6 +19,7 @@ namespace bms
 
     const Eigen::VectorXd& x() const;
     const Eigen::VectorXd& lambda() const;
+    const std::vector<Activation>& activeSet() const;
 
   private:
     bool checkKKT(const Eigen::VectorXd& x, const Eigen::VectorXd& lambda, double f, const Eigen::VectorXd& g, 

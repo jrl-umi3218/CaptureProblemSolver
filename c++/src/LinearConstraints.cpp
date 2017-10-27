@@ -68,6 +68,8 @@ namespace bms
     , idx_(n, 0)
     , Cx_(n + 1)
     , Cp_(n + 1)
+    , actl_(n + 1)
+    , actu_(n + 1)
   {
   }
 
@@ -134,32 +136,52 @@ namespace bms
     return u_;
   }
 
-  std::pair<FeasiblePointInfo, VectorXd> LinearConstraints::initialPoint() const
+  std::pair<FeasiblePointInfo, VectorXd> LinearConstraints::initialPoint(bool takeActivationIntoAccount) const
   {
     const double eps = 1e-8;
     std::pair<FeasiblePointInfo, VectorXd> ret;
     ret.second.resize(n_);
+
+    //take into account the activation status if applicable
+    if (takeActivationIntoAccount)
+    {
+      for (DenseIndex i = 0; i <= n_; ++i)
+      {
+        switch (activationStatus_[static_cast<int>(i)])
+        {
+        case Activation::None:  actl_[i] = l_[i]; actu_[i] = u_[i]; break;
+        case Activation::Lower: actl_[i] = l_[i]; actu_[i] = l_[i]; break;
+        case Activation::Upper: actl_[i] = u_[i]; actu_[i] = u_[i]; break;
+        case Activation::Equal: actl_[i] = l_[i]; actu_[i] = u_[i]; break;
+        }
+      }
+    }
+    else
+    {
+      actl_ = l_;
+      actu_ = u_;
+    }
 
     double s = 0;
     double t = 0;
     //s = sum(l), t = sum(u-l)
     for (DenseIndex i = 0; i < n_; ++i)
     {
-      s += l_[i];
-      t += u_[i];
+      s += actl_[i];
+      t += actu_[i];
     }
     t -= s;
 
     if (std::abs(t) > n_*eps)
     {
-      double al = (l_[n_] - s) / t;
-      double au = (u_[n_] - s) / t;
+      double al = (actl_[n_] - s) / t;
+      double au = (actu_[n_] - s) / t;
       if (al <= 1 && au >= 0)
       {
         double f = (std::max(al, 0.) + std::min(au, 1.)) / 2;
-        ret.second[0] = l_[0] + f*(u_[0] - l_[0]);
+        ret.second[0] = actl_[0] + f*(actu_[0] - actl_[0]);
         for (DenseIndex i = 1; i < n_; ++i)
-          ret.second[i] = ret.second[i - 1] + l_[i] + f*(u_[i] - l_[i]);
+          ret.second[i] = ret.second[i - 1] + actl_[i] + f*(actu_[i] - actl_[i]);
 
         if (al > 1 - eps || au < eps)
           ret.first = FeasiblePointInfo::TooSmallFeasibilityZone;
@@ -186,9 +208,9 @@ namespace bms
     }
     else
     {
-      ret.second[0] = l_[0];
+      ret.second[0] = actl_[0];
       for (DenseIndex i = 1; i < n_; ++i)
-        ret.second[i] = ret.second[i - 1] + l_[i];
+        ret.second[i] = ret.second[i - 1] + actl_[i];
       if (l_[n_] <= ret.second[n_ - 1] && ret.second[n_ - 1] <= u_[n_])
         ret.first = FeasiblePointInfo::TooSmallZonotope;
       else
