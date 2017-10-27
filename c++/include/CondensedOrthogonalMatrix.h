@@ -99,9 +99,9 @@ namespace bms
     for (const auto& Q : sequences_)
       Q.applyTo(M);
     if (ptranspose_)
-      const_cast<MatrixBase<Derived>&>(M) = transpositions_*M;
+      const_cast<Eigen::MatrixBase<Derived>&>(M) = transpositions_*M;
     else
-      const_cast<MatrixBase<Derived>&>(M) = transpositions_.transpose()*M;
+      const_cast<Eigen::MatrixBase<Derived>&>(M) = transpositions_.transpose()*M;
     Qh_.applyTo(M);
   }
 
@@ -111,9 +111,9 @@ namespace bms
     for (const auto& Q : sequences_)
       Q.applyOnTheRightTo(M);
     if (ptranspose_)
-      const_cast<MatrixBase<Derived>&>(M) = M*transpositions_.transpose();
+      const_cast<Eigen::MatrixBase<Derived>&>(M) = M*transpositions_.transpose();
     else
-      const_cast<MatrixBase<Derived>&>(M) = M*transpositions_;
+      const_cast<Eigen::MatrixBase<Derived>&>(M) = M*transpositions_;
     Qh_.applyOnTheRightTo(M);
   }
 

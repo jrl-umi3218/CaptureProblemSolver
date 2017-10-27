@@ -29,7 +29,7 @@ namespace bms
     for (Eigen::DenseIndex i = 0; i < m-1; ++i)
     {
       Q.emplace_back(M, i, i);
-      Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).rightCols(n-i));
+      Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).rightCols(n-i));
     }
     if (m<=n)
       return abs(M(m - 1, m - 1)) > thresh;
@@ -59,17 +59,17 @@ namespace bms
       for (Eigen::DenseIndex i = 0; i < p; ++i)
       {
         Q.emplace_back(M, i, i);
-        Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 3>(i, i), condensed_t());
+        Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).block<2, 3>(i, i), condensed_t());
       }
       for (Eigen::DenseIndex i = p; i < m - 1; ++i)
       {
         Q.emplace_back(M, i, i);
         if (i+2 == n)
-          Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 2>(i, i), condensed_t());
+          Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).block<2, 2>(i, i), condensed_t());
         else if (i+3<=n)
-          Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 3>(i, i), condensed_t());
+          Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).block<2, 3>(i, i), condensed_t());
         else //i+1==n
-          Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 1>(i, i), condensed_t());
+          Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).block<2, 1>(i, i), condensed_t());
       }
       
       return abs(M(p + 1, p + 1)) > thresh;
@@ -82,7 +82,7 @@ namespace bms
         if (m==1)
           return abs(M(0, 0))> thresh;
         Q.emplace_back(M, 0, 0);
-        Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 1>(0, 0), condensed_t());
+        Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).block<2, 1>(0, 0), condensed_t());
         return abs(M(0,0))> thresh;
       }
       // for m==1, we do nothing

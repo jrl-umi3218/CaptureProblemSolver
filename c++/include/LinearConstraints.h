@@ -169,8 +169,8 @@ namespace bms
     assert(X.cols() == n_);
     assert(Y.rows() == X.rows() && Y.cols() == n_ - na_);
 
-    DenseIndex c = -1;
-    DenseIndex k = 0;
+    Eigen::DenseIndex c = -1;
+    Eigen::DenseIndex k = 0;
     std::fill(idx_.begin(), idx_.end(), -1);
     actIdx_.resize(na_);
 
