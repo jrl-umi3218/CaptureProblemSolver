@@ -85,7 +85,7 @@ The whole linear constraints writes
 where $e_n$ is the $n$-th column of the $n\times n$ identity matrix.
 
 \subsection{Expression as a zonope}
-Let's define $H = \left\{x \in \mathbb{R}^n \vert\ l \leq C_Z \leq u\right\}$, 
+Let's define $H = \left\{x \in \mathbb{R}^n \vert\ l \leq C_Z x \leq u\right\}$, 
 \begin{equation}
 L = \BIN 1 & 0 & \ldots & 0 \\ 1 & 1 &\ldots & 0 \\ & & \ddots & \\ 1 & 1 &\ldots & 1\BOUT, \qquad D = \BIN u_1 - l_1 & & 0 \\ & \ddots & \\ 0 & & u_n - l_n\BOUT
 \end{equation}
@@ -238,9 +238,10 @@ One way to check the feasibility of the problem~(\ref{eq:problem}) is to solve t
 \end{align}
 where
 \begin{equation}
-  c(x) = \sum_{j=0}^{n-1} \frac{a_j}{\sqrt{x_{j+1}} + \sqrt{x_j}} - \alpha \sqrt{x_n} = b
+  c(x) = \sum_{j=0}^{n-1} \frac{a_j}{\sqrt{x_{j+1}} + \sqrt{x_j}} - \alpha
+    \sqrt{x_n} - b
 \end{equation}
-This can be done by solving a SQP with a Gauss-Newton approximation of the objective's Hessian matrix. If at the solution $c(x^*) = 0$, the problem is feasible and $x^*$ is a feasible point.
+This can be done by solving an SQP with a Gauss-Newton approximation of the objective's Hessian matrix. If at the solution $c(x^*) = 0$, the problem is feasible and $x^*$ is a feasible point.
 
 The SQP in itself does not deserve a particular treatment: it can be a simple adaptation of the line-search SQP algorithm found in~\cite{nocedal:book:2006} (Algorithm 18.3), with the initial point taken as described in the previous section (and initial Lagrange multiplier thus set to $0$). Since all constraints are linear, the merit function is simply our objective function and there is no need for a penalty parameter. The only refinement is the use of double sided constraints, so that the KKT conditions checking has to be modified (see~\cite{brossette:phd:2016}, section 4.3.5).
 
