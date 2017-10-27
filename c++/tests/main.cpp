@@ -11,6 +11,7 @@
 #include "QRAlgorithms.h"
 #include "QuadraticObjective.h"
 #include "SQP.h"
+#include "SQPTestCommon.h"
 
 using namespace Eigen;
 using namespace bms;
@@ -287,18 +288,6 @@ void readTest(const std::string& filepath)
   raw.read(base + "/" + filepath);
 }
 
-void testSQPFeas(const std::string& filepath)
-{
-  RawProblem raw;
-  std::string base = TESTS_DIR;
-  raw.read(base + "/" + filepath);
-  
-  Problem pb(raw);
-  SQP sqp(static_cast<int>(raw.delta.size()));
-
-  sqp.solveFeasibility(pb);
-}
-
 void testSQP(const std::string& filepath)
 {
   RawProblem raw;
@@ -322,30 +311,42 @@ void testSQP(const std::string& filepath)
   std::cout << "f(Phi) = " << fphi << std::endl;
 }
 
-void SQPPerformance(const std::string& filepath, const int N)
+void SQPPerformance(const std::string& filepath, int n, const int N)
 {
+  const int precompMax = 20;
+
   RawProblem raw;
   std::string base = TESTS_DIR;
   raw.read(base + "/" + filepath);
+  if (n > 0)
+    raw = resampleProblem(raw, n);
 
   Problem pb(raw);
   Problem pb2(raw);
-  if (raw.delta.size() <= 15)
+  if (raw.delta.size() <= precompMax)
+  {
+    auto start_time = std::chrono::high_resolution_clock::now();
     pb.objective().precompute(1);
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto time = end_time - start_time;
+    std::cout << " - precomputation: " << static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(time).count()) << " ms" << std::endl;
+  }
+
   SQP sqp(static_cast<int>(raw.delta.size()));
 
+  std::cout << "test SQP for n = " << raw.delta.size() << std::endl;
   double d = 0;
-  //{
-  //  auto start_time = std::chrono::high_resolution_clock::now();
-  //  for (int i = 0; i < N; ++i)
-  //  {
-  //    sqp.solveFeasibility(pb);
-  //    d += sqp.x()[0];
-  //  }
-  //  auto end_time = std::chrono::high_resolution_clock::now();
-  //  auto time = end_time - start_time;
-  //  std::cout << "SQPFeasibility: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
-  //}
+  {
+    auto start_time = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < N; ++i)
+    {
+      sqp.solveFeasibility(pb);
+      d += sqp.x()[0];
+    }
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto time = end_time - start_time;
+    std::cout << " - SQPFeasibility: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+  }
   {
     auto start_time = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < N; ++i)
@@ -355,7 +356,20 @@ void SQPPerformance(const std::string& filepath, const int N)
     }
     auto end_time = std::chrono::high_resolution_clock::now();
     auto time = end_time - start_time;
-    std::cout << "SQP: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+    std::cout << " - SQP: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+  }
+
+  if (raw.delta.size() <= precompMax)
+  {
+    auto start_time = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < N; ++i)
+    {
+      sqp.solve(pb2);
+      d += sqp.x()[0];
+    }
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto time = end_time - start_time;
+    std::cout << " - SQP, no precomp: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
   }
   std::cout << d << std::endl;
 }
@@ -377,9 +391,17 @@ int main()
   //testSQP("data/Problem01.txt");
   //testSQP("data/Problem02.txt");
   //testSQP("data/Problem03.txt");
-  SQPPerformance("data/Problem01.txt", 25000);
-  SQPPerformance("data/Problem02.txt", 25000);
-  SQPPerformance("data/Problem03.txt", 25000);
+  //SQPPerformance("data/Problem01.txt", 25000);
+  //SQPPerformance("data/Problem02.txt", 25000);
+  //SQPPerformance("data/Problem03.txt", 25000);
+
+  SQPPerformance("data/Problem01.txt", -1, 5000);
+  SQPPerformance("data/Problem01.txt", 20, 5000);
+  SQPPerformance("data/Problem01.txt", 50, 5000);
+  SQPPerformance("data/Problem01.txt", 100, 5000);
+  SQPPerformance("data/Problem01.txt", 200, 1000);
+  SQPPerformance("data/Problem01.txt", 500, 1000);
+  SQPPerformance("data/Problem01.txt", 1000, 1000);
   //QRJAPerformance(10, 10000);
   //QRJAPerformance(20, 10000);
   //QRJAPerformance(50, 10000);

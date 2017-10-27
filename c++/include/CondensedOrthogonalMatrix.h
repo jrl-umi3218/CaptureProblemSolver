@@ -29,6 +29,12 @@ namespace bms
     /**Empty version*/
     CondensedOrthogonalMatrix() {}
 
+    /** This methods acts exactly as the operator=(), except that it supposes 
+      * (and check by assert) that other will fit in the memory already allocated
+      * to this object.
+      */
+    CondensedOrthogonalMatrix& copyNoAlloc(const CondensedOrthogonalMatrix& other);
+
     Eigen::DenseIndex size() const;
     void reset(bool Ptranspose = false);
     void resize(int n, int kmax, int pmax);
@@ -58,7 +64,29 @@ namespace bms
     std::vector<GivensSequence> sequences_;
     GivensSequence Qh_;
     Eigen::Transpositions<Eigen::Dynamic> transpositions_;
+    Eigen::VectorXi identityTransposition_;
   };
+
+  inline CondensedOrthogonalMatrix& CondensedOrthogonalMatrix::copyNoAlloc(const CondensedOrthogonalMatrix& other)
+  {
+    assert(other.sequences_.size() <= sequences_.size());
+    assert(other.n_ == n_);
+    ptranspose_ = other.ptranspose_;
+    Qh_ = other.Qh_;
+    transpositions_ = other.transpositions_;
+    //we want to keep the preallocated memory, so we just clear the GivensSequences we don't use
+    size_t i;
+    for (i = 0; i < other.sequences_.size(); ++i)
+    {
+      assert(other.sequences_[i].size() <= sequences_[i].capacity());
+      sequences_[i] = other.sequences_[i];
+    }
+    size_t kmax = sequences_.size();
+    for (; i < kmax; ++i)
+      sequences_[i].clear();
+
+    return *this;
+  }
 
   inline Eigen::DenseIndex CondensedOrthogonalMatrix::size() const
   {
