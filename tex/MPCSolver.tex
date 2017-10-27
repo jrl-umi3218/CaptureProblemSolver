@@ -89,9 +89,22 @@ Let's define $H = \left\{x \in \mathbb{R}^n \vert\ l \leq C_Z x \leq u\right\}$,
 \begin{equation}
 L = \BIN 1 & 0 & \ldots & 0 \\ 1 & 1 &\ldots & 0 \\ & & \ddots & \\ 1 & 1 &\ldots & 1\BOUT, \qquad D = \BIN u_1 - l_1 & & 0 \\ & \ddots & \\ 0 & & u_n - l_n\BOUT
 \end{equation}
-and $Z = Ll + LD \left[0,1\right]^n$. Z is a zonotope. We show that $H = Z$.\newline
-TODO: proof
-\newline
+and $Z = Ll + LD \left[0,1\right]^n$. Z is a zonotope. We show that $H = Z$.
+\begin{proof}
+    Let $x \in Z$ and $i \in \{ 1, \ldots, n\}$. Then,
+    $ x_i = \sum_{j=1}^i l_j (1 - \alpha_j) + \alpha_j u_j $
+    where $\forall j, 0 \leq \alpha_j \leq 1$. We verify that:
+    \begin{align}
+        \label{eqCx1} (C_Z x)_1 & = x_1 = l_1 (1 - \alpha_1) + \alpha_1 u_1 \in [l_1, u_1] \\
+        \label{eqCx2} (C_Z x)_i & = x_i - x_{i-1} = l_i (1 - \alpha_i) + \alpha_i u_i \in
+        [l_i, u_i] 
+    \end{align}
+    Thus, $Z \subseteq H$. The converse inclusion follows by defining, for
+    $x\in H$, $\alpha_i = \frac{(C_Z x)_i - l_i}{u_i - l_i}$. We have $\alpha_i
+    \in [0, 1]$ by definition of $H$ and $x_i = \sum_{j=1}^i l_j (1 - \alpha_j)
+    + \alpha_j u_j$ by induction over Equations~\eqref{eqCx1}--\eqref{eqCx2},
+    so that $x \in Z$ and $H \subseteq Z$. 
+\end{proof}
 The constraints~(\ref{eq:feasibility}) are thus a zonotope cut by zero to two ``horizontal'' hyperplanes.
 Note that, alternatively, $Z = Ll + L \mathcal{B}$ where $\mathcal{B}$ is the box defined by $l$ and $u$.
 
