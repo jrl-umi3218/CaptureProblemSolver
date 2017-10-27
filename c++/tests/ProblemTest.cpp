@@ -27,20 +27,3 @@ BOOST_AUTO_TEST_CASE(BoundenessConstraintTest)
   BOOST_CHECK(abs(y + 1.495) <= 1e-15);
   BOOST_CHECK(grad.isApprox(grad0, 1e-15));
 }
-
-BOOST_AUTO_TEST_CASE(testFeasibilitySQP)
-{
-  RawProblem raw;
-  std::string base = TESTS_DIR;
-  raw.read(base + "/data/Problem01.txt");
-
-  Problem pb(raw);
-  SQP sqp(static_cast<int>(raw.delta.size()));
-
-  sqp.solveFeasibility(pb);
-
-  double c;
-  pb.nonLinearConstraint().compute(c, sqp.x());
-  BOOST_CHECK(pb.linearConstraints().checkPrimal(sqp.x()));
-  BOOST_CHECK(std::abs(c) <= 1e-7);
-}

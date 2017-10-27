@@ -22,12 +22,15 @@ addUnitTest(LeastSquareTest)
 addUnitTest(LinearConstraintsTest)
 addUnitTest(ProblemTest)
 addUnitTest(ObjectiveTest)
+addUnitTest(SQPTest SQPTestCommon.h SQPTestCommon.cpp)
 
 set(TESTSOURCES
-    main.cpp
+  main.cpp
+  SQPTestCommon.cpp
 )
 
 set(TESTHEADERS
+  SQPTestCommon.h
 )
 
 add_executable(main ${TESTSOURCES} ${TESTHEADERS})
