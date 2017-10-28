@@ -29,7 +29,7 @@ namespace bms
     for (Eigen::DenseIndex i = 0; i < m-1; ++i)
     {
       Q.emplace_back(M, i, i);
-      Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).rightCols(n-i));
+      Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).rightCols(n-i));
     }
     if (m<=n)
       return abs(M(m - 1, m - 1)) > thresh;
@@ -59,17 +59,17 @@ namespace bms
       for (Eigen::DenseIndex i = 0; i < p; ++i)
       {
         Q.emplace_back(M, i, i);
-        Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 3>(i, i), condensed_t());
+        Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).template block<2, 3>(i, i), condensed_t());
       }
       for (Eigen::DenseIndex i = p; i < m - 1; ++i)
       {
         Q.emplace_back(M, i, i);
         if (i+2 == n)
-          Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 2>(i, i), condensed_t());
+          Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).template block<2, 2>(i, i), condensed_t());
         else if (i+3<=n)
-          Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 3>(i, i), condensed_t());
+          Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).template block<2, 3>(i, i), condensed_t());
         else //i+1==n
-          Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 1>(i, i), condensed_t());
+          Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).template block<2, 1>(i, i), condensed_t());
       }
       
       return abs(M(p + 1, p + 1)) > thresh;
@@ -82,11 +82,11 @@ namespace bms
         if (m==1)
           return abs(M(0, 0))> thresh;
         Q.emplace_back(M, 0, 0);
-        Q.back().applyTo(const_cast<MatrixBase<Derived>&>(M).block<2, 1>(0, 0), condensed_t());
+        Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).template block<2, 1>(0, 0), condensed_t());
         return abs(M(0,0))> thresh;
       }
       // for m==1, we do nothing
-      return M.lpNorm<Eigen::Infinity>() > thresh;
+      return M.template lpNorm<Eigen::Infinity>() > thresh;
     }
   }
 
@@ -165,18 +165,18 @@ namespace bms
     if (variant)
       ek = M(n - 1, n - 1) + M(n - 2, n - 1);
 
-    e.head(n - 1) = M.diagonal<-1>();
+    e.template head(n - 1) = M.template diagonal<-1>();
     e(n - 1) = -ek;
     c1.array() = (d.array() - 1)*e.head(n - 1).array();
     c2.array() = d.array()*e.tail(n-1).array();
     c1.array() *= l.array();
     c2.array() *= l.array();
 
-    const_cast<Eigen::MatrixBase<Derived>&>(M).diagonal<-1>().setZero();
+    const_cast<Eigen::MatrixBase<Derived>&>(M).template diagonal<-1>().setZero();
     const_cast<Eigen::MatrixBase<Derived>&>(M).diagonal().head(n - 1) = c1;
     const_cast<Eigen::MatrixBase<Derived>&>(M)(n - 1, n - 1) = ek / sqrt(n);
-    const_cast<Eigen::MatrixBase<Derived>&>(M).diagonal<1>() = -c1 - c2;
-    const_cast<Eigen::MatrixBase<Derived>&>(M).diagonal<2>() = c2.head(n - 2);
+    const_cast<Eigen::MatrixBase<Derived>&>(M).template diagonal<1>() = -c1 - c2;
+    const_cast<Eigen::MatrixBase<Derived>&>(M).template diagonal<2>() = c2.head(n - 2);
 
     Q.clear();
     Q.reserve(n - 1);
@@ -235,18 +235,18 @@ namespace bms
       case EndType::Case1:
       case EndType::Case2:
         R.diagonal() = c1;
-        R.diagonal<1>() = -c1.head(n - 1) - c2.head(n - 1);
-        R.diagonal<2>() = c2.head(n-2);
+        R.template diagonal<1>() = -c1.head(n - 1) - c2.head(n - 1);
+        R.template diagonal<2>() = c2.head(n-2);
         break;
       case EndType::Case3:
         R.diagonal() = c1;
-        R.diagonal<1>() = -c1 - c2;
-        R.diagonal<2>() = c2.head(n-1);
+        R.template diagonal<1>() = -c1 - c2;
+        R.template diagonal<2>() = c2.head(n-1);
         break;
       case EndType::Case4:
         R.topRows(n).diagonal() = c1;
-        R.topRows(n).diagonal<1>() = -c1 - c2;
-        R.topRows(n).diagonal<2>() = c2.head(n - 1);
+        R.topRows(n).template diagonal<1>() = -c1 - c2;
+        R.topRows(n).template diagonal<2>() = c2.head(n - 1);
         break;
       }
     }

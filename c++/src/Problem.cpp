@@ -99,11 +99,13 @@ namespace bms
         auto i = line.find("=");
         if (i != std::string::npos && i>0)
         {
-          std::string token = trim(line.substr(0, i));
+          std::string substr = line.substr(0, i);
+          std::string token = trim(substr);
           auto j = line.find(";", i + 1);
           if (j != std::string::npos)
           {
-            std::string value = trim(line.substr(i + 1, j - i - 1));
+            substr = line.substr(i + 1, j - i - 1);
+            std::string value = trim(substr);
             table[token] = value;
           }
           else

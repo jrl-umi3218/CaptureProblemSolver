@@ -24,14 +24,14 @@ namespace
     Eigen::MatrixBase<Derived1>& Y = const_cast<Eigen::MatrixBase<Derived1>&>(Y_);
     assert(Y.rows() == k && Y.cols() == X.cols());
     if (k == 1)
-      Y = X.bottomRows<1>();
+      Y = X.template bottomRows<1>();
     else
     {
       auto n = X.rows();
       Y.row(0) = -X.row(n - k);
       for (DenseIndex i = 1; i < k - 1; ++i)
         Y.row(i) = Y.row(i - 1) - X.row(n - k + i);
-      Y.row(k - 1) = -Y.row(k - 2) + X.bottomRows<1>();
+      Y.row(k - 1) = -Y.row(k - 2) + X.template bottomRows<1>();
     }
   }
 
