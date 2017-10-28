@@ -165,7 +165,7 @@ namespace bms
     if (variant)
       ek = M(n - 1, n - 1) + M(n - 2, n - 1);
 
-    e.template head(n - 1) = M.template diagonal<-1>();
+    e.head(n - 1) = M.template diagonal<-1>();
     e(n - 1) = -ek;
     c1.array() = (d.array() - 1)*e.head(n - 1).array();
     c2.array() = d.array()*e.tail(n-1).array();
