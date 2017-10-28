@@ -18,6 +18,7 @@
 %\newcommand{\mdiff1}[1]{\frac{\partial}{\partial #1}}
 \newcommand{\diff}[2]{\dfrac{\partial #1}{\partial #2}}
 \newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\SC}[1]{\begin{flushleft}{\color{red} SC: #1}\end{flushleft}}
 
 \DeclareMathOperator*{\minimize}{\min.}
 \newcommand{\st}{\mbox{s.t.}}
@@ -45,11 +46,18 @@ where $\alpha$ is either $0$ or positive and, by convention, $\Phi_0 = 0$. Lower
 The idea we want to explore here is to pass the equality constraint in the objective as a weighted squared norm. Denoting $f$ the function such that the non-linear constraint writes $f(\Phi) = 0$, we thus transform the above problem into
 \begin{align}
   \minimize_{\Phi \in \mathbb{R}^n}\ & \left\| J \Phi \right\|^2 + w^2 \left\|f\right\|^2\\
-  \st \ & \sum_{j=0}^{n-1} \frac{a_j}{\sqrt{\Phi_{j+1}} + \sqrt{\Phi}_j} - \alpha \sqrt{\Phi_n} = b \nonumber\\
+  \st \ 
+    % & \sum_{j=0}^{n-1} \frac{a_j}{\sqrt{\Phi_{j+1}} + \sqrt{\Phi}_j} - \alpha \sqrt{\Phi_n} = b \nonumber\\
         & l_j \leq \Phi_j - \Phi_{j-1} \leq u_j, \quad j=1..n \nonumber\\
         & \Phi_n^- \leq \Phi_n \leq \Phi_n^+ \nonumber
 \end{align}
-This is an inexact method, but by paying attention to the order of operations we can have $w$ high. The above problem is a non-linear least square optimization with linear constraints. It can be solved with a SQP. The idea is that the underlying QP is a linear least square that we can solve much faster that usual by taking advantage of the form of the matrix $J$ and of the constraints.
+\SC{commented the nonlinear equality constraint}
+This is an inexact method, but by paying attention to the order of operations
+we can have $w$ high. The above problem is a non-linear least square
+optimization with linear constraints. It can be solved with an SQP. The idea is
+that the underlying QP is a linear least square that we can solve much faster
+than usual by taking advantage of the form of the matrix $J$ and of the
+constraints.
 
 \section{Linear constraints}
 We focus here on the constraints
@@ -77,13 +85,26 @@ The whole linear constraints writes
 where $e_n$ is the $n$-th column of the $n\times n$ identity matrix.
 
 \subsection{Expression as a zonope}
-Let's define $H = \left\{x \in \mathbb{R}^n \vert\ l \leq C_Z \leq u\right\}$, 
+Let's define $H = \left\{x \in \mathbb{R}^n \vert\ l \leq C_Z x \leq u\right\}$, 
 \begin{equation}
 L = \BIN 1 & 0 & \ldots & 0 \\ 1 & 1 &\ldots & 0 \\ & & \ddots & \\ 1 & 1 &\ldots & 1\BOUT, \qquad D = \BIN u_1 - l_1 & & 0 \\ & \ddots & \\ 0 & & u_n - l_n\BOUT
 \end{equation}
-and $Z = Ll + LD \left[0,1\right]^n$. Z is a zonotope. We show that $H = Z$.\newline
-TODO: proof
-\newline
+and $Z = Ll + LD \left[0,1\right]^n$. Z is a zonotope. We show that $H = Z$.
+\begin{proof}
+    Let $x \in Z$ and $i \in \{ 1, \ldots, n\}$. Then,
+    $ x_i = \sum_{j=1}^i l_j (1 - \alpha_j) + \alpha_j u_j $
+    where $\forall j, 0 \leq \alpha_j \leq 1$. We verify that:
+    \begin{align}
+        \label{eqCx1} (C_Z x)_1 & = x_1 = l_1 (1 - \alpha_1) + \alpha_1 u_1 \in [l_1, u_1] \\
+        \label{eqCx2} (C_Z x)_i & = x_i - x_{i-1} = l_i (1 - \alpha_i) + \alpha_i u_i \in
+        [l_i, u_i] 
+    \end{align}
+    Thus, $Z \subseteq H$. The converse inclusion follows by defining, for
+    $x\in H$, $\alpha_i = \frac{(C_Z x)_i - l_i}{u_i - l_i}$. We have $\alpha_i
+    \in [0, 1]$ by definition of $H$ and $x_i = \sum_{j=1}^i l_j (1 - \alpha_j)
+    + \alpha_j u_j$ by induction over Equations~\eqref{eqCx1}--\eqref{eqCx2},
+    so that $x \in Z$ and $H \subseteq Z$. 
+\end{proof}
 The constraints~(\ref{eq:feasibility}) are thus a zonotope cut by zero to two ``horizontal'' hyperplanes.
 Note that, alternatively, $Z = Ll + L \mathcal{B}$ where $\mathcal{B}$ is the box defined by $l$ and $u$.
 
@@ -230,9 +251,10 @@ One way to check the feasibility of the problem~(\ref{eq:problem}) is to solve t
 \end{align}
 where
 \begin{equation}
-  c(x) = \sum_{j=0}^{n-1} \frac{a_j}{\sqrt{x_{j+1}} + \sqrt{x_j}} - \alpha \sqrt{x_n} = b
+  c(x) = \sum_{j=0}^{n-1} \frac{a_j}{\sqrt{x_{j+1}} + \sqrt{x_j}} - \alpha
+    \sqrt{x_n} - b
 \end{equation}
-This can be done by solving a SQP with a Gauss-Newton approximation of the objective's Hessian matrix. If at the solution $c(x^*) = 0$, the problem is feasible and $x^*$ is a feasible point.
+This can be done by solving an SQP with a Gauss-Newton approximation of the objective's Hessian matrix. If at the solution $c(x^*) = 0$, the problem is feasible and $x^*$ is a feasible point.
 
 The SQP in itself does not deserve a particular treatment: it can be a simple adaptation of the line-search SQP algorithm found in~\cite{nocedal:book:2006} (Algorithm 18.3), with the initial point taken as described in the previous section (and initial Lagrange multiplier thus set to $0$). Since all constraints are linear, the merit function is simply our objective function and there is no need for a penalty parameter. The only refinement is the use of double sided constraints, so that the KKT conditions checking has to be modified (see~\cite{brossette:phd:2016}, section 4.3.5).
 
