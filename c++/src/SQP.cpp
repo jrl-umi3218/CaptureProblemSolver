@@ -67,7 +67,7 @@ namespace bms
     lambda_.setZero();
 
     //main loop
-    for (int k = 0; k < maxIter_; ++k)
+    for (k_ = 0; k_ < maxIter_; ++k_)
     {
       double f;
       nlc.compute(f, j_, x_);
@@ -85,7 +85,8 @@ namespace bms
       shiftedLC_ = lc.shift(x_, true);
       previousActiveSet_ = currentActiveSet_;
       shiftedLC_.setActivationStatus(currentActiveSet_);
-      ls_.solve(obj, Jx_, j_, f, shiftedLC_);
+      if (ls_.solve(obj, Jx_, j_, f, shiftedLC_) != SolverStatus::Converge)
+        return SolverStatus::Fail;
       currentActiveSet_ = shiftedLC_.activationStatus();
       const auto& p = ls_.x();
       const auto& pl = ls_.lambda();
@@ -184,6 +185,11 @@ namespace bms
   const std::vector<Activation>& SQP::activeSet() const
   {
     return currentActiveSet_;
+  }
+
+  const int SQP::numberOfIterations() const
+  {
+    return k_;
   }
 
   bool SQP::checkKKT(const Eigen::VectorXd& x, const Eigen::VectorXd& lambda, double f, const Eigen::VectorXd& g, 
