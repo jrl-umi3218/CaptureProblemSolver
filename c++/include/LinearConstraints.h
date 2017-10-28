@@ -221,7 +221,7 @@ namespace bms
 
     Y.topRows(n_) = X;
     Y.middleRows(1, n_ - 1) -= X.topRows(n_ - 1);
-    Y.bottomRows<1>() = X.bottomRows<1>();
+    Y.template bottomRows<1>() = X.template bottomRows<1>();
   }
 
   template<typename Derived1, typename Derived2>
@@ -233,6 +233,6 @@ namespace bms
 
     Y = X.topRows(n_);
     Y.topRows(n_ - 1) -= X.middleRows(1, n_ - 1);
-    Y.bottomRows<1>() += X.bottomRows<1>();
+    Y.template bottomRows<1>() += X.template bottomRows<1>();
   }
 }
