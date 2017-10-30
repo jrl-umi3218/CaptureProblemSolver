@@ -191,10 +191,10 @@ namespace bms
     auto n = e.size();
     assert(n > 0);
     assert(n <= c1_.size() && "allocated size is not sufficient");
-    assert(endType == EndType::Case1 && M.rows() == n + 1 && M.cols() == n + 0
-        || endType == EndType::Case2 && M.rows() == n + 0 && M.cols() == n + 0
-        || endType == EndType::Case3 && M.rows() == n + 0 && M.cols() == n + 1
-        || endType == EndType::Case4 && M.rows() == n + 1 && M.cols() == n + 1);
+    assert((endType == EndType::Case1 && M.rows() == n + 1 && M.cols() == n + 0)
+        || (endType == EndType::Case2 && M.rows() == n + 0 && M.cols() == n + 0)
+        || (endType == EndType::Case3 && M.rows() == n + 0 && M.cols() == n + 1)
+        || (endType == EndType::Case4 && M.rows() == n + 1 && M.cols() == n + 1));
 
     auto& R = const_cast<Eigen::MatrixBase<Derived>&>(M);
     R.setZero();
