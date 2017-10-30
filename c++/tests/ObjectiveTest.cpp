@@ -43,7 +43,7 @@ int nact(const std::vector<bool>& act)
 bool isBandMatrix(const MatrixXd& M, DenseIndex p, DenseIndex q, double prec = 1e-15)
 {
   auto m = M.rows();
-  auto n = M.cols();
+  // auto n = M.cols();
 
   bool b = true;
   for (DenseIndex i = p + 1; i < m && b; ++i)
