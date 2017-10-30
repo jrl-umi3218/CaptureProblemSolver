@@ -187,7 +187,7 @@ namespace bms
     return currentActiveSet_;
   }
 
-  const int SQP::numberOfIterations() const
+  int SQP::numberOfIterations() const
   {
     return k_;
   }

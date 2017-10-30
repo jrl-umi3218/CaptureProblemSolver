@@ -32,9 +32,9 @@ namespace bms
       Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).rightCols(n-i));
     }
     if (m<=n)
-      return abs(M(m - 1, m - 1)) > thresh;
+      return std::abs(M(m - 1, m - 1)) > thresh;
     else
-      return abs(M(n - 1, n - 1)) > thresh;
+      return std::abs(M(n - 1, n - 1)) > thresh;
   }
 
   /** Performs a QR in place of the mxn tridiagonal matrix M. Supposes n>=m-1.
@@ -72,7 +72,7 @@ namespace bms
           Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).template block<2, 1>(i, i), condensed_t());
       }
       
-      return abs(M(p + 1, p + 1)) > thresh;
+      return std::abs(M(p + 1, p + 1)) > thresh;
     }
     else
     {
@@ -80,10 +80,10 @@ namespace bms
       if (n == 1)
       {
         if (m==1)
-          return abs(M(0, 0))> thresh;
+          return std::abs(M(0, 0))> thresh;
         Q.emplace_back(M, 0, 0);
         Q.back().applyTo(const_cast<Eigen::MatrixBase<Derived>&>(M).template block<2, 1>(0, 0), condensed_t());
-        return abs(M(0,0))> thresh;
+        return std::abs(M(0,0))> thresh;
       }
       // for m==1, we do nothing
       return M.template lpNorm<Eigen::Infinity>() > thresh;
@@ -174,7 +174,7 @@ namespace bms
 
     const_cast<Eigen::MatrixBase<Derived>&>(M).template diagonal<-1>().setZero();
     const_cast<Eigen::MatrixBase<Derived>&>(M).diagonal().head(n - 1) = c1;
-    const_cast<Eigen::MatrixBase<Derived>&>(M)(n - 1, n - 1) = ek / sqrt(n);
+    const_cast<Eigen::MatrixBase<Derived>&>(M)(n - 1, n - 1) = ek / sqrt(double(n));
     const_cast<Eigen::MatrixBase<Derived>&>(M).template diagonal<1>() = -c1 - c2;
     const_cast<Eigen::MatrixBase<Derived>&>(M).template diagonal<2>() = c2.head(n - 2);
 
@@ -221,7 +221,7 @@ namespace bms
       if (endType == EndType::Case2 || endType == EndType::Case3)
       {
         d(n - 1) = 0;
-        l(n - 1) = 1 / sqrt(n);
+        l(n - 1) = 1 / sqrt(double(n));
       }
 
       c1.array() = (d.array() - 1)*e.array();

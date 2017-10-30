@@ -24,6 +24,6 @@ BOOST_AUTO_TEST_CASE(BoundenessConstraintTest)
   VectorXd grad(10);
   bc.compute(y, grad, x);
 
-  BOOST_CHECK(abs(y + 1.495) <= 1e-15);
+  BOOST_CHECK(std::abs(y + 1.495) <= 1e-15);
   BOOST_CHECK(grad.isApprox(grad0, 1e-15));
 }

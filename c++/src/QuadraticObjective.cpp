@@ -115,7 +115,7 @@ namespace bms
     R.setZero();
     //permutation management
     Index up = 0;
-    const int reduce = -1;
+    //const int reduce = -1;
 
     if (nact == n_) return;
 
@@ -241,7 +241,7 @@ namespace bms
     {
       int n = static_cast<int>(n_);
       precomputations_.resize(1 << (n + 1));
-      CondensedOrthogonalMatrix Qi(n, n, 2 * n_, true);
+      CondensedOrthogonalMatrix Qi(n, n, 2 * n, true);
       for (int i = 0; i < (1 << (n_ + 1)) - 1; ++i)
       {
         Qi.reset(true);

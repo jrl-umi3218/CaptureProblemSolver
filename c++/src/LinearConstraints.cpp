@@ -40,14 +40,14 @@ namespace
   {
     Eigen::MatrixBase<Derived1>& Y = const_cast<Eigen::MatrixBase<Derived1>&>(Y_);
     assert(Y.rows() == k - 1 && Y.cols() == X.cols());
-    double d = 1. / k;
+    double d = 1. / double(k);
     for (DenseIndex i = 0; i < k - 1; ++i)
     {
-      double m = (i + 1 - k)*d;
+      double m = double(i + 1 - k)*d;
       Y.row(i) = m * X.row(s);
       for (DenseIndex j = 1; j < i + 1; ++j)
         Y.row(i) += m * X.row(s + j);
-      m = (i+1)*d;
+      m = double(i+1)*d;
       for (DenseIndex j = i + 1; j < k; ++j)
         Y.row(i) += m*X.row(s + j);
     }
@@ -172,7 +172,7 @@ namespace bms
     }
     t -= s;
 
-    if (std::abs(t) > n_*eps)
+    if (std::abs(t) > double(n_)*eps)
     {
       double al = (actl_[n_] - s) / t;
       double au = (actu_[n_] - s) / t;

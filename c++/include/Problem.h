@@ -45,8 +45,8 @@ namespace bms
 
   private:
     LeastSquareObjective lso_;
-    BoundenessConstraint bc_;
     LinearConstraints lc_;
+    BoundenessConstraint bc_;
 
     RawProblem raw_;
   };

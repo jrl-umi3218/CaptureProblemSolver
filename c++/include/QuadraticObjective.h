@@ -86,11 +86,11 @@ namespace bms
     Eigen::DenseIndex n_;
     Eigen::VectorXd delta_;
     Eigen::VectorXd d_;     // 1/delta
-    bool precomputed_;
 
     //computation data
     mutable Eigen::VectorXd e_;
     SpecialQR qr_;
+    bool precomputed_;
 
     //precomputations
     std::vector<Precomputation> precomputations_;
