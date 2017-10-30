@@ -2,6 +2,7 @@
 #include <Eigen/Jacobi>
 #include <Eigen/QR>
 
+#include <fstream>
 #include <iostream>
 #include <chrono>
 
@@ -12,21 +13,10 @@
 #include "QuadraticObjective.h"
 #include "SQP.h"
 #include "SQPTestCommon.h"
+#include "toMatlab.h"
 
 using namespace Eigen;
 using namespace bms;
-
-void exampleMatrices(int n)
-{
-  VectorXd d = VectorXd::Random(n).cwiseAbs();
-
-  std::cout << "J=\n" << buildJ(d) << std::endl;
-  std::cout << "J0=\n" << buildJ0(d) << std::endl;
-  std::cout << "Jj=\n" << buildJj(d) << std::endl;
-  std::cout << "J{p-1}=\n" << buildJpm1(d) << std::endl;
-  std::cout << "Cz=\n" << buildCZ(n) << std::endl;
-  std::cout << "C=\n" << buildC(n) << std::endl;
-}
 
 /** n: size of matrices, N: number of tests*/
 void QRPerformances(int n, const int N)
@@ -281,36 +271,6 @@ void QRJAPerformance(int n, const int N)
   std::cout << acc << std::endl;
 }
 
-void readTest(const std::string& filepath)
-{
-  RawProblem raw;
-  std::string base = TESTS_DIR;
-  raw.read(base + "/" + filepath);
-}
-
-void testSQP(const std::string& filepath)
-{
-  RawProblem raw;
-  std::string base = TESTS_DIR;
-  raw.read(base + "/" + filepath);
-
-  Problem pb(raw);
-  if (raw.delta.size() <= 15)
-    pb.objective().precompute(1);
-  SQP sqp(static_cast<int>(raw.delta.size()));
-
-  sqp.solve(pb);
-  std::cout << "  x = " << sqp.x().transpose() << std::endl;
-  std::cout << "Phi = " << raw.Phi_.tail(raw.Phi_.size()-1).transpose() << std::endl;
-  
-  double fx;
-  double fphi;
-  pb.nonLinearConstraint().compute(fx, sqp.x());
-  pb.nonLinearConstraint().compute(fphi, raw.Phi_.tail(raw.Phi_.size() - 1));
-  std::cout << "  f(x) = " << fx << std::endl;
-  std::cout << "f(Phi) = " << fphi << std::endl;
-}
-
 void SQPPerformance(const std::string& filepath, int n, const int N)
 {
   const int precompMax = 20;
@@ -389,9 +349,49 @@ void SQPPerformance(const std::string& filepath, int n, const int N)
   std::cout << d << std::endl;
 }
 
+void mapFeasibleInputs()
+{
+  RawProblem raw;
+  std::string base = TESTS_DIR;
+  raw.read(base + "/data/Problem01.txt");
+
+  Problem pb(raw);
+  SQP sqp(static_cast<int>(raw.delta.size()));
+  std::vector<Vector3d> points;
+  points.reserve(500000);
+
+  for (double zf = 0.0; zf <= 2; zf += 0.04)
+  {
+    for (double zi = 0.0; zi <= 2; zi += 0.04)
+    {
+      std::cout << zi << std::endl;
+      for (double dzi = -5; dzi <= 5; dzi += 0.2)
+      {
+        pb.set_zi(zi);
+        pb.set_dzi(dzi);
+        pb.set_zf(zf);
+        auto s = sqp.solveFeasibility(pb);
+        if (s == SolverStatus::Converge)
+        {
+          double v;
+          pb.nonLinearConstraint().compute(v, sqp.x());
+          if (std::abs(v) < 1e-5)
+            points.push_back({ zi,dzi,zf });
+        }
+      }
+    }
+  }
+
+  Eigen::MatrixXd P(3, static_cast<DenseIndex>(points.size()));
+  for (DenseIndex i = 0; i < P.cols(); ++i)
+    P.col(i) = points[static_cast<size_t>(i)];
+
+  std::ofstream aof("points.m");
+  aof << "P = " << (toMatlab)P << ";" << std::endl;
+}
+
 int main()
 {
-  //exampleMatrices(10);
   //QRPerformances(10, 10000);
   //QRPerformances(20, 10000);
   //QRPerformances(100, 1000);
@@ -401,28 +401,25 @@ int main()
   //LSPerformance(200, 1000);
   //LSPerformance(500, 1000);
 
-  //readTest("data/Problem01.txt");
-
-  //testSQP("data/Problem01.txt");
-  //testSQP("data/Problem02.txt");
-  //testSQP("data/Problem03.txt");
   //SQPPerformance("data/Problem01.txt", 25000);
   //SQPPerformance("data/Problem02.txt", 25000);
   //SQPPerformance("data/Problem03.txt", 25000);
 
-  SQPPerformance("data/Problem01.txt", -1, 5000);
-  SQPPerformance("data/Problem01.txt", 20, 5000);
-  SQPPerformance("data/Problem01.txt", 50, 5000);
-  SQPPerformance("data/Problem01.txt", 100, 5000);
-  SQPPerformance("data/Problem01.txt", 200, 1000);
-  SQPPerformance("data/Problem01.txt", 500, 1000);
-  SQPPerformance("data/Problem01.txt", 1000, 1000);
+  //SQPPerformance("data/Problem01.txt", -1, 5000);
+  //SQPPerformance("data/Problem01.txt", 20, 5000);
+  //SQPPerformance("data/Problem01.txt", 50, 5000);
+  //SQPPerformance("data/Problem01.txt", 100, 5000);
+  //SQPPerformance("data/Problem01.txt", 200, 1000);
+  //SQPPerformance("data/Problem01.txt", 500, 1000);
+  //SQPPerformance("data/Problem01.txt", 1000, 1000);
   //QRJAPerformance(10, 10000);
   //QRJAPerformance(20, 10000);
   //QRJAPerformance(50, 10000);
   //QRJAPerformance(100, 10000);
   //QRJAPerformance(200, 1000);
   //QRJAPerformance(500, 1000);
+
+  mapFeasibleInputs();
 
 #ifdef WIN32
   system("pause");

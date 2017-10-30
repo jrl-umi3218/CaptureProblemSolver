@@ -170,4 +170,87 @@ namespace bms
     return lc_;
   }
 
+  void Problem::set_zf(double zf)
+  {
+    raw_.zf = zf;
+    computeAndSetBounds0();
+  }
+
+  void Problem::set_zi(double zi)
+  {
+    raw_.zi = zi;
+    computeAndSetAlpha();
+  }
+
+  void Problem::set_dzi(double dzi)
+  {
+    raw_.dzi = dzi;
+    computeAndSetb();
+  }
+
+  void Problem::set_lambda_min(double lmin)
+  {
+    raw_.lmin = lmin;
+    computeAndSetZonotopeBounds();
+  }
+
+  void Problem::set_lambda_max(double lmax)
+  {
+    raw_.lmax = lmax;
+    computeAndSetZonotopeBounds();
+  }
+
+  void Problem::set_lambdas(double lmin, double lmax)
+  {
+    raw_.lmin = lmin;
+    raw_.lmax = lmax;
+    computeAndSetZonotopeBounds();
+  }
+
+  void Problem::set_wi_min(double wi_min)
+  {
+    raw_.wi_min = wi_min;
+    computeAndSetBoundsN();
+  }
+
+  void Problem::set_wi_max(double wi_max)
+  {
+    raw_.wi_max = wi_max;
+    computeAndSetBoundsN();
+  }
+
+  void Problem::set_wi(double wi_min, double wi_max)
+  {
+    raw_.wi_min = wi_min;
+    raw_.wi_max = wi_max;
+    computeAndSetBoundsN();
+  }
+
+  void Problem::computeAndSetBounds0()
+  {
+    double d = raw_.delta[0] * raw_.g / raw_.zf;
+    lc_.changeBounds(0, d, d);
+  }
+
+  void Problem::computeAndSetZonotopeBounds()
+  {
+    lc_.changeBounds(raw_.lmin*raw_.delta, raw_.lmax*raw_.delta);
+    computeAndSetBounds0();
+  }
+
+  void Problem::computeAndSetBoundsN()
+  {
+    lc_.changeBounds(raw_.delta.size(), raw_.wi_min*raw_.wi_min, raw_.wi_max*raw_.wi_max);
+  }
+
+  void Problem::computeAndSetAlpha()
+  {
+    bc_.setAlpha(raw_.zi / raw_.g);
+  }
+
+  void Problem::computeAndSetb()
+  {
+    bc_.setb(raw_.dzi / raw_.g);
+  }
+
 }

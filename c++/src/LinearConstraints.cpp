@@ -319,6 +319,16 @@ namespace bms
     u_[i] = u;
     if (l == u)
       activate(static_cast<int>(i), Activation::Equal);
+    else
+      deactivate(static_cast<int>(i));
+  }
+
+  void LinearConstraints::changeBounds(const VectorConstRef l, const VectorConstRef u)
+  {
+    assert(l.size() == n_ || l.size() == n_ + 1);
+    assert(l.size() == u.size());
+    for (DenseIndex i = 0; i < l.size(); ++i)
+      changeBounds(i, l[i], u[i]);
   }
 
   void LinearConstraints::applyNullSpaceOnTheLeft(MatrixRef Y, const MatrixConstRef& X) const

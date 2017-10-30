@@ -16,6 +16,9 @@ namespace bms
     void compute(double& val, const VectorConstRef& x) const;
     void compute(double& val, VectorRef grad, const VectorConstRef& x) const;
 
+    void setAlpha(double alpha);
+    void setb(double b);
+
   private:
     Eigen::DenseIndex n_;
     double alpha_;
