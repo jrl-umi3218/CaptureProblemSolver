@@ -30,4 +30,14 @@ namespace bms
     }
     grad[n_ - 1] -= alpha_ / (2 * y_[n_]);
   }
+
+  void BoundenessConstraint::setAlpha(double alpha)
+  {
+    alpha_ = alpha;
+  }
+
+  void BoundenessConstraint::setb(double b)
+  {
+    b_ = b;
+  }
 }

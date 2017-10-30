@@ -103,6 +103,7 @@ namespace bms
     Eigen::DenseIndex numberOfActiveConstraints() const;
 
     void changeBounds(Eigen::DenseIndex i, double l, double u);
+    void changeBounds(const VectorConstRef l, const VectorConstRef u);
 
     /** Y = X*N_A */
     template<typename Derived1, typename Derived2>
