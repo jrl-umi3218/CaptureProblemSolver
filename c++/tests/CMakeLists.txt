@@ -1,5 +1,3 @@
-set(BOOST_COMPONENTS unit_test_framework timer system)
-search_for_boost()
 add_definitions(-DBOOST_TEST_DYN_LINK)
 include_directories(${Boost_INCLUDE_DIRS})
 if(WIN32)

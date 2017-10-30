@@ -19,9 +19,20 @@ if(NOT WIN32)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-sign-conversion -std=c++0x -pedantic")
 endif()
 
+option(PYTHON_BINDINGS "Generate Python bindings" ON)
+
 #########################
 # External dependencies
 SEARCH_FOR_EIGEN()
+
+SET(BOOST_COMPONENTS python system)
+IF(PYTHON_BINDINGS)
+    set(BOOST_COMPONENTS python unit_test_framework timer system)
+ELSE()
+    set(BOOST_COMPONENTS unit_test_framework timer system)
+ENDIF()
+
+SEARCH_FOR_BOOST()
 
 #########################
 
@@ -36,5 +47,11 @@ add_subdirectory(tests)
 
 # Add dependency towards the library in the pkg-config file.
 PKG_CONFIG_APPEND_LIBS(BalanceMPCSolver)
+
+IF(PYTHON_BINDINGS)
+    # Add dependency towards the python bindings in the pkg-config file.
+    add_subdirectory(bindings)
+    PKG_CONFIG_APPEND_LIBS(PyBalanceMPCSolver)
+ENDIF()
 
 SETUP_PROJECT_FINALIZE()
