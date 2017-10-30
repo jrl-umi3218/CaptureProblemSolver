@@ -9,11 +9,11 @@ configure_file(__init__.py ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}/__init__.p
 set(PYBMS_SOURCES PyBalanceMPCSolver.cpp)
 
 set(BMS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../include)
-set(PYBMS_HEADERS ${BMS_INCLUDE_DIR}/bms_api.h)
+set(PYBMS_HEADERS converters.h ${BMS_INCLUDE_DIR}/bms_api.h)
 
 add_library(PyBalanceMPCSolver SHARED ${PYBMS_SOURCES} ${PYBMS_HEADERS})
 
-target_link_libraries(PyBalanceMPCSolver BalanceMPCSolver)
+target_link_libraries(PyBalanceMPCSolver BalanceMPCSolver boost_numpy)
 TARGET_LINK_BOOST_PYTHON(PyBalanceMPCSolver)
 
 set_target_properties(PyBalanceMPCSolver PROPERTIES PREFIX "")
