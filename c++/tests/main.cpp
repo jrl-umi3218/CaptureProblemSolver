@@ -401,11 +401,7 @@ int main()
   //LSPerformance(200, 1000);
   //LSPerformance(500, 1000);
 
-  //SQPPerformance("data/Problem01.txt", 25000);
-  //SQPPerformance("data/Problem02.txt", 25000);
-  //SQPPerformance("data/Problem03.txt", 25000);
-
-  //SQPPerformance("data/Problem01.txt", -1, 5000);
+  SQPPerformance("data/Problem01.txt", -1, 5000);
   //SQPPerformance("data/Problem01.txt", 20, 5000);
   //SQPPerformance("data/Problem01.txt", 50, 5000);
   //SQPPerformance("data/Problem01.txt", 100, 5000);
@@ -419,7 +415,7 @@ int main()
   //QRJAPerformance(200, 1000);
   //QRJAPerformance(500, 1000);
 
-  mapFeasibleInputs();
+  //mapFeasibleInputs();
 
 #ifdef WIN32
   system("pause");

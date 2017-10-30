@@ -3,7 +3,10 @@
 
 #include "converters.h"
 
+#include "LeastSquare.h"
 #include "Problem.h"
+#include "QuadraticObjective.h"
+#include "SQP.h"
 
 namespace py = boost::python;
 namespace np = boost::python::numpy;
@@ -16,6 +19,28 @@ BOOST_PYTHON_MODULE(PyBalanceMPCSolver)
   pygen::convert<double>(pygen::Converters::Vector);
 
   using namespace bms;
+
+  py::class_<LeastSquare>("LeastSquare", py::init<int>());
+
+  py::class_<LeastSquareObjective>("LeastSquareObjective", py::init<const Eigen::VectorXd&>());
+
+  LeastSquareObjective& (Problem::*pyObjective)() = &Problem::objective;
+  BoundenessConstraint& (Problem::*pyNonLinearConstraint)() = &Problem::nonLinearConstraint;
+  LinearConstraints& (Problem::*pyLinearConstraints)() = &Problem::linearConstraints;
+  py::class_<Problem>("Problem", py::init<RawProblem>())
+    .add_property("size", &Problem::size)
+    .def("linear_constraints", pyLinearConstraints, py::return_internal_reference<>())
+    .def("nonlinear_constraint", pyNonLinearConstraint, py::return_internal_reference<>())
+    .def("objective", pyObjective, py::return_internal_reference<>())
+    .def("set_dzi", &Problem::set_dzi)
+    .def("set_lambda_max", &Problem::set_lambda_max)
+    .def("set_lambda_min", &Problem::set_lambda_min)
+    .def("set_lambdas", &Problem::set_lambdas)
+    .def("set_wi", &Problem::set_wi)
+    .def("set_wi_max", &Problem::set_wi_max)
+    .def("set_wi_min", &Problem::set_wi_min)
+    .def("set_zf", &Problem::set_zf)
+    .def("set_zi", &Problem::set_zi);
 
   py::class_<RawProblem>("RawProblem")
     .def("read", &RawProblem::read)
@@ -37,14 +62,16 @@ BOOST_PYTHON_MODULE(PyBalanceMPCSolver)
     .def_readwrite("dzi", &RawProblem::dzi)
     .def_readwrite("zf", &RawProblem::zf);
 
-  py::class_<Problem>("Problem", py::init<RawProblem>())
-      .def("set_zf", &Problem::set_zf)
-      .def("set_zi", &Problem::set_zi)
-      .def("set_dzi", &Problem::set_dzi)
-      .def("set_lambda_min", &Problem::set_lambda_min)
-      .def("set_lambda_max", &Problem::set_lambda_max)
-      .def("set_lambdas", &Problem::set_lambdas)
-      .def("set_wi_min", &Problem::set_wi_min)
-      .def("set_wi_max", &Problem::set_wi_max)
-      .def("set_wi", &Problem::set_wi);
+  py::enum_<SolverStatus>("SolverStatus")
+    .value("Converge", SolverStatus::Converge)
+    .value("MaxIteration", SolverStatus::MaxIteration)
+    .value("StepTooSmall", SolverStatus::StepTooSmall)
+    .value("NoLinearlyFeasiblePoint", SolverStatus::NoLinearlyFeasiblePoint)
+    .value("Fail", SolverStatus::Fail);
+
+  py::class_<SQP>("SQP", py::init<int>())
+    .add_property("nb_iter", &SQP::numberOfIterations)
+    .def("lambda_", &SQP::lambda, py::return_value_policy<py::copy_const_reference>())
+    .def("solve", &SQP::solve)
+    .def("x", &SQP::x, py::return_value_policy<py::copy_const_reference>());
 }

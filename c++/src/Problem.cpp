@@ -170,6 +170,11 @@ namespace bms
     return lc_;
   }
 
+  Eigen::VectorXd::Index Problem::size() const
+  {
+    return raw_.delta.size();
+  }
+
   void Problem::set_zf(double zf)
   {
     raw_.zf = zf;
