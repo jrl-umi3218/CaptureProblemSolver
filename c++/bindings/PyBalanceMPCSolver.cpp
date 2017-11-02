@@ -53,14 +53,13 @@ BOOST_PYTHON_MODULE(PyBalanceMPCSolver)
           py::return_value_policy<py::copy_non_const_reference>()),
         py::make_setter(&RawProblem::Phi_))
     .def_readwrite("g", &RawProblem::g)
-    .def_readwrite("g", &RawProblem::g)
-    .def_readwrite("lmin", &RawProblem::lmin)
-    .def_readwrite("lmax", &RawProblem::lmax)
-    .def_readwrite("wi_min", &RawProblem::wi_min)
-    .def_readwrite("wi_max", &RawProblem::wi_max)
-    .def_readwrite("zi", &RawProblem::zi)
-    .def_readwrite("dzi", &RawProblem::dzi)
-    .def_readwrite("zf", &RawProblem::zf);
+    .def_readwrite("lambda_min", &RawProblem::lmin)
+    .def_readwrite("lambda_max", &RawProblem::lmax)
+    .def_readwrite("omega_i_min", &RawProblem::wi_min)
+    .def_readwrite("omega_i_max", &RawProblem::wi_max)
+    .def_readwrite("z_bar", &RawProblem::zi)
+    .def_readwrite("zd_bar", &RawProblem::dzi)
+    .def_readwrite("z_f", &RawProblem::zf);
 
   py::enum_<SolverStatus>("SolverStatus")
     .value("Converge", SolverStatus::Converge)

@@ -281,7 +281,7 @@ struct eigen_vector_to_numpy_array {
         auto shape = py::make_tuple(mat.size());
         np::ndarray mOut = np::empty(shape, dt);
 
-        for (unsigned i = 0; i < mat.size(); ++i)
+        for (long int i = 0; i < mat.size(); ++i)
             mOut[i] = mat(i);
 
         return py::incref(mOut.ptr());
@@ -303,8 +303,8 @@ struct eigen_matrix_to_numpy_array {
         auto shape = py::make_tuple(mat.rows(), mat.cols());
         np::ndarray mOut = np::empty(shape, dt);
 
-        for (unsigned i = 0; i < mat.rows(); ++i)
-            for (unsigned j = 0; j < mat.cols(); ++j)
+        for (long int i = 0; i < mat.rows(); ++i)
+            for (long int j = 0; j < mat.cols(); ++j)
                 mOut[i][j] = mat(i, j);
 
         return py::incref(mOut.ptr());
