@@ -10,10 +10,11 @@ namespace bms
 {
   enum class SolverStatus
   {
-    Converge,
-    MaxIteration,
-    StepTooSmall,
-    NoLinearlyFeasiblePoint,
+    Converge,                       /** A solution was found*/
+    MaxIteration,                   /** The maximum number of iteration was reached*/
+    LineSearchFailed,               /** Step in the line search became too small*/
+    NoLinearlyFeasiblePoint,        /** Linear inequality constraints are incompatible*/
+    NumericallyEquivalentIterates,  /** Previous and new iterates are equal*/
     Fail
   };
 

@@ -390,6 +390,21 @@ void mapFeasibleInputs()
   aof << "P = " << (toMatlab)P << ";" << std::endl;
 }
 
+void SQPSolveTest(const std::string& filepath)
+{
+  RawProblem raw;
+  std::string base = TESTS_DIR;
+  raw.read(base + "/" + filepath);
+
+  Problem pb(raw);
+  pb.objective().precompute(1);
+  SQP sqp(static_cast<int>(raw.delta.size()));
+  auto s = sqp.solve(pb);
+  std::cout << static_cast<int>(s) << std::endl;
+  std::cout << sqp.x().transpose() << std::endl;
+  std::cout << raw.Phi_.transpose() << std::endl;
+}
+
 int main()
 {
   //QRPerformances(10, 10000);
@@ -419,7 +434,9 @@ int main()
   //QRJAPerformance(200, 1000);
   //QRJAPerformance(500, 1000);
 
-  mapFeasibleInputs();
+  //mapFeasibleInputs();
+  SQPSolveTest("data/Problem04.txt");
+
 
 #ifdef WIN32
   system("pause");

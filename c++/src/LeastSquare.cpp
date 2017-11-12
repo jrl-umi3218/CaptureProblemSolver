@@ -78,7 +78,7 @@ namespace bms
       else
         p_.setZero();
 
-      if (p_.lpNorm<Infinity>() < 1e-12)  //FIXME: hard coded threshold?
+      if (p_.lpNorm<Infinity>() < 1e-10)  //FIXME: hard coded threshold?
       {
         //compute Lagrange multipliers for the active constraints: -C_A^+T(A^T(Ax+[c;Jx0]))
         obj.applyJToTheLeft(Jx_, x_);
