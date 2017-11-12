@@ -75,7 +75,7 @@ namespace bms
       j_ *= mu;
       obj.applyJToTheLeft(Jx_, x_);
       double v = 0.5* Jx_.squaredNorm();
-      //std::cout << "1/2||f||^2" << 0.5*f*f << std::endl;
+      //std::cout << "1/2||f||^2 " << 0.5*f*f << std::endl;
       //std::cout << "obj = " << 0.5*f*f + v << std::endl;
 
       if (checkKKT(x_, lambda_, f, j_, lc, &obj))
@@ -106,10 +106,19 @@ namespace bms
       {
         a = beta * a;
         if (a < smallestLSStep)
-          return SolverStatus::StepTooSmall;
+          return SolverStatus::LineSearchFailed;
         xa_ = x_ + a*p;
         nlc.compute(fa, xa_);
         va = obj.value(xa_);
+      }
+      if (x_.isApprox(xa_))
+      {
+        //x_ didn't change so we just need to update lambda but not the objective-related values
+        lambda_ += a*(pl - lambda_);
+        if (checkKKT(x_, lambda_, f, j_, lc, &obj))
+          return SolverStatus::Converge;
+        else
+          return SolverStatus::NumericallyEquivalentIterates;
       }
       x_ = xa_;
       lambda_ += a*(pl - lambda_);
@@ -162,9 +171,18 @@ namespace bms
       {
         a = beta * a;
         if (a < smallestLSStep)
-          return SolverStatus::StepTooSmall;
+          return SolverStatus::LineSearchFailed;
         xa_ = x_ + a*p;
         nlc.compute(fa, xa_);
+      }
+      if (x_.isApprox(xa_))
+      {
+        //x_ didn't change so we just need to update lambda but not the objective-related values
+        lambda_ += a*(pl - lambda_);
+        if (checkKKT(x_, lambda_, f, j_, lc))
+          return SolverStatus::Converge;
+        else
+          return SolverStatus::NumericallyEquivalentIterates;
       }
       x_ = xa_;
       lambda_ += a*(pl - lambda_);
