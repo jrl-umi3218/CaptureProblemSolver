@@ -64,8 +64,9 @@ BOOST_PYTHON_MODULE(PyBalanceMPCSolver)
   py::enum_<SolverStatus>("SolverStatus")
     .value("Converge", SolverStatus::Converge)
     .value("MaxIteration", SolverStatus::MaxIteration)
-    .value("StepTooSmall", SolverStatus::StepTooSmall)
+    .value("LineSearchFailed", SolverStatus::LineSearchFailed)
     .value("NoLinearlyFeasiblePoint", SolverStatus::NoLinearlyFeasiblePoint)
+    .value("NumericallyEquivalentIterates", SolverStatus::NumericallyEquivalentIterates)
     .value("Fail", SolverStatus::Fail);
 
   py::class_<SQP>("SQP", py::init<int>())
