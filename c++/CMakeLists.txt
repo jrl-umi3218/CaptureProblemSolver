@@ -20,6 +20,7 @@ if(NOT WIN32)
 endif()
 
 option(PYTHON_BINDINGS "Generate Python bindings" ON)
+option(STATISTICS "Use statistics" ON)
 
 #########################
 # External dependencies

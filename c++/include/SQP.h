@@ -6,6 +6,7 @@
 #include <LeastSquare.h>
 #include <Problem.h>
 #include <QuadraticObjective.h>
+#include <Statistics.h>
 
 namespace bms
 {
@@ -58,6 +59,8 @@ namespace bms
     const std::vector<Activation>& activeSet() const;
     int numberOfIterations() const;
 
+    const stats::SQPStats& statistics() const;
+
   private:
     bool checkKKT(const Eigen::VectorXd& x, const Eigen::VectorXd& lambda, double f, const Eigen::VectorXd& g, 
                   const LinearConstraints& lc, const LeastSquareObjective* const obj = nullptr) const;
@@ -83,5 +86,8 @@ namespace bms
     std::vector<Activation> currentActiveSet_;    //current active set
     std::vector<Activation> previousActiveSet_;   //active set backup
     int k_;                                       //iteration number
+
+    //stats
+    stats::SQPStats stats_;
   };
 }

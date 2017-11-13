@@ -5,6 +5,7 @@
 #include <defs.h>
 #include <LinearConstraints.h>
 #include <QuadraticObjective.h>
+#include <Statistics.h>
 
 namespace bms
 {
@@ -55,6 +56,9 @@ namespace bms
     /** Retrieve the Lagrange multipliers (after call to solve() or solveFeasibility())*/
     const Eigen::VectorXd& lambda() const;
 
+    /** Get stats on the last run. Only meaningful if USE_STATS is defined*/
+    const stats::LSStats& statistics() const;
+
   private:
     Eigen::DenseIndex n_;
 
@@ -75,5 +79,8 @@ namespace bms
     Eigen::VectorXd tmp_;
     GivensSequence Qg_;
     CondensedOrthogonalMatrix Q_;
+
+    //stats
+    stats::LSStats stats_;
   };
 }

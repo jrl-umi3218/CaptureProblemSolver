@@ -403,6 +403,14 @@ void SQPSolveTest(const std::string& filepath)
   std::cout << static_cast<int>(s) << std::endl;
   std::cout << sqp.x().transpose() << std::endl;
   std::cout << raw.Phi_.transpose() << std::endl;
+
+  auto statistics = sqp.statistics();
+  std::cout << "(iter, act, deact, #actCstr)" << std::endl;
+  for (size_t i = 0; i < statistics.lsStats.size(); ++i)
+  {
+    auto si = statistics.lsStats[i];
+    std::cout << si.iter << ", " << si.activation << ", " << si.deactivation << ", " << si.activeConstraints << std::endl;
+  }
 }
 
 int main()
@@ -431,7 +439,7 @@ int main()
   //QRJAPerformance(500, 1000);
 
   //mapFeasibleInputs();
-  SQPSolveTest("data/Problem04.txt");
+  SQPSolveTest("data/Problem02.txt");
 
 #ifdef WIN32
   system("pause");

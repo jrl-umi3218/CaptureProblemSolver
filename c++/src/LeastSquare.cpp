@@ -45,6 +45,8 @@ namespace bms
     x_.setZero();
     assert(lc.checkPrimal(x_) && "This solver supposes that 0 is a feasible point");
 
+    STATISTICS(stats_.reset());
+
     //main loop
     int k = 0;
     if (params_.maxIter() <= 0) { params_.maxIter(10 * static_cast<int>(n_)); } //default value for maxIter if need be.
@@ -82,6 +84,7 @@ namespace bms
           z.head(nz - 1) = -b_.head(nz - 1);
           A.topLeftCorner(nz - 1, nz - 1).triangularView<Upper>().solveInPlace(z.head(nz - 1));
           z[nz - 1] = 0;
+          STATISTICS(++stats_.rankLoss);
         }
         lc.applyNullSpaceOnTheLeft(p_, z);                            //p = Nz
       }
@@ -103,17 +106,27 @@ namespace bms
         //std::cout << "optim = " << ((c + j.dot(x_))*j + obj.matrix().transpose()*(obj.matrix()*x_) + lc.matrixAct().transpose()*lambdaAct).transpose() << std::endl;
         lc.expandActive(lambda_, lambdaAct);
         if (lc.checkDual(lambda_, params_.dualEps()))
+        {
+          STATISTICS(stats_.iter = k + 1);
+          STATISTICS(stats_.activeConstraints = (int)lc.numberOfActiveConstraints());
           return SolverStatus::Converge;
+        }
         else
+        {
           lc.deactivateMaxLambda(lambda_);
+          STATISTICS(++stats_.deactivation);
+        }
         skip = false;
       }
       else
       {
         lc.performQPstep(x_, p_, &skip);
+        STATISTICS(if (!skip) { ++stats_.activation; });
       }
     }
 
+    STATISTICS(stats_.iter = k);
+    STATISTICS(stats_.activeConstraints = (int)lc.numberOfActiveConstraints());
     return SolverStatus::MaxIteration;
   }
 
@@ -165,5 +178,10 @@ namespace bms
   const Eigen::VectorXd & LeastSquare::lambda() const
   {
     return lambda_;
+  }
+
+  const stats::LSStats & LeastSquare::statistics() const
+  {
+    return stats_;
   }
 }

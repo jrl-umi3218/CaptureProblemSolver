@@ -28,10 +28,15 @@ set(BMS_HEADERS
   ${BMS_INCLUDE_DIR}/QRAlgorithms.h
   ${BMS_INCLUDE_DIR}/QuadraticObjective.h
   ${BMS_INCLUDE_DIR}/SQP.h
+  ${BMS_INCLUDE_DIR}/Statistics.h
   ${BMS_INCLUDE_DIR}/toMatlab.h)
   
 add_library(BoundednessMPCSolver SHARED ${BMS_SOURCES} ${BMS_HEADERS})
 set_target_properties(BoundednessMPCSolver PROPERTIES COMPILE_FLAGS "-DBMS_EXPORTS")
+
+if(STATISTICS)
+  add_definitions(-DUSE_STATS)
+endif()
 
 install(TARGETS BoundednessMPCSolver
   RUNTIME DESTINATION bin

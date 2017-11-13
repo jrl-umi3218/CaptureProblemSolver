@@ -48,6 +48,8 @@ namespace bms
 
   SolverStatus SQP::solve(const Problem& pb)
   {
+    STATISTICS(stats_.reset());
+
     //shortcuts
     const auto& lc = pb.linearConstraints();
     const auto& nlc = pb.nonLinearConstraint();
@@ -106,7 +108,11 @@ namespace bms
       previousActiveSet_ = currentActiveSet_;
       shiftedLC_.setActivationStatus(currentActiveSet_);
       if (ls_.solve(obj, Jx_, j_, f, shiftedLC_) != SolverStatus::Converge)
+      {
+        STATISTICS(stats_.lsStats.push_back(ls_.statistics()));
         return SolverStatus::Fail;
+      }
+      STATISTICS(stats_.lsStats.push_back(ls_.statistics()));
       currentActiveSet_ = shiftedLC_.activationStatus();
       const auto& p = ls_.x();
       const auto& pl = ls_.lambda();
@@ -122,17 +128,24 @@ namespace bms
       nlc.compute(fa, xa_);
       double va = obj.value(xa_);
       double val0 = 0.5*f*f + v;
+      STATISTICS(int kls = 0);
       while (0.5*mu2*fa*fa + va > val0 + a*cgp)
       {
+        STATISTICS(++kls);
         a = params_.beta() * a;
         if (a < params_.smallestLSStep())
+        {
+          STATISTICS(stats_.lineSearchSteps.push_back(kls));
           return SolverStatus::LineSearchFailed;
+        }
         xa_ = x_ + a*p;
         nlc.compute(fa, xa_);
         va = obj.value(xa_);
       }
+      STATISTICS(stats_.lineSearchSteps.push_back(kls));
       if (x_.isApprox(xa_))
       {
+        ++k_; //we did full iteration, we need to count it.
         //x_ didn't change so we just need to update lambda but not the objective-related values
         lambda_ += a*(pl - lambda_);
         if (checkKKT(x_, lambda_, f, j_, lc, &obj))
@@ -228,6 +241,11 @@ namespace bms
   int SQP::numberOfIterations() const
   {
     return k_;
+  }
+
+  const stats::SQPStats & SQP::statistics() const
+  {
+    return stats_;
   }
 
   bool SQP::checkKKT(const Eigen::VectorXd& x, const Eigen::VectorXd& lambda, double f, const Eigen::VectorXd& g, 
