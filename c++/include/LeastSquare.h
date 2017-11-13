@@ -21,7 +21,31 @@ namespace bms
   class BMS_DLLAPI LeastSquare
   {
   public:
+    class Parameters
+    {
+    public:
+      int    maxIter()       const { return maxIter_; }
+      double minNorm_p()     const { return minNorm_p_; }
+      double dualEps()       const { return dualEps_; }
+      double rankThreshold() const { return rankThreshold_; }
+
+      Parameters& maxIter      (int i)    { maxIter_ = i;       return *this; }
+      Parameters& minNorm_p    (double d) { minNorm_p_ = d;     return *this; }
+      Parameters& dualEps      (double d) { dualEps_ = d;       return *this; }
+      Parameters& rankThreshold(double d) { rankThreshold_ = d; return *this; }
+
+    private:
+      int maxIter_ = -1;              //maximum number of active set iterations. If <= 0, defaulted to 10*n
+      double minNorm_p_ = 1e-10;      //bound on the L-inf norm of p under which p is treated as 0
+      double dualEps_ = 1e-15;        //margin on the 0 for the Lagrange multipliers
+      double rankThreshold_ = 1e-12;  //threshold on the last diagonal value in the QR of A, to detect rank loss
+    };
+
+
     LeastSquare(int n);
+
+    void parameters(const Parameters& param);
+    const Parameters& parameters() const;
 
     SolverStatus solve(const LeastSquareObjective& obj, const VectorConstRef& Jx0, const VectorConstRef& j, double c, LinearConstraints& lc);
     SolverStatus solveFeasibility(const VectorConstRef& j, double c, LinearConstraints& lc);
@@ -35,7 +59,7 @@ namespace bms
     Eigen::DenseIndex n_;
 
     //solver parameters;
-    int maxIter_;
+    Parameters params_;
 
     //computation data
     Eigen::VectorXd x_;

@@ -9,7 +9,6 @@ namespace bms
 {
   LeastSquare::LeastSquare(int n)
     : n_(n)
-    , maxIter_(10*n)
     , x_(n)
     , p_(n)
     , z_(n)
@@ -26,6 +25,16 @@ namespace bms
     Qg_.reserve(n);
   }
 
+  void LeastSquare::parameters(const LeastSquare::Parameters& param)
+  {
+    params_ = param;
+  }
+
+  const LeastSquare::Parameters& LeastSquare::parameters() const
+  {
+    return params_;
+  }
+
   SolverStatus LeastSquare::solve(const LeastSquareObjective& obj, const VectorConstRef& Jx0, const VectorConstRef& j, double c, LinearConstraints& lc)
   {
     assert(j.size() == n_);
@@ -38,8 +47,9 @@ namespace bms
 
     //main loop
     int k = 0;
+    if (params_.maxIter() <= 0) { params_.maxIter(10 * static_cast<int>(n_)); } //default value for maxIter if need be.
     bool skip = false;
-    for (k = 0; k < maxIter_; ++k)
+    for (k = 0; k < params_.maxIter(); ++k)
     {
       auto nz = lc.nullSpaceSize();
       if (nz > 0 && !skip)
@@ -56,7 +66,7 @@ namespace bms
         b_.tail(n_ - 1) += Jx0;
         b_[0] = c + j.dot(x_);
         //QR of A (A is upper Hessenberg
-        bool fullRank = hessenbergQR(A.topLeftCorner(std::min(n_, nz + 1), nz), Qg_, false, 1e-12);
+        bool fullRank = hessenbergQR(A.topLeftCorner(std::min(n_, nz + 1), nz), Qg_, false, params_.rankThreshold());
         //std::cout << "A= \n" << A << std::endl;
         //z = A^-1 b
         Q_.applyTo(b_);
@@ -78,7 +88,7 @@ namespace bms
       else
         p_.setZero();
 
-      if (p_.lpNorm<Infinity>() < 1e-10)  //FIXME: hard coded threshold?
+      if (p_.lpNorm<Infinity>() < params_.minNorm_p())  //FIXME: hard coded threshold?
       {
         //compute Lagrange multipliers for the active constraints: -C_A^+T(A^T(Ax+[c;Jx0]))
         obj.applyJToTheLeft(Jx_, x_);
@@ -92,7 +102,7 @@ namespace bms
         //std::cout << "err = " << (lc.matrixAct().transpose()*lambdaAct - tmp_).transpose() << std::endl;
         //std::cout << "optim = " << ((c + j.dot(x_))*j + obj.matrix().transpose()*(obj.matrix()*x_) + lc.matrixAct().transpose()*lambdaAct).transpose() << std::endl;
         lc.expandActive(lambda_, lambdaAct);
-        if (lc.checkDual(lambda_))
+        if (lc.checkDual(lambda_, params_.dualEps()))
           return SolverStatus::Converge;
         else
           lc.deactivateMaxLambda(lambda_);
@@ -117,7 +127,8 @@ namespace bms
 
     //main loop
     int k = 0;
-    for (k = 0; k < maxIter_; ++k)
+    if (params_.maxIter() <= 0) { params_.maxIter(10 * static_cast<int>(n_)); } //default value for maxIter if need be.
+    for (k = 0; k < params_.maxIter(); ++k)
     {
       auto jN = jN_.head(lc.nullSpaceSize());
       auto z = z_.head(lc.nullSpaceSize());
@@ -125,14 +136,14 @@ namespace bms
       z = -(c+j.dot(x_))/jN.squaredNorm() * jN;                     //-pinv(jN^T*(c+j^T*x)
       lc.applyNullSpaceOnTheLeft(p_, z);                            //p = Nz
 
-      if (p_.lpNorm<Infinity>() < 1e-12)  //FIXME: hard coded threshold?
+      if (p_.lpNorm<Infinity>() < params_.minNorm_p())  //FIXME: hard coded threshold?
       {
         //compute Lagrange multipliers
         auto lambdaAct = lambdaAct_.head(lc.numberOfActiveConstraints());
         lc.pinvTransposeMultAct(lambdaAct, j);
         lambdaAct *= -(c + j.dot(x_));
         lc.expandActive(lambda_, lambdaAct);
-        if (lc.checkDual(lambda_))
+        if (lc.checkDual(lambda_, params_.dualEps()))
           return SolverStatus::Converge;
         else
           lc.deactivateMaxLambda(lambda_);

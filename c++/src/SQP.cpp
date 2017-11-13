@@ -25,6 +25,26 @@ namespace bms
   {
   }
 
+  void SQP::SQPParameters(const Parameters & p)
+  {
+    params_ = p;
+  }
+
+  void SQP::LSParameters(const LeastSquare::Parameters & p)
+  {
+    ls_.parameters(p);
+  }
+
+  const SQP::Parameters& SQP::SQPParameters() const
+  {
+    return params_;
+  }
+
+  const LeastSquare::Parameters & SQP::LSParameters() const
+  {
+    return ls_.parameters();
+  }
+
 
   SolverStatus SQP::solve(const Problem& pb)
   {
@@ -38,16 +58,16 @@ namespace bms
     previousActiveSet_ = lc.activationStatus();
 
     //penality parameter
-    double mu = 100000;
+    double mu = params_.mu();
     double mu2 = mu*mu;
 
     //feasible (x,lambda)
     FeasiblePointInfo fpi;
-    std::tie(fpi, x_) = lc.initialPoint(true);
+    std::tie(fpi, x_) = lc.initialPoint(true, params_.feasibilityEps());
     if (fpi != FeasiblePointInfo::Found) //FIXME: we can be more precise here
     {
       //attempt to find a point without the active set
-      std::tie(fpi, x_) = lc.initialPoint(false);
+      std::tie(fpi, x_) = lc.initialPoint(false, params_.feasibilityEps());
       if (fpi != FeasiblePointInfo::Found)
         return SolverStatus::NoLinearlyFeasiblePoint;
       else
@@ -67,7 +87,7 @@ namespace bms
     lambda_.setZero();
 
     //main loop
-    for (k_ = 0; k_ < maxIter_; ++k_)
+    for (k_ = 0; k_ < params_.maxIter(); ++k_)
     {
       double f;
       nlc.compute(f, j_, x_);
@@ -95,7 +115,7 @@ namespace bms
       double a = 1;
       obj.applyJToTheLeft(Jx_, x_);
       obj.applyJToTheLeft(Jp_, p);
-      double cgp = c1*(f*j_.dot(p) + Jx_.dot(Jp_));
+      double cgp = params_.c1()*(f*j_.dot(p) + Jx_.dot(Jp_));
 
       xa_ = x_ + a*p;
       double fa;
@@ -104,8 +124,8 @@ namespace bms
       double val0 = 0.5*f*f + v;
       while (0.5*mu2*fa*fa + va > val0 + a*cgp)
       {
-        a = beta * a;
-        if (a < smallestLSStep)
+        a = params_.beta() * a;
+        if (a < params_.smallestLSStep())
           return SolverStatus::LineSearchFailed;
         xa_ = x_ + a*p;
         nlc.compute(fa, xa_);
@@ -139,13 +159,13 @@ namespace bms
 
     //feasible (x,lambda)
     FeasiblePointInfo fpi;
-    std::tie(fpi, x_) = lc.initialPoint();
+    std::tie(fpi, x_) = lc.initialPoint(false, params_.feasibilityEps());
     if (fpi != FeasiblePointInfo::Found) //FIXME: we can be more precise here
       return SolverStatus::NoLinearlyFeasiblePoint; 
     lambda_.setZero();
 
     //main loop
-    for (int k = 0; k < maxIter_; ++k)
+    for (int k = 0; k < params_.maxIter(); ++k)
     {
       double f;
       nlc.compute(f, j_, x_);
@@ -162,15 +182,15 @@ namespace bms
 
       //line search
       double a = 1;
-      double cgp = c1*f*j_.dot(p);
+      double cgp = params_.c1()*f*j_.dot(p);
 
       xa_ = x_ + a*p;
       double fa;
       nlc.compute(fa, xa_);
       while (0.5*fa*fa > 0.5*f*f + a*cgp)
       {
-        a = beta * a;
-        if (a < smallestLSStep)
+        a = params_.beta() * a;
+        if (a < params_.smallestLSStep())
           return SolverStatus::LineSearchFailed;
         xa_ = x_ + a*p;
         nlc.compute(fa, xa_);
@@ -214,8 +234,8 @@ namespace bms
                      const LinearConstraints& lc, const LeastSquareObjective* const obj) const
   {
     //see Stan's thesis $4.3.5
-    double tx = tau_p*(1 + x.lpNorm<Infinity>());
-    double tl = tau_d*(1 + lambda.lpNorm<Infinity>());
+    double tx = params_.tau_p()*(1 + x.lpNorm<Infinity>());
+    double tl = params_.tau_d()*(1 + lambda.lpNorm<Infinity>());
 
     lc.transposeMult(Cl_, lambda);
     gradL_ = f*g + Cl_;

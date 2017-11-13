@@ -76,9 +76,10 @@ namespace bms
 
     /** Return a feasible point for the constraints.
       *
-      * If takeActivationIntoAccount is true, the point is on the activated constraints
+      * If takeActivationIntoAccount is true, the point is on the activated constraints.
+      * eps is the margin to infeasibility for which the info returned is a warning.
       */
-    std::pair<FeasiblePointInfo, Eigen::VectorXd> initialPoint(bool takeActivationIntoAccount = false) const;
+    std::pair<FeasiblePointInfo, Eigen::VectorXd> initialPoint(bool takeActivationIntoAccount = false, double eps = 1e-8) const;
 
     Eigen::DenseIndex size() const;
     Eigen::DenseIndex nullSpaceSize() const;

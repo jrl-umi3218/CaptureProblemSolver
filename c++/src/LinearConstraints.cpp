@@ -136,9 +136,8 @@ namespace bms
     return u_;
   }
 
-  std::pair<FeasiblePointInfo, VectorXd> LinearConstraints::initialPoint(bool takeActivationIntoAccount) const
+  std::pair<FeasiblePointInfo, VectorXd> LinearConstraints::initialPoint(bool takeActivationIntoAccount, double eps) const
   {
-    const double eps = 1e-8;
     std::pair<FeasiblePointInfo, VectorXd> ret;
     ret.second.resize(n_);
 
