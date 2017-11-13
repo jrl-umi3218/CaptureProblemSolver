@@ -1,7 +1,7 @@
-from .PyBalanceMPCSolver import Problem
-from .PyBalanceMPCSolver import RawProblem
-from .PyBalanceMPCSolver import SolverStatus
-from .PyBalanceMPCSolver import SQP
+from .PyBoundednessMPCSolver import Problem
+from .PyBoundednessMPCSolver import RawProblem
+from .PyBoundednessMPCSolver import SolverStatus
+from .PyBoundednessMPCSolver import SQP
 
 __all__ = [
     "Problem",

@@ -12,7 +12,7 @@ namespace py = boost::python;
 namespace np = boost::python::numpy;
 
 
-BOOST_PYTHON_MODULE(PyBalanceMPCSolver)
+BOOST_PYTHON_MODULE(PyBoundednessMPCSolver)
 {
   Py_Initialize();
   np::initialize();
