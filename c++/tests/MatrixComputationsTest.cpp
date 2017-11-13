@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(HessenbergQRTest)
   MatrixXd M2 = M;
   GivensSequence seq;
 
-  bool b = hessenbergQR(M, seq, 1e-7);
+  bool b = hessenbergQR(M, seq, false, 1e-7);
   BOOST_CHECK(isUpperTriangular(M));
   BOOST_CHECK(b);
 
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(TridiagonalQRTest)
   MatrixXd M2 = M;
   GivensSequence seq;
 
-  bool b = tridiagonalQR(M, seq, 1e-7);
+  bool b = tridiagonalQR(M, seq, false, 1e-7);
   BOOST_CHECK(isBandMatrix(M,0,2));
   BOOST_CHECK(b);
 
