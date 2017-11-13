@@ -42,6 +42,7 @@ namespace bms
     BoundenessConstraint& nonLinearConstraint();
     const LinearConstraints& linearConstraints() const;
     LinearConstraints& linearConstraints();
+    Eigen::VectorXd::Index size() const;
 
     void set_zf(double zf);
     void set_zi(double zi);
