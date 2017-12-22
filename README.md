@@ -1,4 +1,9 @@
-# README
+# NameOfTheSolverHere
+
+Name ideas:
+
+- CO: Capturability Optimizer
+- COS: Capturability Optimization Solver
 
 ## Thanks
 
