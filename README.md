@@ -2,8 +2,8 @@
 
 Name ideas:
 
-- CO: Capturability Optimizer
-- COS: Capturability Optimization Solver
+- COS: Capture Optimization Solver (a bit too general)
+- ZSCOS: Zero-Step Capture Optimization Solver
 
 ## Thanks
 
