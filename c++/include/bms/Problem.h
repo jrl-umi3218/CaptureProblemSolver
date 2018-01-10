@@ -16,9 +16,9 @@ namespace bms
   {
     void read(const std::string& filepath);
 
-    double g;
-    double lmin;
-    double lmax;
+    double g = 9.80665; // ISO 80000-3
+    double lambda_min;
+    double lambda_max;
     Eigen::VectorXd delta;
     double wi_min;
     double wi_max;
@@ -47,9 +47,9 @@ namespace bms
     void set_zf(double zf);
     void set_zi(double zi);
     void set_dzi(double dzi);
-    void set_lambda_min(double lmin);
-    void set_lambda_max(double lmax);
-    void set_lambdas(double lmin, double lmax);
+    void set_lambda_min(double lambda_min);
+    void set_lambda_max(double lambda_max);
+    void set_lambdas(double lambda_min, double lambda_max);
     void set_wi_min(double wi_min);
     void set_wi_max(double wi_max);
     void set_wi(double wi_min, double wi_max);

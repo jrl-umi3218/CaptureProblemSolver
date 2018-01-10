@@ -114,8 +114,8 @@ namespace bms
       }
 
       g = parseDouble(table, "g");
-      lmin = parseDouble(table, "lambda_min");
-      lmax = parseDouble(table, "lambda_max");
+      lambda_min = parseDouble(table, "lambda_min");
+      lambda_max = parseDouble(table, "lambda_max");
       delta = parseVector(table, "Delta");
       wi_min = parseDouble(table, "omega_i_min");
       wi_max = parseDouble(table, "omega_i_max");
@@ -132,7 +132,7 @@ namespace bms
 
   Problem::Problem(const RawProblem& pb)
     : lso_(pb.delta)
-    , lc_(pb.lmin*pb.delta, pb.lmax*pb.delta, pb.wi_min*pb.wi_min, pb.wi_max*pb.wi_max)
+    , lc_(pb.lambda_min*pb.delta, pb.lambda_max*pb.delta, pb.wi_min*pb.wi_min, pb.wi_max*pb.wi_max)
     , bc_(pb.delta, pb.zi / pb.g, pb.dzi / pb.g)
     , raw_(pb)
   {
@@ -193,22 +193,22 @@ namespace bms
     computeAndSetb();
   }
 
-  void Problem::set_lambda_min(double lmin)
+  void Problem::set_lambda_min(double lambda_min)
   {
-    raw_.lmin = lmin;
+    raw_.lambda_min = lambda_min;
     computeAndSetZonotopeBounds();
   }
 
-  void Problem::set_lambda_max(double lmax)
+  void Problem::set_lambda_max(double lambda_max)
   {
-    raw_.lmax = lmax;
+    raw_.lambda_max = lambda_max;
     computeAndSetZonotopeBounds();
   }
 
-  void Problem::set_lambdas(double lmin, double lmax)
+  void Problem::set_lambdas(double lambda_min, double lambda_max)
   {
-    raw_.lmin = lmin;
-    raw_.lmax = lmax;
+    raw_.lambda_min = lambda_min;
+    raw_.lambda_max = lambda_max;
     computeAndSetZonotopeBounds();
   }
 
@@ -239,7 +239,7 @@ namespace bms
 
   void Problem::computeAndSetZonotopeBounds()
   {
-    lc_.changeBounds(raw_.lmin*raw_.delta, raw_.lmax*raw_.delta);
+    lc_.changeBounds(raw_.lambda_min*raw_.delta, raw_.lambda_max*raw_.delta);
     computeAndSetBounds0();
   }
 

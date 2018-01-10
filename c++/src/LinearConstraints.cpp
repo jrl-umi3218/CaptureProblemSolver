@@ -468,7 +468,7 @@ namespace bms
     if (!validActIdx_)
       computeActIdx();
     
-    double lmax = 0;
+    double lambda_max = 0;
     DenseIndex kmax;
 
     for (size_t i = 0; i < actIdx_.size(); ++i)
@@ -476,13 +476,13 @@ namespace bms
       auto k = actIdx_[i];
       switch (activationStatus_[static_cast<size_t>(k)])
       {
-      case Activation::Lower: if (lambda[k] > lmax) { lmax = lambda[k]; kmax = k; } break;
-      case Activation::Upper: if (-lambda[k] > lmax) { lmax = -lambda[k]; kmax = k; } break;
+      case Activation::Lower: if (lambda[k] > lambda_max) { lambda_max = lambda[k]; kmax = k; } break;
+      case Activation::Upper: if (-lambda[k] > lambda_max) { lambda_max = -lambda[k]; kmax = k; } break;
       default: break;
       }
     }
 
-    //std::cout << "deactivate " << lmax << std::endl;
+    //std::cout << "deactivate " << lambda_max << std::endl;
     deactivate(static_cast<size_t>(kmax));
   }
 
