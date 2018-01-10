@@ -361,23 +361,23 @@ void mapFeasibleInputs()
   std::vector<Vector3d> points;
   points.reserve(500000);
 
-  for (double zf = 0.0; zf <= 2; zf += 0.04)
+  for (double target_height = 0.0; target_height <= 2; target_height += 0.04)
   {
-    for (double zi = 0.0; zi <= 2; zi += 0.04)
+    for (double init_zbar = 0.0; init_zbar <= 2; init_zbar += 0.04)
     {
-      std::cout << zi << std::endl;
-      for (double dzi = -5; dzi <= 5; dzi += 0.2)
+      std::cout << init_zbar << std::endl;
+      for (double init_zbar_deriv = -5; init_zbar_deriv <= 5; init_zbar_deriv += 0.2)
       {
-        pb.set_zi(zi);
-        pb.set_dzi(dzi);
-        pb.set_zf(zf);
+        pb.set_init_zbar(init_zbar);
+        pb.set_init_zbar_deriv(init_zbar_deriv);
+        pb.set_target_height(target_height);
         auto s = sqp.solveFeasibility(pb);
         if (s == SolverStatus::Converge)
         {
           double v;
           pb.nonLinearConstraint().compute(v, sqp.x());
           if (std::abs(v) < 1e-5)
-            points.push_back({ zi,dzi,zf });
+            points.push_back({init_zbar, init_zbar_deriv, target_height});
         }
       }
     }

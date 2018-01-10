@@ -117,11 +117,11 @@ namespace bms
       lambda_min = parseDouble(table, "lambda_min");
       lambda_max = parseDouble(table, "lambda_max");
       delta = parseVector(table, "Delta");
-      wi_min = parseDouble(table, "omega_i_min");
-      wi_max = parseDouble(table, "omega_i_max");
-      zi = parseDouble(table, "z_bar");
-      dzi = parseDouble(table, "zd_bar");
-      zf = parseDouble(table, "z_f");
+      init_omega_min = parseDouble(table, "omega_i_min");
+      init_omega_max = parseDouble(table, "omega_i_max");
+      init_zbar = parseDouble(table, "z_bar");
+      init_zbar_deriv = parseDouble(table, "zd_bar");
+      target_height = parseDouble(table, "z_f");
       Phi_ = parseVector(table, "Phi", true);
     }
     else
@@ -132,11 +132,11 @@ namespace bms
 
   Problem::Problem(const RawProblem& pb)
     : lso_(pb.delta)
-    , lc_(pb.lambda_min*pb.delta, pb.lambda_max*pb.delta, pb.wi_min*pb.wi_min, pb.wi_max*pb.wi_max)
-    , bc_(pb.delta, pb.zi / pb.g, pb.dzi / pb.g)
+    , lc_(pb.lambda_min*pb.delta, pb.lambda_max*pb.delta, pb.init_omega_min*pb.init_omega_min, pb.init_omega_max*pb.init_omega_max)
+    , bc_(pb.delta, pb.init_zbar / pb.g, pb.init_zbar_deriv / pb.g)
     , raw_(pb)
   {
-    double d = pb.delta[0] * pb.g / pb.zf;
+    double d = pb.delta[0] * pb.g / pb.target_height;
     lc_.changeBounds(0, d, d);
   }
 
@@ -175,21 +175,21 @@ namespace bms
     return raw_.delta.size();
   }
 
-  void Problem::set_zf(double zf)
+  void Problem::set_target_height(double target_height)
   {
-    raw_.zf = zf;
+    raw_.target_height = target_height;
     computeAndSetBounds0();
   }
 
-  void Problem::set_zi(double zi)
+  void Problem::set_init_zbar(double init_zbar)
   {
-    raw_.zi = zi;
+    raw_.init_zbar = init_zbar;
     computeAndSetAlpha();
   }
 
-  void Problem::set_dzi(double dzi)
+  void Problem::set_init_zbar_deriv(double init_zbar_deriv)
   {
-    raw_.dzi = dzi;
+    raw_.init_zbar_deriv = init_zbar_deriv;
     computeAndSetb();
   }
 
@@ -212,28 +212,28 @@ namespace bms
     computeAndSetZonotopeBounds();
   }
 
-  void Problem::set_wi_min(double wi_min)
+  void Problem::set_init_omega_min(double init_omega_min)
   {
-    raw_.wi_min = wi_min;
+    raw_.init_omega_min = init_omega_min;
     computeAndSetBoundsN();
   }
 
-  void Problem::set_wi_max(double wi_max)
+  void Problem::set_init_omega_max(double init_omega_max)
   {
-    raw_.wi_max = wi_max;
+    raw_.init_omega_max = init_omega_max;
     computeAndSetBoundsN();
   }
 
-  void Problem::set_wi(double wi_min, double wi_max)
+  void Problem::set_init_omega(double init_omega_min, double init_omega_max)
   {
-    raw_.wi_min = wi_min;
-    raw_.wi_max = wi_max;
+    raw_.init_omega_min = init_omega_min;
+    raw_.init_omega_max = init_omega_max;
     computeAndSetBoundsN();
   }
 
   void Problem::computeAndSetBounds0()
   {
-    double d = raw_.delta[0] * raw_.g / raw_.zf;
+    double d = raw_.delta[0] * raw_.g / raw_.target_height;
     lc_.changeBounds(0, d, d);
   }
 
@@ -245,17 +245,17 @@ namespace bms
 
   void Problem::computeAndSetBoundsN()
   {
-    lc_.changeBounds(raw_.delta.size(), raw_.wi_min*raw_.wi_min, raw_.wi_max*raw_.wi_max);
+    lc_.changeBounds(raw_.delta.size(), raw_.init_omega_min*raw_.init_omega_min, raw_.init_omega_max*raw_.init_omega_max);
   }
 
   void Problem::computeAndSetAlpha()
   {
-    bc_.setAlpha(raw_.zi / raw_.g);
+    bc_.setAlpha(raw_.init_zbar / raw_.g);
   }
 
   void Problem::computeAndSetb()
   {
-    bc_.setb(raw_.dzi / raw_.g);
+    bc_.setb(raw_.init_zbar_deriv / raw_.g);
   }
 
 }

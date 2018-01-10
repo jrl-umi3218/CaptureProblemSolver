@@ -20,11 +20,11 @@ namespace bms
     double lambda_min;
     double lambda_max;
     Eigen::VectorXd delta;
-    double wi_min;
-    double wi_max;
-    double zi;
-    double dzi;
-    double zf;
+    double init_omega_min;
+    double init_omega_max;
+    double init_zbar;
+    double init_zbar_deriv;
+    double target_height;
 
     //solution (optional)
     Eigen::VectorXd Phi_;
@@ -44,15 +44,15 @@ namespace bms
     LinearConstraints& linearConstraints();
     Eigen::VectorXd::Index size() const;
 
-    void set_zf(double zf);
-    void set_zi(double zi);
-    void set_dzi(double dzi);
-    void set_lambda_min(double lambda_min);
+    void set_init_omega(double init_omega_min, double init_omega_max);
+    void set_init_omega_max(double init_omega_max);
+    void set_init_omega_min(double init_omega_min);
+    void set_init_zbar(double init_zbar);
+    void set_init_zbar_deriv(double init_zbar_deriv);
     void set_lambda_max(double lambda_max);
+    void set_lambda_min(double lambda_min);
     void set_lambdas(double lambda_min, double lambda_max);
-    void set_wi_min(double wi_min);
-    void set_wi_max(double wi_max);
-    void set_wi(double wi_min, double wi_max);
+    void set_target_height(double target_height);
 
   private:
     void computeAndSetBounds0();
