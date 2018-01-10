@@ -4,10 +4,10 @@
 
 #include <Eigen/Core>
 
-#include <bms_api.h>
-#include <BoundenessConstraint.h>
-#include <LinearConstraints.h>
-#include <QuadraticObjective.h>
+#include <bms/bms_api.h>
+#include <bms/BoundenessConstraint.h>
+#include <bms/LinearConstraints.h>
+#include <bms/QuadraticObjective.h>
 
 
 namespace bms

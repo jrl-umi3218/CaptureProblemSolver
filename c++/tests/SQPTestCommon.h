@@ -1,5 +1,5 @@
-#include <Problem.h>
-#include <SQP.h>
+#include <bms/Problem.h>
+#include <bms/SQP.h>
 
 using namespace Eigen;
 

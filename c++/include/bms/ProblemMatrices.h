@@ -2,7 +2,7 @@
 
 #include <Eigen/Core>
 
-#include <bms_api.h>
+#include <bms/bms_api.h>
 
 namespace bms
 {

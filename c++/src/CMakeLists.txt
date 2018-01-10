@@ -14,22 +14,22 @@ set(BMS_SOURCES
 
 set(BMS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 set(BMS_HEADERS
-  ${BMS_INCLUDE_DIR}/bms_api.h
-  ${BMS_INCLUDE_DIR}/BoundenessConstraint.h
-  ${BMS_INCLUDE_DIR}/CondensedOrthogonalMatrix.h
-  ${BMS_INCLUDE_DIR}/defs.h
-  ${BMS_INCLUDE_DIR}/Givens.h
-  ${BMS_INCLUDE_DIR}/GivensSequence.h
-  ${BMS_INCLUDE_DIR}/LeastSquare.h
-  ${BMS_INCLUDE_DIR}/LinearConstraints.h
-  ${BMS_INCLUDE_DIR}/Logger.h
-  ${BMS_INCLUDE_DIR}/Problem.h
-  ${BMS_INCLUDE_DIR}/ProblemMatrices.h
-  ${BMS_INCLUDE_DIR}/QRAlgorithms.h
-  ${BMS_INCLUDE_DIR}/QuadraticObjective.h
-  ${BMS_INCLUDE_DIR}/SQP.h
-  ${BMS_INCLUDE_DIR}/Statistics.h
-  ${BMS_INCLUDE_DIR}/toMatlab.h)
+  ${BMS_INCLUDE_DIR}/bms/bms_api.h
+  ${BMS_INCLUDE_DIR}/bms/BoundenessConstraint.h
+  ${BMS_INCLUDE_DIR}/bms/CondensedOrthogonalMatrix.h
+  ${BMS_INCLUDE_DIR}/bms/defs.h
+  ${BMS_INCLUDE_DIR}/bms/Givens.h
+  ${BMS_INCLUDE_DIR}/bms/GivensSequence.h
+  ${BMS_INCLUDE_DIR}/bms/LeastSquare.h
+  ${BMS_INCLUDE_DIR}/bms/LinearConstraints.h
+  ${BMS_INCLUDE_DIR}/bms/Logger.h
+  ${BMS_INCLUDE_DIR}/bms/Problem.h
+  ${BMS_INCLUDE_DIR}/bms/ProblemMatrices.h
+  ${BMS_INCLUDE_DIR}/bms/QRAlgorithms.h
+  ${BMS_INCLUDE_DIR}/bms/QuadraticObjective.h
+  ${BMS_INCLUDE_DIR}/bms/SQP.h
+  ${BMS_INCLUDE_DIR}/bms/Statistics.h
+  ${BMS_INCLUDE_DIR}/bms/toMatlab.h)
   
 add_library(BoundednessMPCSolver SHARED ${BMS_SOURCES} ${BMS_HEADERS})
 set_target_properties(BoundednessMPCSolver PROPERTIES COMPILE_FLAGS "-DBMS_EXPORTS")
@@ -43,5 +43,5 @@ install(TARGETS BoundednessMPCSolver
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)
 
-install(DIRECTORY ${BMS_INCLUDE_DIR}/ DESTINATION include/BoundednessMPCSolver
+install(DIRECTORY ${BMS_INCLUDE_DIR}/ DESTINATION include
   FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")

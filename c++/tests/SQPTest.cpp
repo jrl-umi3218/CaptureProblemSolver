@@ -1,7 +1,8 @@
-#include <SQP.h>
-#include "SQPTestCommon.h"
-
 #include <iostream>
+
+#include <bms/SQP.h>
+
+#include "SQPTestCommon.h"
 
 // boost
 #define BOOST_TEST_MODULE SQPTests

@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include <bms_api.h>
-#include <GivensSequence.h>
+#include <bms/bms_api.h>
+#include <bms/GivensSequence.h>
 
 #include <iostream>
 

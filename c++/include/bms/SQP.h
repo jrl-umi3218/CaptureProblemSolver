@@ -2,11 +2,11 @@
 
 #include <Eigen/Core>
 
-#include <bms_api.h>
-#include <LeastSquare.h>
-#include <Problem.h>
-#include <QuadraticObjective.h>
-#include <Statistics.h>
+#include <bms/bms_api.h>
+#include <bms/LeastSquare.h>
+#include <bms/Problem.h>
+#include <bms/QuadraticObjective.h>
+#include <bms/Statistics.h>
 
 namespace bms
 {

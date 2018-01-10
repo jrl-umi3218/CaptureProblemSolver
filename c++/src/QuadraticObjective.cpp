@@ -1,10 +1,9 @@
-#include "ProblemMatrices.h"
-#include "QuadraticObjective.h"
-
 #include <iostream>
 
-using namespace Eigen;
+#include <bms/ProblemMatrices.h>
+#include <bms/QuadraticObjective.h>
 
+using namespace Eigen;
 
 namespace
 {

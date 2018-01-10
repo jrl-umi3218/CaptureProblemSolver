@@ -1,9 +1,9 @@
-#include <LinearConstraints.h>
-#include <ProblemMatrices.h>
-
-#include<Eigen/SVD>
-
 #include <iostream>
+
+#include <Eigen/SVD>
+
+#include <bms/LinearConstraints.h>
+#include <bms/ProblemMatrices.h>
 
 // boost
 #define BOOST_TEST_MODULE LinearConstraintsTest

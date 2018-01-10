@@ -1,13 +1,13 @@
 #pragma once
 
-#include<iterator>
+#include <iterator>
 
 #include <Eigen/Core>
 
-#include <bms_api.h>
-#include <defs.h>
-#include <Givens.h>
-#include <GivensSequence.h>
+#include <bms/bms_api.h>
+#include <bms/defs.h>
+#include <bms/Givens.h>
+#include <bms/GivensSequence.h>
 
 namespace bms
 {

@@ -1,19 +1,20 @@
-﻿#include <Eigen/Core>
+﻿#include <chrono>
+#include <fstream>
+#include <iostream>
+
+#include <Eigen/Core>
 #include <Eigen/Jacobi>
 #include <Eigen/QR>
 
-#include <fstream>
-#include <iostream>
-#include <chrono>
+#include <bms/LeastSquare.h>
+#include <bms/Problem.h>
+#include <bms/ProblemMatrices.h>
+#include <bms/QRAlgorithms.h>
+#include <bms/QuadraticObjective.h>
+#include <bms/SQP.h>
+#include <bms/toMatlab.h>
 
-#include "LeastSquare.h"
-#include "Problem.h"
-#include "ProblemMatrices.h"
-#include "QRAlgorithms.h"
-#include "QuadraticObjective.h"
-#include "SQP.h"
 #include "SQPTestCommon.h"
-#include "toMatlab.h"
 
 using namespace Eigen;
 using namespace bms;

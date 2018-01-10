@@ -1,16 +1,15 @@
 #include <boost/python.hpp>
 #include <boost/python/numpy.hpp>
 
-#include "converters.h"
+#include <bms/LeastSquare.h>
+#include <bms/Problem.h>
+#include <bms/QuadraticObjective.h>
+#include <bms/SQP.h>
 
-#include "LeastSquare.h"
-#include "Problem.h"
-#include "QuadraticObjective.h"
-#include "SQP.h"
+#include "converters.h"
 
 namespace py = boost::python;
 namespace np = boost::python::numpy;
-
 
 BOOST_PYTHON_MODULE(PyBoundednessMPCSolver)
 {

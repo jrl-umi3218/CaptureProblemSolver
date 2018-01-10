@@ -1,9 +1,8 @@
-#include "LinearConstraints.h"
-
 #include <iostream>
 
-using namespace Eigen;
+#include <bms/LinearConstraints.h>
 
+using namespace Eigen;
 
 namespace
 {

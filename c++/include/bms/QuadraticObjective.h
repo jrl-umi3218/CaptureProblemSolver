@@ -2,10 +2,10 @@
 
 #include <Eigen/Core>
 
-#include <bms_api.h>
-#include <CondensedOrthogonalMatrix.h>
-#include <defs.h>
-#include <QRAlgorithms.h>
+#include <bms/bms_api.h>
+#include <bms/CondensedOrthogonalMatrix.h>
+#include <bms/defs.h>
+#include <bms/QRAlgorithms.h>
 
 namespace bms
 {

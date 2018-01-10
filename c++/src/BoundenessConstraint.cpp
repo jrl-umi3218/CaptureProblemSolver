@@ -1,6 +1,7 @@
-#include "BoundenessConstraint.h"
+#include <bms/BoundenessConstraint.h>
 
 using namespace Eigen;
+
 namespace bms
 {
   BoundenessConstraint::BoundenessConstraint(const Eigen::VectorXd& delta, double alpha, double b)

@@ -1,4 +1,4 @@
-#include "QRAlgorithms.h"
+#include <bms/QRAlgorithms.h>
 
 using namespace Eigen;
 

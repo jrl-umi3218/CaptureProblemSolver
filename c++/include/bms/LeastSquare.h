@@ -1,11 +1,12 @@
 #pragma once
+
 #include <Eigen/Core>
 
-#include <bms_api.h>
-#include <defs.h>
-#include <LinearConstraints.h>
-#include <QuadraticObjective.h>
-#include <Statistics.h>
+#include <bms/bms_api.h>
+#include <bms/defs.h>
+#include <bms/LinearConstraints.h>
+#include <bms/QuadraticObjective.h>
+#include <bms/Statistics.h>
 
 namespace bms
 {

@@ -1,4 +1,4 @@
-#include "GivensSequence.h"
+#include <bms/GivensSequence.h>
 
 namespace bms
 {

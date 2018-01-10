@@ -1,8 +1,9 @@
 #pragma once
+
 #include <vector>
 
-#include <bms_api.h>
-#include <Givens.h>
+#include <bms/bms_api.h>
+#include <bms/Givens.h>
 
 namespace bms
 {

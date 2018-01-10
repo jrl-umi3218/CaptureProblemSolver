@@ -2,8 +2,8 @@
 
 #include <Eigen/Core>
 
-#include <bms_api.h>
-#include <defs.h>
+#include <bms/bms_api.h>
+#include <bms/defs.h>
 
 namespace bms
 {

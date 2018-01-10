@@ -1,7 +1,7 @@
-#include "LeastSquare.h"
-#include "QRAlgorithms.h"
-
 #include <Eigen/SVD>
+
+#include <bms/LeastSquare.h>
+#include <bms/QRAlgorithms.h>
 
 using namespace Eigen;
 

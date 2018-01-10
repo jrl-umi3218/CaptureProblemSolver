@@ -1,4 +1,4 @@
-#include "ProblemMatrices.h"
+#include <bms/ProblemMatrices.h>
 
 using namespace Eigen;
 

@@ -1,7 +1,7 @@
-#include <LeastSquare.h>
-#include <QuadraticObjective.h>
-
 #include <iostream>
+
+#include <bms/LeastSquare.h>
+#include <bms/QuadraticObjective.h>
 
 // boost
 #define BOOST_TEST_MODULE LeastSquareTests

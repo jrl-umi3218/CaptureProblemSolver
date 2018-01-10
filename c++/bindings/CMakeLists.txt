@@ -9,7 +9,7 @@ configure_file(__init__.py ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}/__init__.p
 set(PYBMS_SOURCES PyBoundednessMPCSolver.cpp)
 
 set(BMS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../include)
-set(PYBMS_HEADERS converters.h ${BMS_INCLUDE_DIR}/bms_api.h)
+set(PYBMS_HEADERS converters.h ${BMS_INCLUDE_DIR}/bms/bms_api.h)
 
 add_library(PyBoundednessMPCSolver SHARED ${PYBMS_SOURCES} ${PYBMS_HEADERS})
 
