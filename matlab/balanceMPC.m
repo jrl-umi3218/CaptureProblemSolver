@@ -1,4 +1,4 @@
-function phi = balanceMPC(g,delta,zi,dzi,zf,lmin,lmax,wimin,wimax)
+function phi = balanceMPC(g,delta,zi,dzi,zf,lmin,lmax,wimin,wimax,relax)
 assert(nargin>=8)
 twoD = nargin==8;
 delta=delta(:);
@@ -11,8 +11,13 @@ else
   alpha = zi/g;
   b = dzi/g;
 end
+
+if nargin<10
+  relax = false;
+end
+
 o = @(x) objMPC(delta,x);
-c = @(x) constrMPC(delta,x,alpha,b);
+c = @(x) constrMPC(delta,x,alpha,b,relax);
 
 A = diag(ones(n,1))+diag(-ones(n-1,1),-1);
 A = [-A;A];
