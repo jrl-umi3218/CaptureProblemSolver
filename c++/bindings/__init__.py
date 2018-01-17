@@ -1,7 +1,7 @@
-from .PyBoundednessMPCSolver import Problem
-from .PyBoundednessMPCSolver import RawProblem
-from .PyBoundednessMPCSolver import SolverStatus
-from .PyBoundednessMPCSolver import SQP
+from .PyCaptureProblemSolver import Problem
+from .PyCaptureProblemSolver import RawProblem
+from .PyCaptureProblemSolver import SolverStatus
+from .PyCaptureProblemSolver import SQP
 
 __all__ = [
     "Problem",

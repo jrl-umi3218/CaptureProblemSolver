@@ -1,23 +1,23 @@
 #include <boost/python.hpp>
 #include <boost/python/numpy.hpp>
 
-#include <bms/LeastSquare.h>
-#include <bms/Problem.h>
-#include <bms/QuadraticObjective.h>
-#include <bms/SQP.h>
+#include <cps/LeastSquare.h>
+#include <cps/Problem.h>
+#include <cps/QuadraticObjective.h>
+#include <cps/SQP.h>
 
 #include "converters.h"
 
 namespace py = boost::python;
 namespace np = boost::python::numpy;
 
-BOOST_PYTHON_MODULE(PyBoundednessMPCSolver)
+BOOST_PYTHON_MODULE(PyCaptureProblemSolver)
 {
   Py_Initialize();
   np::initialize();
   pygen::convert<double>(pygen::Converters::Vector);
 
-  using namespace bms;
+  using namespace cps;
 
   py::class_<LeastSquare>("LeastSquare", py::init<int>());
 
