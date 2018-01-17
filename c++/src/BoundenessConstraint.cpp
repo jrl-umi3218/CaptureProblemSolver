@@ -1,4 +1,4 @@
-#include <bms/BoundenessConstraint.h>
+#include <cps/BoundenessConstraint.h>
 
 using namespace Eigen;
 

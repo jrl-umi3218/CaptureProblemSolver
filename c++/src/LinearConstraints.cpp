@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <bms/LinearConstraints.h>
+#include <cps/LinearConstraints.h>
 
 using namespace Eigen;
 

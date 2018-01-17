@@ -2,11 +2,11 @@
 
 #include <Eigen/Core>
 
-#include <bms/bms_api.h>
-#include <bms/defs.h>
-#include <bms/LinearConstraints.h>
-#include <bms/QuadraticObjective.h>
-#include <bms/Statistics.h>
+#include <cps/cps_api.h>
+#include <cps/defs.h>
+#include <cps/LinearConstraints.h>
+#include <cps/QuadraticObjective.h>
+#include <cps/Statistics.h>
 
 namespace cps
 {
@@ -20,7 +20,7 @@ namespace cps
     Fail
   };
 
-  class BMS_DLLAPI LeastSquare
+  class CPS_DLLAPI LeastSquare
   {
   public:
     class Parameters

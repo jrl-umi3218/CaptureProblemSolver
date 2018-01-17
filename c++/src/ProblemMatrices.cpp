@@ -1,4 +1,4 @@
-#include <bms/ProblemMatrices.h>
+#include <cps/ProblemMatrices.h>
 
 using namespace Eigen;
 

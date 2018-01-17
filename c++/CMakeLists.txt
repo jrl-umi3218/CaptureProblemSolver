@@ -5,7 +5,7 @@ INCLUDE(cmake/boost.cmake)
 INCLUDE(cmake/eigen.cmake)
 INCLUDE(cmake/msvc-specific.cmake)
 
-SET(PROJECT_NAME BoundednessMPCSolver)
+SET(PROJECT_NAME CaptureProblemSolver)
 SET(PROJECT_DESCRIPTION "...")
 SET(PROJECT_URL "https://gite.lirmm.fr/adrien_escande_at_gmail_com/BoundednessMPCSolver")
 SET(PROJECT_DEBUG_POSTFIX "_d")
@@ -20,7 +20,7 @@ if(NOT WIN32)
 endif()
 
 option(PYTHON_BINDINGS "Generate Python bindings" ON)
-option(STATISTICS "Use statistics" ON)
+option(STATISTICS "Use statistics" OFF)
 
 #########################
 # External dependencies
@@ -47,12 +47,12 @@ add_subdirectory(src)
 add_subdirectory(tests)
 
 # Add dependency towards the library in the pkg-config file.
-PKG_CONFIG_APPEND_LIBS(BoundednessMPCSolver)
+PKG_CONFIG_APPEND_LIBS(CaptureProblemSolver)
 
 IF(PYTHON_BINDINGS)
     # Add dependency towards the python bindings in the pkg-config file.
     add_subdirectory(bindings)
-    PKG_CONFIG_APPEND_LIBS(PyBoundednessMPCSolver)
+    PKG_CONFIG_APPEND_LIBS(PyCaptureProblemSolver)
 ENDIF()
 
 SETUP_PROJECT_FINALIZE()

@@ -2,14 +2,14 @@
 
 #include <Eigen/Core>
 
-#include <bms/bms_api.h>
-#include <bms/CondensedOrthogonalMatrix.h>
-#include <bms/defs.h>
-#include <bms/QRAlgorithms.h>
+#include <cps/cps_api.h>
+#include <cps/CondensedOrthogonalMatrix.h>
+#include <cps/defs.h>
+#include <cps/QRAlgorithms.h>
 
 namespace cps
 {
-  class BMS_DLLAPI LeastSquareObjective
+  class CPS_DLLAPI LeastSquareObjective
   {
   public:
     using Index = Eigen::DenseIndex;

@@ -1,4 +1,4 @@
-#include <bms/GivensSequence.h>
+#include <cps/GivensSequence.h>
 
 namespace cps
 {

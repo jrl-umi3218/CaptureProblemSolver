@@ -2,8 +2,8 @@
 
 #include <Eigen/SVD>
 
-#include <bms/LinearConstraints.h>
-#include <bms/ProblemMatrices.h>
+#include <cps/LinearConstraints.h>
+#include <cps/ProblemMatrices.h>
 
 // boost
 #define BOOST_TEST_MODULE LinearConstraintsTest

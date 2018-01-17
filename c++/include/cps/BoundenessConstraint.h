@@ -2,13 +2,13 @@
 
 #include <Eigen/Core>
 
-#include <bms/bms_api.h>
-#include <bms/defs.h>
+#include <cps/cps_api.h>
+#include <cps/defs.h>
 
 namespace cps
 {
   /** The function sum(delta_j/(sqrt(x(j+1))+sqrt(x(j))) - alpha sqrt(x(n)) - b*/
-  class BMS_DLLAPI BoundenessConstraint
+  class CPS_DLLAPI BoundenessConstraint
   {
   public:
     BoundenessConstraint(const Eigen::VectorXd& delta, double alpha, double b);

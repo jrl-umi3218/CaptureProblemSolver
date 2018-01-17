@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include <bms/Problem.h>
-#include <bms/BoundenessConstraint.h>
-#include <bms/SQP.h>
+#include <cps/Problem.h>
+#include <cps/BoundenessConstraint.h>
+#include <cps/SQP.h>
 
 // boost
 #define BOOST_TEST_MODULE ProblemTest

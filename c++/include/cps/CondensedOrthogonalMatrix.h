@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include <bms/bms_api.h>
-#include <bms/GivensSequence.h>
+#include <cps/cps_api.h>
+#include <cps/GivensSequence.h>
 
 #include <iostream>
 
@@ -17,7 +17,7 @@ namespace cps
     * - providing an abstraction for easier manipulation
     * - preallocating memory to avoid memory allocation in critical code
     */
-  class BMS_DLLAPI CondensedOrthogonalMatrix
+  class CPS_DLLAPI CondensedOrthogonalMatrix
   {
   public:
     /** Create an instance preallocating kmax Givens sequences with pmax Givens

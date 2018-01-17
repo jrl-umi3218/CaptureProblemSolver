@@ -2,7 +2,7 @@
 
 #include <Eigen/Core>
 
-#include <bms/bms_api.h>
+#include <cps/cps_api.h>
 
 namespace cps
 {
@@ -12,22 +12,22 @@ namespace cps
     */
 
   /** Build J such that the objective is ||Jx||^2 where d = 1/delta */
-  BMS_DLLAPI Eigen::MatrixXd buildJ(const Eigen::VectorXd& d);
+  CPS_DLLAPI Eigen::MatrixXd buildJ(const Eigen::VectorXd& d);
 
   /** Build J_0 without the initial 0 rows (see doc)*/
-  BMS_DLLAPI Eigen::MatrixXd buildJ0(const Eigen::VectorXd& e);
+  CPS_DLLAPI Eigen::MatrixXd buildJ0(const Eigen::VectorXd& e);
   
   /** Build J_j (see doc)*/
-  BMS_DLLAPI Eigen::MatrixXd buildJj(const Eigen::VectorXd& e);
+  CPS_DLLAPI Eigen::MatrixXd buildJj(const Eigen::VectorXd& e);
   
   /** Build J_{p-1} (see doc)*/
-  BMS_DLLAPI Eigen::MatrixXd buildJpm1(const Eigen::VectorXd& e);
+  CPS_DLLAPI Eigen::MatrixXd buildJpm1(const Eigen::VectorXd& e);
 
   /** Build the matrix of zonotopique constraints l_i <= x_i - x_{i-1} <= u_i
     * n is the size of x
     */
-  BMS_DLLAPI Eigen::MatrixXd buildCZ(int n);
+  CPS_DLLAPI Eigen::MatrixXd buildCZ(int n);
 
   /** [C_Z;e_n^T] where e_n is the n-th column of the nxn identity matrix.*/
-  BMS_DLLAPI Eigen::MatrixXd buildC(int n);
+  CPS_DLLAPI Eigen::MatrixXd buildC(int n);
 }

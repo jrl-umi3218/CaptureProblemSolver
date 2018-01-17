@@ -1,11 +1,11 @@
 #include <iostream>
 
-#include <bms/CondensedOrthogonalMatrix.h>
-#include <bms/Givens.h>
-#include <bms/GivensSequence.h>
-#include <bms/ProblemMatrices.h>
-#include <bms/QRAlgorithms.h>
-#include <bms/QuadraticObjective.h>
+#include <cps/CondensedOrthogonalMatrix.h>
+#include <cps/Givens.h>
+#include <cps/GivensSequence.h>
+#include <cps/ProblemMatrices.h>
+#include <cps/QRAlgorithms.h>
+#include <cps/QuadraticObjective.h>
 
 // boost
 #define BOOST_TEST_MODULE MatrixComputationsTest

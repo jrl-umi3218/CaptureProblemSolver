@@ -4,8 +4,8 @@
 
 #include <Eigen/Core>
 
-#include <bms/bms_api.h>
-#include <bms/defs.h>
+#include <cps/cps_api.h>
+#include <cps/defs.h>
 
 namespace cps
 {
@@ -44,7 +44,7 @@ namespace cps
     * xln <= x_{n-1} <= xun
     * Constraints are considered in this order
     */
-  class BMS_DLLAPI LinearConstraints
+  class CPS_DLLAPI LinearConstraints
   {
   private:
     /** Intermediate temporary structure for shifting the constraints. See shift*/

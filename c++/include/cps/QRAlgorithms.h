@@ -4,10 +4,10 @@
 
 #include <Eigen/Core>
 
-#include <bms/bms_api.h>
-#include <bms/defs.h>
-#include <bms/Givens.h>
-#include <bms/GivensSequence.h>
+#include <cps/cps_api.h>
+#include <cps/defs.h>
+#include <cps/Givens.h>
+#include <cps/GivensSequence.h>
 
 namespace cps
 {
@@ -91,7 +91,7 @@ namespace cps
   }
 
   /** A class for QR decomposition of matrices with particular form.*/
-  class BMS_DLLAPI SpecialQR
+  class CPS_DLLAPI SpecialQR
   {
   public:
     /** kmax is the maximum value of k, as described above

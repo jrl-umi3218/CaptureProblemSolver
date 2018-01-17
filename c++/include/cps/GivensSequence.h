@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include <bms/bms_api.h>
-#include <bms/Givens.h>
+#include <cps/cps_api.h>
+#include <cps/Givens.h>
 
 namespace cps
 {
@@ -12,7 +12,7 @@ namespace cps
     * Note: it is ok to derive publicly here as we do not have any additional
     * data.
     */
-  class BMS_DLLAPI GivensSequence final : public std::vector<Givens>
+  class CPS_DLLAPI GivensSequence final : public std::vector<Givens>
   {
   public:
     using std::vector<Givens>::vector;

@@ -2,15 +2,15 @@
 
 #include <Eigen/Core>
 
-#include <bms/bms_api.h>
-#include <bms/LeastSquare.h>
-#include <bms/Problem.h>
-#include <bms/QuadraticObjective.h>
-#include <bms/Statistics.h>
+#include <cps/cps_api.h>
+#include <cps/LeastSquare.h>
+#include <cps/Problem.h>
+#include <cps/QuadraticObjective.h>
+#include <cps/Statistics.h>
 
 namespace cps
 {
-  class BMS_DLLAPI SQP
+  class CPS_DLLAPI SQP
   {
   public:
     class Parameters

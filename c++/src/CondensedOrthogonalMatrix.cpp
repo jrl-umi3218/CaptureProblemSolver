@@ -1,4 +1,4 @@
-#include <bms/CondensedOrthogonalMatrix.h>
+#include <cps/CondensedOrthogonalMatrix.h>
 
 using namespace Eigen;
 

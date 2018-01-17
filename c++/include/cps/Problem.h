@@ -4,15 +4,15 @@
 
 #include <Eigen/Core>
 
-#include <bms/bms_api.h>
-#include <bms/BoundenessConstraint.h>
-#include <bms/LinearConstraints.h>
-#include <bms/QuadraticObjective.h>
+#include <cps/cps_api.h>
+#include <cps/BoundenessConstraint.h>
+#include <cps/LinearConstraints.h>
+#include <cps/QuadraticObjective.h>
 
 
 namespace cps
 {
-  struct BMS_DLLAPI RawProblem
+  struct CPS_DLLAPI RawProblem
   {
     void read(const std::string& filepath);
 
@@ -31,7 +31,7 @@ namespace cps
   };
 
 
-  class BMS_DLLAPI Problem
+  class CPS_DLLAPI Problem
   {
   public:
     Problem(const RawProblem& pb);

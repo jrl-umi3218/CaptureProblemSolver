@@ -3,7 +3,7 @@
 #include <sstream>
 #include <vector>
 
-#include <bms/Problem.h>
+#include <cps/Problem.h>
 
 namespace
 {

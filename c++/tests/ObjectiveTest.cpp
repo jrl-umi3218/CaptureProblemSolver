@@ -1,8 +1,8 @@
 #include <iostream>
 #include <vector>
 
-#include <bms/LinearConstraints.h>
-#include <bms/QuadraticObjective.h>
+#include <cps/LinearConstraints.h>
+#include <cps/QuadraticObjective.h>
 
 // boost
 #define BOOST_TEST_MODULE ObjectiveTest

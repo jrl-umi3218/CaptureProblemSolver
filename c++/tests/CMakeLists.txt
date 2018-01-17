@@ -9,7 +9,7 @@ add_definitions(-DTESTS_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 macro(addUnitTest name)
   add_executable(${name} ${name}.cpp ${ARGN})
-  target_link_libraries(${name} ${Boost_LIBRARIES} BoundednessMPCSolver)
+  target_link_libraries(${name} ${Boost_LIBRARIES} CaptureProblemSolver)
   add_test(${name}Unit ${name})
   # Adding a project configuration file (for MSVC only)
   GENERATE_MSVC_DOT_USER_FILE(${name})
@@ -32,6 +32,6 @@ set(TESTHEADERS
 )
 
 add_executable(main ${TESTSOURCES} ${TESTHEADERS})
-target_link_libraries(main PUBLIC BoundednessMPCSolver)
+target_link_libraries(main PUBLIC CaptureProblemSolver)
 GENERATE_MSVC_DOT_USER_FILE(main)
 

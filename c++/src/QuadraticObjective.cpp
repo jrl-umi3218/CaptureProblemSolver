@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include <bms/ProblemMatrices.h>
-#include <bms/QuadraticObjective.h>
+#include <cps/ProblemMatrices.h>
+#include <cps/QuadraticObjective.h>
 
 using namespace Eigen;
 

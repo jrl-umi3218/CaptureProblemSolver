@@ -4,11 +4,11 @@
 #include <string>
 #include <vector>
 
-#include <bms/bms_api.h>
+#include <cps/cps_api.h>
 
 namespace cps
 {
-  class BMS_DLLAPI Logger
+  class CPS_DLLAPI Logger
   {
   public:
     Logger(const std::string& filename);

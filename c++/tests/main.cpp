@@ -6,13 +6,13 @@
 #include <Eigen/Jacobi>
 #include <Eigen/QR>
 
-#include <bms/LeastSquare.h>
-#include <bms/Problem.h>
-#include <bms/ProblemMatrices.h>
-#include <bms/QRAlgorithms.h>
-#include <bms/QuadraticObjective.h>
-#include <bms/SQP.h>
-#include <bms/toMatlab.h>
+#include <cps/LeastSquare.h>
+#include <cps/Problem.h>
+#include <cps/ProblemMatrices.h>
+#include <cps/QRAlgorithms.h>
+#include <cps/QuadraticObjective.h>
+#include <cps/SQP.h>
+#include <cps/toMatlab.h>
 
 #include "SQPTestCommon.h"
 
@@ -61,7 +61,7 @@ void QRPerformances(int n, const int N)
     }
     auto end_time = std::chrono::high_resolution_clock::now();
     auto time = end_time - start_time;
-    std::cout << " - bms::hessenbergQR " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+    std::cout << " - cps::hessenbergQR " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
   }
 
   //tridiagonalQR
@@ -80,7 +80,7 @@ void QRPerformances(int n, const int N)
     }
     auto end_time = std::chrono::high_resolution_clock::now();
     auto time = end_time - start_time;
-    std::cout << " - bms::tridiagonalQR " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+    std::cout << " - cps::tridiagonalQR " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
   }
 
   //copy overhead
@@ -117,7 +117,7 @@ void QRPerformances(int n, const int N)
     }
     auto end_time = std::chrono::high_resolution_clock::now();
     auto time = end_time - start_time;
-    std::cout << " - bms::tridiagonalQR " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+    std::cout << " - cps::tridiagonalQR " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
   }
 
   //specialQR
@@ -137,7 +137,7 @@ void QRPerformances(int n, const int N)
     }
     auto end_time = std::chrono::high_resolution_clock::now();
     auto time = end_time - start_time;
-    std::cout << " - bms::SpecialQR " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
+    std::cout << " - cps::SpecialQR " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
   }
 
   //copy overhead

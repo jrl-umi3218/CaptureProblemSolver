@@ -1,4 +1,4 @@
-set(BMS_SOURCES
+set(CPS_SOURCES
   BoundenessConstraint.cpp
   CondensedOrthogonalMatrix.cpp
   Givens.cpp
@@ -12,33 +12,33 @@ set(BMS_SOURCES
   QuadraticObjective.cpp
   SQP.cpp)
 
-set(BMS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../include)
-set(BMS_HEADERS
-  ${BMS_INCLUDE_DIR}/bms/bms_api.h
-  ${BMS_INCLUDE_DIR}/bms/BoundenessConstraint.h
-  ${BMS_INCLUDE_DIR}/bms/CondensedOrthogonalMatrix.h
-  ${BMS_INCLUDE_DIR}/bms/defs.h
-  ${BMS_INCLUDE_DIR}/bms/Givens.h
-  ${BMS_INCLUDE_DIR}/bms/GivensSequence.h
-  ${BMS_INCLUDE_DIR}/bms/LeastSquare.h
-  ${BMS_INCLUDE_DIR}/bms/LinearConstraints.h
-  ${BMS_INCLUDE_DIR}/bms/Logger.h
-  ${BMS_INCLUDE_DIR}/bms/Problem.h
-  ${BMS_INCLUDE_DIR}/bms/ProblemMatrices.h
-  ${BMS_INCLUDE_DIR}/bms/QRAlgorithms.h
-  ${BMS_INCLUDE_DIR}/bms/QuadraticObjective.h
-  ${BMS_INCLUDE_DIR}/bms/SQP.h
-  ${BMS_INCLUDE_DIR}/bms/Statistics.h
-  ${BMS_INCLUDE_DIR}/bms/toMatlab.h)
+set(CPS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+set(CPS_HEADERS
+  ${CPS_INCLUDE_DIR}/cps/cps_api.h
+  ${CPS_INCLUDE_DIR}/cps/BoundenessConstraint.h
+  ${CPS_INCLUDE_DIR}/cps/CondensedOrthogonalMatrix.h
+  ${CPS_INCLUDE_DIR}/cps/defs.h
+  ${CPS_INCLUDE_DIR}/cps/Givens.h
+  ${CPS_INCLUDE_DIR}/cps/GivensSequence.h
+  ${CPS_INCLUDE_DIR}/cps/LeastSquare.h
+  ${CPS_INCLUDE_DIR}/cps/LinearConstraints.h
+  ${CPS_INCLUDE_DIR}/cps/Logger.h
+  ${CPS_INCLUDE_DIR}/cps/Problem.h
+  ${CPS_INCLUDE_DIR}/cps/ProblemMatrices.h
+  ${CPS_INCLUDE_DIR}/cps/QRAlgorithms.h
+  ${CPS_INCLUDE_DIR}/cps/QuadraticObjective.h
+  ${CPS_INCLUDE_DIR}/cps/SQP.h
+  ${CPS_INCLUDE_DIR}/cps/Statistics.h
+  ${CPS_INCLUDE_DIR}/cps/toMatlab.h)
   
-add_library(BoundednessMPCSolver SHARED ${BMS_SOURCES} ${BMS_HEADERS})
-set_target_properties(BoundednessMPCSolver PROPERTIES COMPILE_FLAGS "-DBMS_EXPORTS")
+add_library(CaptureProblemSolver SHARED ${CPS_SOURCES} ${CPS_HEADERS})
+set_target_properties(CaptureProblemSolver PROPERTIES COMPILE_FLAGS "-DCPS_EXPORTS")
 
 if(STATISTICS)
   add_definitions(-DUSE_STATS)
 endif()
 
-install(TARGETS BoundednessMPCSolver
+install(TARGETS CaptureProblemSolver
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)

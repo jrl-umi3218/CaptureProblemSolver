@@ -2,8 +2,8 @@
 
 #include <Eigen/Jacobi>
 
-#include <bms/bms_api.h>
-#include <bms/defs.h>
+#include <cps/cps_api.h>
+#include <cps/defs.h>
 
 namespace cps
 {
@@ -11,7 +11,7 @@ namespace cps
   struct condensed_t {};
 
   /** Represent a Givens matrix G.*/
-  class BMS_DLLAPI Givens
+  class CPS_DLLAPI Givens
   {
   public:
     using Index = Eigen::DenseIndex;

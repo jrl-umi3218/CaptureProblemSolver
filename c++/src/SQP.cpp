@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <bms/SQP.h>
+#include <cps/SQP.h>
 
 using namespace Eigen;
 
