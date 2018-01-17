@@ -9,7 +9,7 @@
 #include <boost/test/unit_test.hpp>
 
 using namespace Eigen;
-using namespace bms;
+using namespace cps;
 
 BOOST_AUTO_TEST_CASE(testFeasibilitySQP)
 {

@@ -2,7 +2,7 @@
 
 using namespace Eigen;
 
-namespace bms
+namespace cps
 {
   BoundenessConstraint::BoundenessConstraint(const Eigen::VectorXd& delta, double alpha, double b)
     : n_(delta.size()), alpha_(alpha), b_(b), delta_(delta), y_(delta.size()+1)

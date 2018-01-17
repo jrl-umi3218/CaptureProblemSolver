@@ -7,7 +7,7 @@
 #include <bms/defs.h>
 #include <bms/QRAlgorithms.h>
 
-namespace bms
+namespace cps
 {
   class BMS_DLLAPI LeastSquareObjective
   {

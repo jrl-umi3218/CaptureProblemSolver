@@ -7,7 +7,7 @@
 #include <bms/bms_api.h>
 #include <bms/defs.h>
 
-namespace bms
+namespace cps
 {
   enum class Activation
   {

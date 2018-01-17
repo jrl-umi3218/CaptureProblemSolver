@@ -8,7 +8,7 @@
 # define STATISTICS(x) (void)0
 #endif
 
-namespace bms
+namespace cps
 {
   namespace stats
   {

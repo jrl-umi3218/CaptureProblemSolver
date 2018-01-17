@@ -2,7 +2,7 @@
 
 using namespace Eigen;
 
-namespace bms
+namespace cps
 {
   Eigen::MatrixXd buildJ(const Eigen::VectorXd& d)
   {

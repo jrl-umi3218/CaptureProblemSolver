@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-namespace bms
+namespace cps
 {
   /** A class representing a product Q1 Q2 ... Qk P Qh where the Qi are 
     * orthogonal matrices and P is a permutation matrix.

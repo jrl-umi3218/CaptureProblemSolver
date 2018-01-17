@@ -5,7 +5,7 @@
 #include <bms/bms_api.h>
 #include <bms/Givens.h>
 
-namespace bms
+namespace cps
 {
   /** A sequence of Givens rotations G_0*G_1*...
     *

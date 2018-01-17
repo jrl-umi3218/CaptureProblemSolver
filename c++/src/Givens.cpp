@@ -1,6 +1,6 @@
 #include <bms/Givens.h>
 
-namespace bms
+namespace cps
 {
   Givens::Givens()
     : Givens(0,0,1,0)

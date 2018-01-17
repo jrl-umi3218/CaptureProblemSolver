@@ -4,7 +4,7 @@
 
 using namespace Eigen;
 
-namespace bms
+namespace cps
 {
   SQP::SQP(int n)
     : n_(n)

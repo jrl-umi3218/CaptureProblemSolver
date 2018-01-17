@@ -1,6 +1,6 @@
 #include "SQPTestCommon.h"
 
-namespace bms
+namespace cps
 {
   RawProblem resampleProblem(const RawProblem& raw, int n)
   {

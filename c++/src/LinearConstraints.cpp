@@ -53,7 +53,7 @@ namespace
   }
 }
 
-namespace bms
+namespace cps
 {
   LinearConstraints::LinearConstraints(int n)
     : n_(n)

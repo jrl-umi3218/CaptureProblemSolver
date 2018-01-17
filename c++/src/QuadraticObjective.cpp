@@ -35,7 +35,7 @@ namespace
   }
 }
 
-namespace bms
+namespace cps
 {
   LeastSquareObjective::LeastSquareObjective(const VectorXd& delta)
     : n_(delta.size())

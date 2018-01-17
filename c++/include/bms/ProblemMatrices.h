@@ -4,7 +4,7 @@
 
 #include <bms/bms_api.h>
 
-namespace bms
+namespace cps
 {
   /** A collection of functions to generate the problem matrices.
     *

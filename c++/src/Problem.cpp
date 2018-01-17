@@ -86,7 +86,7 @@ namespace
   }
 }
 
-namespace bms
+namespace cps
 {
   void RawProblem::read(const std::string& filepath)
   {

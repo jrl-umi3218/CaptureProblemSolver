@@ -2,7 +2,7 @@
 
 using namespace Eigen;
 
-namespace bms
+namespace cps
 {
   SpecialQR::SpecialQR(DenseIndex kmax)
     : e_(kmax + 1)

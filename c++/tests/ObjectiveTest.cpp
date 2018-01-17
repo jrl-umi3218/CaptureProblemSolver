@@ -9,7 +9,7 @@
 #include <boost/test/unit_test.hpp>
 
 using namespace Eigen;
-using namespace bms;
+using namespace cps;
 
 //binary form of i
 std::vector<bool> toVec(int i, int nbits)

@@ -5,7 +5,7 @@
 
 using namespace Eigen;
 
-namespace bms
+namespace cps
 {
   LeastSquare::LeastSquare(int n)
     : n_(n)

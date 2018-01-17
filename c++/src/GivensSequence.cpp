@@ -1,6 +1,6 @@
 #include <bms/GivensSequence.h>
 
-namespace bms
+namespace cps
 {
   void GivensSequence::extend(int incr)
   {

@@ -6,7 +6,7 @@
 
 #include <bms/bms_api.h>
 
-namespace bms
+namespace cps
 {
   class BMS_DLLAPI Logger
   {

@@ -2,7 +2,7 @@
 
 #include <Eigen/Core>
 
-namespace bms
+namespace cps
 {
   typedef Eigen::Ref<const Eigen::MatrixXd> MatrixConstRef;
   typedef Eigen::Ref<Eigen::MatrixXd>       MatrixRef;

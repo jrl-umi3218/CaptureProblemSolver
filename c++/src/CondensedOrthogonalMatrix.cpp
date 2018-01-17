@@ -2,7 +2,7 @@
 
 using namespace Eigen;
 
-namespace bms
+namespace cps
 {
   CondensedOrthogonalMatrix::CondensedOrthogonalMatrix(int n, int kmax, int pmax, bool Ptranspose)
     : ptranspose_(Ptranspose)

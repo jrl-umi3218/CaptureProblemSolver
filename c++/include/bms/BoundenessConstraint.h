@@ -5,7 +5,7 @@
 #include <bms/bms_api.h>
 #include <bms/defs.h>
 
-namespace bms
+namespace cps
 {
   /** The function sum(delta_j/(sqrt(x(j+1))+sqrt(x(j))) - alpha sqrt(x(n)) - b*/
   class BMS_DLLAPI BoundenessConstraint

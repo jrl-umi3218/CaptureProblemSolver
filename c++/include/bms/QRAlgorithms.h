@@ -9,7 +9,7 @@
 #include <bms/Givens.h>
 #include <bms/GivensSequence.h>
 
-namespace bms
+namespace cps
 {
   /** Performs a QR in place of the mxn Hessenberg matrix M. Supposes n>=m.
     *

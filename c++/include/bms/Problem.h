@@ -10,7 +10,7 @@
 #include <bms/QuadraticObjective.h>
 
 
-namespace bms
+namespace cps
 {
   struct BMS_DLLAPI RawProblem
   {

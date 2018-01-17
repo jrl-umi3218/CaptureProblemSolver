@@ -8,7 +8,7 @@
 #include <bms/QuadraticObjective.h>
 #include <bms/Statistics.h>
 
-namespace bms
+namespace cps
 {
   enum class SolverStatus
   {

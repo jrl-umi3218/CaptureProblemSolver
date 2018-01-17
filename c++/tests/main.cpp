@@ -17,7 +17,7 @@
 #include "SQPTestCommon.h"
 
 using namespace Eigen;
-using namespace bms;
+using namespace cps;
 
 /** n: size of matrices, N: number of tests*/
 void QRPerformances(int n, const int N)
