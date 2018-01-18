@@ -11,7 +11,7 @@
 
 namespace cps
 {
-  /** Performs a QR in place of the mxn Hessenberg matrix M. Supposes n>=m.
+  /** Performs a QR decomposition in place of the mxn Hessenberg matrix M. Supposes n>=m.
     *
     * Upon completion, M contains the R matrix and Q is a sequence of Givens rotations.
     * The function returns true if R is full rank. 0 is determined by the absolute
@@ -37,7 +37,7 @@ namespace cps
       return std::abs(M(n - 1, n - 1)) > thresh;
   }
 
-  /** Performs a QR in place of the mxn tridiagonal matrix M. Supposes n>=m-1.
+  /** Performs a QR decomposition in place of the mxn tridiagonal matrix M. Supposes n>=m-1.
   *
   * Upon completion, M contains the R matrix and Q is a sequence of Givens rotations.
   * The function returns true if R is full rank. 0 is determined by the absolute

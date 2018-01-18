@@ -38,8 +38,8 @@ namespace cps
 
     /** Performs M = G^T M
       *
-      * Don't let the const ref fool you: it is a (recommended) trick to accept
-      * temporaries such as blocks. Internally, the const is cast away.
+      * Don't let the const ref on M fool you: it is a (recommended) trick to
+      * accept temporaries such as blocks. Internally, the const is cast away.
       *
       * We don't use Eigen::Ref here because this function will be used with
       * many small fixed-size matrices, and we want the compiler to take 

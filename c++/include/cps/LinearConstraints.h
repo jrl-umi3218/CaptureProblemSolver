@@ -42,12 +42,14 @@ namespace cps
   /** A class to manipulate the linear constraints of the problem.
     * l_i <= x_i-x_{i-1} <= u_i for i=0..n-1  (x_{-1} = 0)
     * xln <= x_{n-1} <= xun
-    * Constraints are considered in this order
+    * Constraints are considered in this order.
+    *
+    * In particular, the class is in charge of the activation status of the constraints.
     */
   class CPS_DLLAPI LinearConstraints
   {
   private:
-    /** Intermediate temporary structure for shifting the constraints. See shift*/
+    /** Intermediate temporary structure for shifting the constraints. See shift.*/
     struct Shift
     {
       const LinearConstraints& c;
@@ -56,7 +58,9 @@ namespace cps
     };
 
   public:
+    /** Create uninitialized constraints with memory allocated for a problem with size n.*/
     LinearConstraints(int n);
+    /** Create the constraints with initialized data.*/
     LinearConstraints(const Eigen::VectorXd& l, const Eigen::VectorXd& u, double xln, double xun);
 
     /** See shift*/
@@ -71,7 +75,9 @@ namespace cps
       */
     Shift shift(const Eigen::VectorXd& x, bool feasible=false) const;
 
+    /** Get the lower bound [l;xln] of the constraints.*/
     const Eigen::VectorXd& l() const;
+    /** Get the upper bound [u;xun] of the constraints.*/
     const Eigen::VectorXd& u() const;
 
     /** Return a feasible point for the constraints.
@@ -81,7 +87,9 @@ namespace cps
       */
     std::pair<FeasiblePointInfo, Eigen::VectorXd> initialPoint(bool takeActivationIntoAccount = false, double eps = 1e-8) const;
 
+    /** Size n of the problem.*/
     Eigen::DenseIndex size() const;
+    /** Size of the nullspace of the active constraints.*/
     Eigen::DenseIndex nullSpaceSize() const;
 
     /** Activate the i-th constraint
@@ -94,16 +102,25 @@ namespace cps
     /** Deactivate all non-equality constraints*/
     void resetActivation();
 
+    /** Get the activation status of the i-th constraint (0-base index).*/
     Activation activationStatus(size_t i) const;
 
+    /** Get the current active set. v[i] is true if the i-th constraint is active.*/
     const std::vector<bool>& activeSet() const;
+    /** Get the current activation status of all constraints.*/
     const std::vector<Activation>& activationStatus() const;
+    /** Set the activation status of all constraints.*/
     void setActivationStatus(const std::vector<Activation>& act);
-    /** Index of active constraints*/
+    /** Index of active constraints.*/
     const std::vector<Eigen::DenseIndex>& activeSetIdx() const;
+    /** Number na of active constraints.*/
     Eigen::DenseIndex numberOfActiveConstraints() const;
 
+    /** Change the bounds of the i-th constraint to l and u 0<= i <=n.*/
     void changeBounds(Eigen::DenseIndex i, double l, double u);
+    /** Change the bounds of the n first or all constraints, depending on the
+      * size of l and u.
+      */
     void changeBounds(const VectorConstRef l, const VectorConstRef u);
 
     /** Y = X*N_A */

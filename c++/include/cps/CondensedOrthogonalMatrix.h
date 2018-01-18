@@ -30,25 +30,40 @@ namespace cps
     CondensedOrthogonalMatrix() {}
 
     /** This methods acts exactly as the operator=(), except that it supposes 
-      * (and check by assert) that other will fit in the memory already allocated
+      * (and checks by assert) that other will fit in the memory already allocated
       * to this object.
       */
     CondensedOrthogonalMatrix& copyNoAlloc(const CondensedOrthogonalMatrix& other);
 
+    /** Return the size n of the represented matrix.*/
     Eigen::DenseIndex size() const;
+    /** Reset to identity*/
     void reset(bool Ptranspose = false);
+    /** Resize the allocated memory. This invalidates the previous values.*/
     void resize(int n, int kmax, int pmax);
 
+    /** Get the sequence Q1 Q2 ... Qk.*/
     std::vector<GivensSequence>& Q();
+    /** Get the i+1-th element of the above sequence (0-based indexation).*/
     GivensSequence& Q(size_t i);
+    /** Get the Qh matrix*/
     GivensSequence& Qh();
+    /** Get the P matrix*/
     Eigen::Transpositions<Eigen::Dynamic>& P();
 
-    /** M = P^T Q_k^T Q_{k-1}^T .... Q_1^T M*/
+    /** M = Qh^T P^T Q_k^T Q_{k-1}^T .... Q_1^T M
+      *
+      * Don't let the const ref on M fool you: it is a (recommended) trick to
+      * accept temporaries such as blocks. Internally, the const is cast away.
+      *
+      * We don't use Eigen::Ref here because this function will be used with
+      * many small fixed - size matrices, and we want the compiler to take
+      * advantage of that.
+      */
     template<typename Derived>
     void applyTo(const Eigen::MatrixBase<Derived>& M) const;
 
-    /** Computes M = M * Q_1 Q_2 ... G_n P */
+    /** Computes M = M Q_1 Q_2 ... G_n P Qh */
     template<typename Derived>
     void applyOnTheRightTo(const Eigen::MatrixBase<Derived>& M) const;
 
@@ -59,11 +74,17 @@ namespace cps
     Eigen::MatrixXd matrix();
 
   private:
+    /** Wether P (false) or P^T (true) is stored in transpositions_.*/
     bool ptranspose_;
+    /** Size of the represented matrix.*/
     Eigen::DenseIndex n_;
+    /** The sequence Q1 Q2 ...  Qk*/
     std::vector<GivensSequence> sequences_;
+    /** The matrix Qh*/
     GivensSequence Qh_;
+    /** The matrix P*/
     Eigen::Transpositions<Eigen::Dynamic> transpositions_;
+    /** Internal vector used to reset transpositions_ to identity.*/
     Eigen::VectorXi identityTransposition_;
   };
 
@@ -127,7 +148,7 @@ namespace cps
     return sequences_[i];
   }
 
-  inline GivensSequence & CondensedOrthogonalMatrix::Qh()
+  inline GivensSequence& CondensedOrthogonalMatrix::Qh()
   {
     return Qh_;
   }

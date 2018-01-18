@@ -10,6 +10,7 @@
 
 namespace cps
 {
+  /** Information returned by the solvers upon completion.*/
   enum class SolverStatus
   {
     Converge,                       /** A solution was found*/
@@ -20,9 +21,18 @@ namespace cps
     Fail
   };
 
+  /** A solver dedicated solver for the problem for the least-square subproblem
+    * occuring in cps::SQP.
+    *
+    * The class in itself handle the memory and statistics useful for its two
+    * main methods:
+    *  - solve
+    *  - solveFeasibility
+    */
   class CPS_DLLAPI LeastSquare
   {
   public:
+    /** A set of parameters for controlling the execution of the resolution.*/
     class Parameters
     {
     public:
@@ -43,13 +53,32 @@ namespace cps
       double rankThreshold_ = 1e-12;  //threshold on the last diagonal value in the QR of A, to detect rank loss
     };
 
-
+    /** Create a solver for a problem of size n.*/
     LeastSquare(int n);
 
+    /** Change parameters.*/
     void parameters(const Parameters& param);
+    /** Get the current parameters.*/
     const Parameters& parameters() const;
 
+    /** Solve the following problem:
+      *
+      * min. ||J x + Jx0||^2 + ||j^T x + c||^2
+      * s.t. l_i <= x_i-x_{i-1} <= u_i for i=0..n-1  (x_{-1} = 0)
+      *      xln <= x_{n-1} <= xun
+      *
+      * where J is described by obj, and the constraints by lc
+      */
     SolverStatus solve(const LeastSquareObjective& obj, const VectorConstRef& Jx0, const VectorConstRef& j, double c, LinearConstraints& lc);
+
+    /** Solve the following problem:
+    *
+    * min. ||j^T x + c||^2
+    * s.t. l_i <= x_i-x_{i-1} <= u_i for i=0..n-1  (x_{-1} = 0)
+    *      xln <= x_{n-1} <= xun
+    *
+    * where the constraints are described by lc
+    */
     SolverStatus solveFeasibility(const VectorConstRef& j, double c, LinearConstraints& lc);
 
     /** Retrieve the solution (after call to solve() or solveFeasibility())*/
@@ -61,6 +90,7 @@ namespace cps
     const stats::LSStats& statistics() const;
 
   private:
+    // size of the problem
     Eigen::DenseIndex n_;
 
     //solver parameters;

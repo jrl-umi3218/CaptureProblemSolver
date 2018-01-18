@@ -10,9 +10,17 @@
 
 namespace cps
 {
+  /** A solver for the (modified) capture problem.
+    *
+    * The class in itself handle the memory and statistics useful for its two
+    * main methods:
+    *  - solve
+    *  - solveFeasibility
+    */
   class CPS_DLLAPI SQP
   {
   public:
+    /** A set of parameters for controlling the execution of the resolution.*/
     class Parameters
     {
     public:
@@ -35,7 +43,7 @@ namespace cps
       Parameters& feasibilityEps(double d) { feasibilityEps_ = d; return *this; }
 
     private:
-      int maxIter_ = 100;
+      int maxIter_ = 100;            //maximum number of iterations
       double mu_ = 100000;           //penalty parameter
       double beta_ = 0.9;            //backtracking multiplier in line search
       double c1_ = 0.01;             //gradient coefficient in line search
@@ -45,20 +53,32 @@ namespace cps
       double feasibilityEps_ = 1e-8; //margin of feasibility for which a potential numerical issue is detected
     };
 
+    /** Build a solver for problems of size n.*/
     SQP(int n);
+    /** Set a new set of parameters for the SQP.*/
     void SQPParameters(const Parameters& p);
+    /** Set a new set of parameters for the underlying least-square solver.*/
     void LSParameters(const LeastSquare::Parameters& p);
+    /** Get the current parameters of the SQP.*/
     const Parameters& SQPParameters() const;
+    /** Get the current parameters of the underlying least-square solver.*/
     const LeastSquare::Parameters& LSParameters() const;
 
+    /***/
     SolverStatus solve(const Problem& pb);
+    /***/
     SolverStatus solveFeasibility(const Problem& pb);
 
+    /** Retrieve the solution (after call to solve() or solveFeasibility())*/
     const Eigen::VectorXd& x() const;
+    /** Retrieve the Lagrange multipliers (after call to solve() or solveFeasibility())*/
     const Eigen::VectorXd& lambda() const;
+    /** Retrieve the current active set.*/
     const std::vector<Activation>& activeSet() const;
+    /** Get the number of iterations of the last run.*/
     int numberOfIterations() const;
 
+    /** Get stats on the last run. Only meaningful if USE_STATS is defined*/
     const stats::SQPStats& statistics() const;
 
   private:

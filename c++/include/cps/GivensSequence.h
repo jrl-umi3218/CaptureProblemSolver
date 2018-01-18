@@ -9,19 +9,19 @@ namespace cps
 {
   /** A sequence of Givens rotations G_0*G_1*...
     *
-    * Note: it is ok to derive publicly here as we do not have any additional
-    * data.
+    * Note: it is ok to derive publicly from std::vector here as we do not have
+    * any additional data.
     */
   class CPS_DLLAPI GivensSequence final : public std::vector<Givens>
   {
   public:
     using std::vector<Givens>::vector;
 
-    /** M = G_{n-1}^T G_{n-2}^T .... G_0^T M*/
+    /** M = G_{k-1}^T G_{k-2}^T .... G_0^T M*/
     template<typename Derived>
     void applyTo(const Eigen::MatrixBase<Derived>& M) const;
 
-    /** Computes M = M * G_0 G_1 ... G_{n-1}*/
+    /** Computes M = M * G_0 G_1 ... G_{k-1}*/
     template<typename Derived>
     void applyOnTheRightTo(const Eigen::MatrixBase<Derived>& M) const;
 

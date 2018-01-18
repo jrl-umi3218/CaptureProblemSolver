@@ -12,23 +12,25 @@ namespace cps
 {
   namespace stats
   {
+    /** A structure gathering statistics about a LS run.*/
     struct LSStats
     {
       void reset();
 
-      int iter;
-      int activation;
-      int deactivation;
-      int rankLoss;
-      int activeConstraints;
+      int iter;                 //number of iterations
+      int activation;           //number of activations
+      int deactivation;         //number of deactivations
+      int rankLoss;             //number of time a rank loss was detected in the objective matrix
+      int activeConstraints;    //number of active constraints
     };
 
+    /** A structure gathering statistics about a SQP run.*/
     struct SQPStats
     {
       void reset();
 
-      std::vector<int> lineSearchSteps; //number of steps for each iter
-      std::vector<LSStats> lsStats;
+      std::vector<int> lineSearchSteps; //number of steps in the line search for each iteration
+      std::vector<LSStats> lsStats;     //statistics of the LS runs for each iterations
     };
 
     inline void LSStats::reset()

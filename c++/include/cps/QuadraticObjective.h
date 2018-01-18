@@ -9,16 +9,21 @@
 
 namespace cps
 {
+  /** A class for the computations related to the objective function ||J x||^2.*/
   class CPS_DLLAPI LeastSquareObjective
   {
   public:
     using Index = Eigen::DenseIndex;
 
+    /** Build the objective from the vector delta.*/
     LeastSquareObjective(const Eigen::VectorXd& delta);
 
+    /** Size of the problem.*/
     Index size() const;
 
+    /** Evaluate the objective at x.*/
     double value(const VectorConstRef& x) const;
+
     /** Y = J X
       * Note that the constness of Y is a trick to allow the compiler to accept 
       * temporary views (like block). The constness is not honored.
@@ -33,13 +38,24 @@ namespace cps
     void applyJTransposeToTheLeft(const Eigen::MatrixBase<Derived1>& Y, const Eigen::MatrixBase<Derived2>& X) const;
 
 
+    /** Returns the QR decomposition of J_A for the given active-set act.
+      * The computation is performed only of no precomputation were carried,
+      * otherwise the precomputed decomposition is returned.
+      *
+      * If J_A is a subset of (continuous) rows in a bigger matrix, shift is
+      * the number of line above J_A.
+      */
     void qr(MatrixRef R, CondensedOrthogonalMatrix& Q, const std::vector<bool>& act, Index shift = 0) const;
+    /** Same as above, were the number of active constraints in act is already
+      * given by nact, to  avoid re-scanning the vector.
+      */
     void qr(MatrixRef R, CondensedOrthogonalMatrix& Q, Index nact, const std::vector<bool>& act, Index shift = 0) const;
 
     /** Return J. For Debug*/
     Eigen::MatrixXd matrix() const;
     /** Return J*Na. For debug*/
     Eigen::MatrixXd projectedMatrix(const std::vector<bool>& act) const;
+    /** Same as above, where the number of active constraint in act is given by nact.*/
     Eigen::MatrixXd projectedMatrix(Index nact, const std::vector<bool>& act) const;
 
     /** Given e = d_(dstart:dend), build a matrix with main body of the form
@@ -74,15 +90,19 @@ namespace cps
     void precompute(Index shift);
 
   private:
+    /** Precomputed QR decomposition.*/
     struct Precomputation
     {
       Eigen::MatrixXd R;
       CondensedOrthogonalMatrix Q;
     };
 
+    /** Performe the QR decomposition of J_A in qr(R,Q,act,shift) when it was not precomputed. */
     void qrComputation(MatrixRef R, CondensedOrthogonalMatrix& Q, const std::vector<bool>& act, Index shift = 0) const;
+    /** Same as above for qr(R,Q,nact,act,shift)*/
     void qrComputation(MatrixRef R, CondensedOrthogonalMatrix& Q, Index nact, const std::vector<bool>& act, Index shift = 0) const;
 
+    //data
     Eigen::DenseIndex n_;
     Eigen::VectorXd delta_;
     Eigen::VectorXd d_;     // 1/delta
