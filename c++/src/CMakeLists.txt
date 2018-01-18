@@ -5,7 +5,6 @@ set(CPS_SOURCES
   GivensSequence.cpp
   LeastSquare.cpp
   LinearConstraints.cpp
-  Logger.cpp
   Problem.cpp
   ProblemMatrices.cpp
   QRAlgorithms.cpp
@@ -22,7 +21,6 @@ set(CPS_HEADERS
   ${CPS_INCLUDE_DIR}/cps/GivensSequence.h
   ${CPS_INCLUDE_DIR}/cps/LeastSquare.h
   ${CPS_INCLUDE_DIR}/cps/LinearConstraints.h
-  ${CPS_INCLUDE_DIR}/cps/Logger.h
   ${CPS_INCLUDE_DIR}/cps/Problem.h
   ${CPS_INCLUDE_DIR}/cps/ProblemMatrices.h
   ${CPS_INCLUDE_DIR}/cps/QRAlgorithms.h
