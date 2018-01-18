@@ -25,10 +25,12 @@ addUnitTest(SQPTest SQPTestCommon.h SQPTestCommon.cpp)
 set(TESTSOURCES
   main.cpp
   SQPTestCommon.cpp
+  timings.cpp
 )
 
 set(TESTHEADERS
   SQPTestCommon.h
+  timings.h
 )
 
 add_executable(main ${TESTSOURCES} ${TESTHEADERS})
