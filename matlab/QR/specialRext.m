@@ -1,3 +1,5 @@
+%Extension of specialR to more types of ending
+%See universalJj for the meaning of endType
 function R = specialRext(e,endType)
 n = length(e);
 d = -(1:n)';

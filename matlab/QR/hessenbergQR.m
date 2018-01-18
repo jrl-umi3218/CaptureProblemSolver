@@ -1,4 +1,4 @@
-%%perform a QR decomposition on an upper Hessenberg matrix
+%perform a QR decomposition on an upper Hessenberg matrix
 function [g,R] = hessenbergQR(H)
 n = size(H,1);
 g(n-1,1) = struct('i',0,'n',0,'c',0.,'s',0.);

@@ -10,7 +10,7 @@
 % -e_k-e_{k+1} if ext is true
 %
 % The matrix R is such that Q*R = A where Q is obtained with
-% specialGivensConss
+% specialGivensCons
 function R = specialR(A,ext)
 if nargin<2
   ext = false;
