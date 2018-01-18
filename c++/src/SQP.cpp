@@ -48,6 +48,7 @@ namespace cps
 
   SolverStatus SQP::solve(const Problem& pb)
   {
+    k_ = 0;  // reset iteration number
     STATISTICS(stats_.reset());
 
     //shortcuts
@@ -166,6 +167,8 @@ namespace cps
 
   SolverStatus SQP::solveFeasibility(const Problem& pb)
   {
+    k_ = 0;  // reset iteration number
+
     //shortcuts
     const auto& lc = pb.linearConstraints();
     const auto& nlc = pb.nonLinearConstraint();

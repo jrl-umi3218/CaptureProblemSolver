@@ -58,6 +58,16 @@ namespace cps
     /** Get the size n of the problem.*/
     Eigen::VectorXd::Index size() const;
 
+    /** Precompute QR decompositions of the projected-nullspace jacobians of
+      * the least-square objective for all possible active set value.
+      *
+      * Note that these pre-computations depend only on the `delta` vector of
+      * the internal RawProblem. All other parameters (`init_zbar`,
+      * `target_height`, etc.) can be changed with no need to call this function
+      * again.
+      */
+    void precompute();
+
     /** Change omega_i_min and omega_i_max.*/
     void set_init_omega(double init_omega_min, double init_omega_max);
     /** Change omega_i_max.*/
@@ -72,10 +82,27 @@ namespace cps
     void set_lambda_max(double lambda_max);
     /** Change lambda_min.*/
     void set_lambda_min(double lambda_min);
-    /** Change nambda_min and lambda_max.*/
+    /** Change lambda_min and lambda_max.*/
     void set_lambdas(double lambda_min, double lambda_max);
     /** Change z_f*/
     void set_target_height(double target_height);
+
+    /** Get delta.*/
+    const Eigen::VectorXd& delta() const { return raw_.delta; }
+    /** Get omega_i_max.*/
+    double init_omega_max() const { return raw_.init_omega_max; }
+    /** Get omega_i_min.*/
+    double init_omega_min() const { return raw_.init_omega_min; }
+    /** Get z_i.*/
+    double init_zbar() const { return raw_.init_zbar; }
+    /** Get dz_i/dt.*/
+    double init_zbar_deriv() const { return raw_.init_zbar_deriv; }
+    /** Get lambda_max.*/
+    double lambda_max() const { return raw_.lambda_max; }
+    /** Get lambda_min.*/
+    double lambda_min() const { return raw_.lambda_min; }
+    /** Get z_f.*/
+    double target_height() const { return raw_.target_height; }
 
   private:
     void computeAndSetBounds0();

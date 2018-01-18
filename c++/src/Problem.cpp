@@ -258,4 +258,8 @@ namespace cps
     bc_.setb(raw_.init_zbar_deriv / raw_.g);
   }
 
+  void Problem::precompute()
+  {
+    objective().precompute(1);
+  }
 }
