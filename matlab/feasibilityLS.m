@@ -23,7 +23,7 @@ x = zeros(n,1);
 %finished = checkKKT(j,c,x,lambdaZ,lambdaN,l,u,xln,xun,1e-6,1e-6);
 maxIter = 10*n;
 for k=1:maxIter
-  [jn,idx] = applyNullspace(j',activeZ~=0,false,activeN~=0);
+  [jn,idx] = applyNullspace(j',activeZ~=0,activeN~=0);
   %z = -pinv(jn)*(c+j'*x);
   z = -(jn'/(jn*jn'))*(c+j'*x);
   %compute p = N*z
@@ -34,7 +34,7 @@ for k=1:maxIter
     act = [activeZ;activeN];
     %[~,Cact] = dedicatedNullspace(activeZ~=0,false,activeN~=0);
     %lambda(act~=0) = -(j'*x+c)*(pinv(Cact')*j);
-    lambda(act~=0) = -(j'*x+c)*(multByPinvCaT(j,activeZ~=0,false,activeN~=0));
+    lambda(act~=0) = -(j'*x+c)*(multByPinvCaT(j,activeZ~=0,activeN~=0));
     lambda(act==0) = 0;
     if all(lambda(act==-1)<=0) && all(lambda(act==1)>=0)
       return;

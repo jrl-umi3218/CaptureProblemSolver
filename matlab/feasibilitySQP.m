@@ -3,11 +3,23 @@
 % s.t. l_i <= x_i-x_{i-1} <= u_i for i=1..n  (x_0 = 0)
 %      xln <= x_n <= xun
 %
-%where c is the boundeness constraint
+%where c is the boundedness constraint
+%
+%Example
+% delta = [0.01, 0.03, 0.05, 0.07, 0.09, 0.11, 0.13, 0.15, 0.17, 0.19];
+% g = 9.80665;
+% lambda_max = 19.6133;
+% lambda_min = 0.980665;
+% omega_i_max = 3.5004454562949268;
+% omega_i_min = 2.7492602295351802;
+% z_bar = 0.91307774471737957;
+% z_f = 0.8;
+% zd_bar = -0.17413705390465162;
+% feasibilitySQP(g,delta,z_bar,zd_bar,z_f,lambda_min,lambda_max, omega_i_min, omega_i_max)
 function x = feasibilitySQP(g,delta,zi,dzi,zf,lmin,lmax,wimin,wimax)
 n = length(delta);
-l = lmin*delta;
-u = lmax*delta;
+l = lmin*delta(:);
+u = lmax*delta(:);
 l(1) = delta(1)*g/zf;
 u(1) = l(1);
 xln = wimin^2;
@@ -23,7 +35,7 @@ maxIter = 100;
 for i=1:maxIter
   [~,f,~,g] = c(x);
   disp(['||c||^2 : ' num2str(f^2)])
-  if checkKKT(f,g,x,lambda,l,u,xln,xun,1e-6,1e-6);
+  if checkKKT(f,g,x,lambda,l,u,xln,xun,1e-6,1e-6)
 %    disp(norm(f));
     break;
   end

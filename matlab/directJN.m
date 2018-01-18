@@ -1,9 +1,12 @@
-function JN = directJN(delta,az,a1,an)
-assert(~(a1 && az(1)));
+%Build J*N directly (no multiplication)
+%
+%Example
+% delta = [0.01, 0.03, 0.05, 0.07, 0.09, 0.11, 0.13, 0.15, 0.17, 0.19];
+% directJN(Delta,[1 1 0 0 1 0 0 1 1 1],false)
+function JN = directJN(delta,az,an)
 n = length(az);
-na = sum(az) + a1 +an;
+na = sum(az) + an;
 JN = zeros(n-1,n-na);
-az(1) = az(1) || a1;
 az(end+1) = an;
 d = 1./delta;
 

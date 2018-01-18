@@ -1,4 +1,5 @@
-%objective of the balance problem
+%Objective function of the original capture problem
+%sum(((x[i+1]-x[i])\delta[i] - (x[i]-x[i-1])\delta[i-1])^2) (with x[0] = 0)
 function [f,gradf] = objMPC(delta, x)
 n = length(x);
 assert(length(delta) == n)

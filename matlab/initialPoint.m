@@ -23,16 +23,16 @@ function [x,b] = initialPoint(l,u,xln,xun)
 assert(xln<=xun);
 assert(all(l<=u));
 s = sum(l);
-d = u-l;
+d = u(:)-l(:);
 t = sum(d);
 if abs(t) < 1e-15
   b = xln<=s && s<=xun;
-  x = l;
+  x = l(:);
 else
   al = (xln-s)/t;
   au = (xun-s)/t;
   b = al<=1 && au>=0;
   L = tril(ones(length(l)));
-  x = L*(l + (max(al,0)+min(au,1))/2*d);
+  x = L*(l(:) + (max(al,0)+min(au,1))/2*d);
 end
 end

@@ -1,14 +1,16 @@
 %multiply efficiently the matrix A by the nullspace basis N that 
-%dedicatedNullspace(az, a1, an) would have returned.
+%dedicatedNullspace(az, an) would have returned (see dedicatedNullspace for
+%more details).
 %idx is such that N*B = B(idx,:)
-function [AN,idx,activeIndex] = applyNullspace(A,az,a1,an)
-assert(~(a1 && az(1)));
+%
+%Example
+% MN = applyNullspace([1 1 0 0 1 0 0 1 1 1],false)
+function [AN,idx,activeIndex] = applyNullspace(A,az,an)
 n = length(az);
-na = sum(az) + a1 +an;
+na = sum(az) +an;
 AN = zeros(size(A,1),n-na);
 idx = zeros(n,1);
 activeIndex = zeros(na,1);
-az(1) = az(1) || a1;
 
 c = 0;
 k = 1;

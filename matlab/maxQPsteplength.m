@@ -7,7 +7,6 @@
 % It is 0 if p=1, and n+1 if the blocking constraints is the last one.
 % type=1 (resp. -1) if the upper (resp. lower) bound is blocking and 0 if 
 % p=1. 
-
 function [a,i,type] = maxQPsteplength(x,p,l,u,xln,xun,activeZ,activeN)
 act = [activeZ;activeN];
 

@@ -1,3 +1,5 @@
+%A small utility function to write latex code from a matrix
+%\BIN and \BOUT, are shortcuts for \begin{bmatrix} and \end{bmatrix}
 function s = matrix2latex(M)
 [m,n] = size(M);
 S = num2str(M(:,1));

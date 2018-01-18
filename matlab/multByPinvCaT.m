@@ -2,16 +2,14 @@
 % l_i <= x_i-x_{i-1} <= u_i for i=1..n  (x_0 = 0)
 % xln <= x_n <= xun
 %we note Ca the matrix corresponding to the activated constraints,
-%specified by  az, a1 and an.
+%specified by  az and an.
 %The function computes Y = pinv(Ca^T)*X in an optimized way.
-function Y = multByPinvCaT(X,az,a1,an)
-assert(~(a1 && az(1)));
+function Y = multByPinvCaT(X,az,an)
 n = length(az);
 assert(size(X,1) == n);
-na = sum(az) + a1 +an;
+na = sum(az) + an;
 assert(na<=n); %we do not treat the case where all constraints are active.
 Y = zeros(na,size(X,2));
-az(1) = az(1) || a1;
 
 if az(1)
   k=1;
