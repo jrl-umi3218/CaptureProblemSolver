@@ -32,10 +32,6 @@ set(CPS_HEADERS
 add_library(CaptureProblemSolver SHARED ${CPS_SOURCES} ${CPS_HEADERS})
 set_target_properties(CaptureProblemSolver PROPERTIES COMPILE_FLAGS "-DCPS_EXPORTS")
 
-if(STATISTICS)
-  add_definitions(-DUSE_STATS)
-endif()
-
 install(TARGETS CaptureProblemSolver
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib

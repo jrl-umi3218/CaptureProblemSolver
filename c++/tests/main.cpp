@@ -57,20 +57,24 @@ void SQPSolveTest(const std::string& filepath)
   raw.read(base + "/" + filepath);
 
   Problem pb(raw);
-  pb.objective().precompute(1);
+  pb.precompute();
   SQP sqp(static_cast<int>(raw.delta.size()));
-  auto s = sqp.solve(pb);
-  std::cout << static_cast<int>(s) << std::endl;
-  std::cout << sqp.x().transpose() << std::endl;
-  std::cout << raw.Phi_.transpose() << std::endl;
 
+  std::cout << "Solving problem " << filepath << "\n" <<std::endl;
+  auto s = sqp.solve(pb);
+  std::cout << "  solver status: " << static_cast<int>(s) << std::endl;
+  std::cout << "  sqp solution:  " << sqp.x().transpose() << std::endl;
+  std::cout << "  raw solution:  "<< raw.Phi_.tail(raw.Phi_.size()-1).transpose() << "\n" << std::endl;
+
+#ifdef USE_STATS
   auto statistics = sqp.statistics();
-  std::cout << "(iter, act, deact, #actCstr)" << std::endl;
+  std::cout << " (iter,\tact,\tdeact,\t#actCstr)" << std::endl;
   for (size_t i = 0; i < statistics.lsStats.size(); ++i)
   {
     auto si = statistics.lsStats[i];
-    std::cout << si.iter << ", " << si.activation << ", " << si.deactivation << ", " << si.activeConstraints << std::endl;
+    std::cout << "  " << si.iter << ",\t" << si.activation << ",\t" << si.deactivation << ",\t" << si.activeConstraints << std::endl;
   }
+#endif //USE_STATS
 }
 
 int main()
@@ -109,10 +113,10 @@ int main()
   //QRJAPerformance(500, 1000);
 
   //mapFeasibleInputs();
-  //SQPSolveTest("data/Problem02.txt");
+  SQPSolveTest("data/Problem02.txt");
 
   //SQPTimings({ "data/Problem01.txt", "data/Problem02.txt" , "data/Problem03.txt" , "data/Problem04.txt" }, { -1, 15, 20, 50, 100 }, 1000);
-  SQPTimings({ "data/Problem01.txt" }, { -1, 15, 20, 50, 100 }, 1000);
+  //SQPTimings({ "data/Problem01.txt" }, { -1, 15, 20, 50, 100 }, 1000);
 
 #ifdef WIN32
   system("pause");

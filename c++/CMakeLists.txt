@@ -43,6 +43,10 @@ IF(MSVC)
   SET(CMAKE_MSVCIDE_RUN_PATH "\$(SolutionDir)/src/\$(Configuration)")
 ENDIF(MSVC)
 
+if(STATISTICS)
+  add_definitions(-DUSE_STATS)
+endif()
+
 add_subdirectory(src)
 add_subdirectory(tests)
 
