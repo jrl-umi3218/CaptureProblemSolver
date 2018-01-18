@@ -1,4 +1,4 @@
-Capture Problem Solver
+CPS: a Capture Problem Solver
 ===
 
 This project propose a dedicated solver in C++ for the capture problem presented initially in 
@@ -9,22 +9,26 @@ S. Caron, A. Escande, B. Mallein, L. Lanari, "Capturability-based Analysis, Opti
 
 The repository contains three folders
  - the c++ code of the solver
- - a matlab code that was used for prototyping (and currently lacks of comments)
- - a latex technical documentation, with some of the math behind the solver
+ - a matlab code that was used for prototyping
+ - a latex technical document, with some of the math behind the solver (not fully complete)
 
 Installation
 ---
-## Dependencies
+
+Compilation has been tested on Linux (gcc/clang) and Windows (Visual Studio)
+
+### Tool and dependencies
 
 To compile you need the following tools:
 
  * [Git]()
- * [CMake]() >= 2.8
+ * [CMake]() >= 2.8.12
  * [pkg-config]()
  * [doxygen]()
  * [Boost]() >= 1.49
  * [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) >= 3.2
  * [A compiler with C++11 support]()
+
 
 
 Thanks
