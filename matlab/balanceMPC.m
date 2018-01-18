@@ -1,3 +1,7 @@
+%Build and solve the capture problem
+%If relax is true (false by default), build a relaxed version in which the
+%non-linear equlity constraint c=0 is turned into the convex constraint
+%c<=0
 function phi = balanceMPC(g,delta,zi,dzi,zf,lmin,lmax,wimin,wimax,relax)
 assert(nargin>=8)
 twoD = nargin==8;

@@ -1,3 +1,4 @@
+%The non-linear equality constraint
 %sum(delta_j/(sqrt(x(j+1))+sqrt(x(j))) - alpha sqrt(x(n)) - b
 function [cineq,c,gradcineq,gradc] = constrMPC(delta, x, alpha, b, relax)
 n = length(x);
