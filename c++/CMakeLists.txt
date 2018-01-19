@@ -1,4 +1,3 @@
-# Disable -Werror on Unix for now.
 # Copyright 2018 CNRS-AIST JRL, CNRS-UM LIRMM
 #
 # This file is part of CPS.
@@ -29,6 +28,7 @@ SET(PROJECT_DESCRIPTION "...")
 SET(PROJECT_URL "https://gite.lirmm.fr/adrien_escande_at_gmail_com/BoundednessMPCSolver")
 SET(PROJECT_DEBUG_POSTFIX "_d")
 
+# Disable -Werror on Unix for now.
 SET(CXX_DISABLE_WERROR True)
 
 SETUP_PROJECT()

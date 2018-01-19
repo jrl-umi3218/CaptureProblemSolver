@@ -1,4 +1,3 @@
-# Disable -Werror on Unix for now.
 # Copyright 2018 CNRS-AIST JRL, CNRS-UM LIRMM
 #
 # This file is part of CPS.
