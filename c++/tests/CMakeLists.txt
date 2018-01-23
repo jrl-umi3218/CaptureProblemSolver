@@ -42,11 +42,13 @@ addUnitTest(SQPTest SQPTestCommon.h SQPTestCommon.cpp)
 
 set(TESTSOURCES
   main.cpp
+  misc.cpp
   SQPTestCommon.cpp
   timings.cpp
 )
 
 set(TESTHEADERS
+  misc.h
   SQPTestCommon.h
   timings.h
 )
