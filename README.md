@@ -33,6 +33,23 @@ and the following dependencies:
 
 This repository also uses [jrl-cmakemodules](https://github.com/jrl-umi3218/jrl-cmakemodules) as a submodule.
 
+### Building from source on Linux
+
+Follow the standard CMake build procedure:
+
+```sh
+git clone --recursive https://github.com/jrl-umi3218/CaptureProblemSolver
+cd CaptureProblemSolver
+mkdir build && cd build
+cmake [options] ..
+make && make install
+```
+
+where the main options are:
+ * `-DCMAKE_BUIlD_TYPE=Release` Build in Release mode
+ * `-DCMAKE_INSTALL_PREFIX=some/path/to/install` default is `/usr/local`
+ * `-DPYTHON_BINDINGS=ON` Build Python bindings
+
 Use
 ---
 
