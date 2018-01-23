@@ -26,7 +26,7 @@ void QRPerformances(int n, const int N)
   VectorXd d = VectorXd::Random(n).cwiseAbs();
   MatrixXd J = buildJ(d);
 
-  //dummy accumulator
+  //dummy accumulator to avoid that the compiler optimizes loops away
   double acc = 0;
 
   std::cout << "On matrix J" << std::endl;
@@ -166,7 +166,7 @@ void LSPerformance(int n, const int N)
 {
   std::cout << "LSPerformance, size = " << n << std::endl;
 
-  double d = 0;
+  double d = 0; //dummy accumulator to avoid that the compiler optimizes loops away
 
   VectorXd l = -VectorXd::Random(n).cwiseAbs();
   VectorXd u = VectorXd::Random(n).cwiseAbs();
@@ -206,23 +206,6 @@ void LSPerformance(int n, const int N)
     std::cout << "LS: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
   }
 
-#ifdef LSSOL_OPTION
-  auto opt = ls.parameters();
-  ls.parameters(opt.optimizedSolver(false));
-  {
-    auto start_time = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < N; ++i)
-    {
-      lc.resetActivation();
-      ls.solve(obj, Jx0, j, c, lc);
-      d += ls.x()[0];
-    }
-    auto end_time = std::chrono::high_resolution_clock::now();
-    auto time = end_time - start_time;
-    std::cout << "LS-lssol: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
-  }
-#endif
-
   std::cout << d << std::endl;
 }
 
@@ -242,7 +225,7 @@ void QRJAPerformance(int n, const int N)
   MatrixXd JA(n - 1, n - na);
   lc.applyNullSpaceOnTheRight(JA, J);
 
-  double acc = 0;
+  double acc = 0; //dummy accumulator to avoid that the compiler optimizes loops away
   {
     HouseholderQR<MatrixXd> qr(n - 1, n - na);
     MatrixXd Jcopy(n - 1, n - na);
@@ -315,7 +298,7 @@ void SQPPerformance(const std::string& filepath, int n, const int N)
   SQP sqp(static_cast<int>(raw.delta.size()));
 
   std::cout << "test SQP for n = " << raw.delta.size() << std::endl;
-  double d = 0;
+  double d = 0; //dummy accumulator to avoid that the compiler optimizes loops away
   {
     auto start_time = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < N; ++i)
@@ -367,21 +350,6 @@ void SQPPerformance(const std::string& filepath, int n, const int N)
     std::cout << " - SQP, warm start: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
   }
 
-#ifdef LSSOL_OPTION
-  {
-    auto opt = sqp.LSParameters();
-    sqp.LSParameters(opt.optimizedSolver(false));
-    auto start_time = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < N; ++i)
-    {
-      sqp.solve(pb);
-      d += sqp.x()[0];
-    }
-    auto end_time = std::chrono::high_resolution_clock::now();
-    auto time = end_time - start_time;
-    std::cout << " - SQP, lssol: " << static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(time).count()) / N << " microseconds" << std::endl;
-  }
-#endif
   std::cout << d << std::endl;
 }
 
@@ -398,7 +366,7 @@ void SQPTimings(const std::vector<std::string>& filepath, const std::vector<int>
     raw.push_back(r);
   }
 
-  //dummy
+  //dummy accumulator to avoid that the compiler optimizes loops away
   double d = 0;
 
   for (auto ni : n)
