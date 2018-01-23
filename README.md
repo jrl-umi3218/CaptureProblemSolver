@@ -52,15 +52,15 @@ A problem can be described by a simple text file such as those found in `c++\tes
 The file parser looks for (matlab readable, semi-colum terminated) lines with the `=` character in them, and recognize the following fields (in any order):
  * Delta (![](https://latex.codecogs.com/svg.latex?\boldsymbol{\delta}) in the paper)
  * g
- * lambda_min (![](https://latex.codecogs.com/svg.latex?\boldsymbol{\lambda}_{min}))
- * lambda_max (![](https://latex.codecogs.com/svg.latex?\boldsymbol{\lambda}_{max}))
+ * lambda_min (![](https://latex.codecogs.com/svg.latex?\lambda_{min}))
+ * lambda_max (![](https://latex.codecogs.com/svg.latex?\lambda_{max}))
  * omega_i_min (![](https://latex.codecogs.com/svg.latex?\omega_{\mathrm{i},\text{min}}))
  * omega_i_max (![](https://latex.codecogs.com/svg.latex?\omega_{\mathrm{i},\text{max}}))
  * s 
  * z_bar (![](https://latex.codecogs.com/svg.latex?\bar{z}_{\mathrm{i}}))
  * zd_bar (![](https://latex.codecogs.com/svg.latex?\dot{\bar{z}}_{\mathrm{i}}))
  * z_f (![](https://latex.codecogs.com/svg.latex?\bar{z}_{\mathrm{f}}))
- * (optionally) Phi (![](https://latex.codecogs.com/svg.latex?\left[\varphi_0=0,%20\varphi_1,%20\ldots,%20\varphi_n\right])), the solution computed by an other mean.
+ * (optionally) Phi (![](https://latex.codecogs.com/svg.latex?\left[\varphi_0=0,%20\varphi_1,%20\ldots,%20\varphi_n\right])), the solution computed by any other mean.
  
 All other lines are ignored.
 
