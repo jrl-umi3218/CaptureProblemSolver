@@ -80,7 +80,7 @@ namespace cps
 
     /** Solve the following problem:
       *
-      * min. ||J x + Jx0||^2 + ||j^T x + c||^2
+      * min. 1/2 ||J x + Jx0||^2 + mu^2/2 ||j^T x + c||^2
       * s.t. l_i <= x_i-x_{i-1} <= u_i for i=0..n-1  (x_{-1} = 0)
       *      xln <= x_{n-1} <= xun
       *
@@ -90,7 +90,7 @@ namespace cps
 
     /** Solve the following problem:
     *
-    * min. ||j^T x + c||^2
+    * min. 1/2 ||j^T x + c||^2
     * s.t. l_i <= x_i-x_{i-1} <= u_i for i=0..n-1  (x_{-1} = 0)
     *      xln <= x_{n-1} <= xun
     *

@@ -29,7 +29,7 @@ namespace cps
 {
   /** A solver for the (modified) capture problem.
     *
-    * The class in itself handle the memory and statistics useful for its two
+    * The class in itself handles the memory and statistics useful for its two
     * main methods:
     *  - solve
     *  - solveFeasibility
@@ -81,9 +81,25 @@ namespace cps
     /** Get the current parameters of the underlying least-square solver.*/
     const LeastSquare::Parameters& LSParameters() const;
 
-    /***/
+    /** Solve the following problem: 
+      *
+      * min. 1/2 ||J x||^2 + mu^2/2 ||b(x)||^2
+      * s.t. l_i <= x_i-x_{i-1} <= u_i for i=0..n-1  (x_{-1} = 0)
+      *      xln <= x_{n-1} <= xun
+      *
+      * where b(x) is the boundedness constraint violation described by pb.nonLinearConstraint(),
+      * J is described by pb.objective() and the constraints by pb.linearConstraints().
+      */
     SolverStatus solve(const Problem& pb);
-    /***/
+    /** Solve the following problem: 
+      *
+      * min. 1/2 ||b(x)||^2
+      * s.t. l_i <= x_i-x_{i-1} <= u_i for i=0..n-1  (x_{-1} = 0)
+      *      xln <= x_{n-1} <= xun
+      *
+      * where b(x) is the boundedness constraint violation described by pb.nonLinearConstraint(),
+      * and the constraints are described by pb.linearConstraints().
+      */
     SolverStatus solveFeasibility(const Problem& pb);
 
     /** Retrieve the solution (after call to solve() or solveFeasibility())*/

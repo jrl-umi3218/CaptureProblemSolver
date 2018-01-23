@@ -29,19 +29,21 @@ using namespace cps;
 /** Solve the problem specified by filepath (relatively to TEST_DIR) and display some statistics.*/
 void SQPSolveTest(const std::string& filepath)
 {
+  //reading a problem from file
   RawProblem raw;
   std::string base = TESTS_DIR;
   raw.read(base + "/" + filepath);
 
+  //creating Problem and SQP objects
   Problem pb(raw);
-  pb.precompute();
   SQP sqp(static_cast<int>(raw.delta.size()));
 
+  //solving and displaying
   std::cout << "Solving problem " << filepath << "\n" <<std::endl;
   auto s = sqp.solve(pb);
   std::cout << "  solver status: " << static_cast<int>(s) << std::endl;
   std::cout << "  sqp solution:  " << sqp.x().transpose() << std::endl;
-  std::cout << "  raw solution:  "<< raw.Phi_.tail(raw.Phi_.size()-1).transpose() << "\n" << std::endl;
+  std::cout << "  raw solution:  " << raw.Phi_.tail(raw.Phi_.size()-1).transpose() << "\n" << std::endl;
 
 #ifdef USE_STATS
   auto statistics = sqp.statistics();
