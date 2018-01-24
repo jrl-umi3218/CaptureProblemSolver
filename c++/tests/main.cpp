@@ -41,9 +41,12 @@ void SQPSolveTest(const std::string& filepath)
   //solving and displaying
   std::cout << "Solving problem " << filepath << "\n" <<std::endl;
   auto s = sqp.solve(pb);
-  std::cout << "  solver status: " << static_cast<int>(s) << std::endl;
-  std::cout << "  sqp solution:  " << sqp.x().transpose() << std::endl;
-  std::cout << "  raw solution:  " << raw.Phi_.tail(raw.Phi_.size()-1).transpose() << "\n" << std::endl;
+  std::cout << "  solver status:          " << static_cast<int>(s) << std::endl;
+  std::cout << "  boundenednes violation: " << pb.nonLinearConstraint().compute(sqp.x()) << std::endl;
+  std::cout << "  linear constraint:      " << (pb.linearConstraints().checkPrimal(sqp.x())?"":"not ") << "satisfied" << std::endl;
+  std::cout << "  sqp solution:           " << sqp.x().transpose() << std::endl;
+  if (raw.Phi_.size())
+    std::cout << "  raw solution:         " << raw.Phi_.tail(raw.Phi_.size()-1).transpose() << "\n" << std::endl;
 
 #ifdef USE_STATS
   auto statistics = sqp.statistics();
