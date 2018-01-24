@@ -16,8 +16,6 @@
  * along with CPS.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-
 #include <cps/SQP.h>
 
 using namespace Eigen;
@@ -116,8 +114,6 @@ namespace cps
       j_ *= mu;
       obj.applyJToTheLeft(Jx_, x_);
       double v = 0.5* Jx_.squaredNorm();
-      //std::cout << "1/2||f||^2 " << 0.5*f*f << std::endl;
-      //std::cout << "obj = " << 0.5*f*f + v << std::endl;
 
       if (checkKKT(x_, lambda_, f, j_, lc, &obj))
         return SolverStatus::Converge;
