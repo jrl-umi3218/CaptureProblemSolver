@@ -33,6 +33,9 @@ namespace cps
     void compute(double& val, const VectorConstRef& x) const;
     void compute(double& val, VectorRef grad, const VectorConstRef& x) const;
 
+    // alternative version
+    double compute(const VectorConstRef& x) const;
+
     void setAlpha(double alpha);
     void setb(double b);
 

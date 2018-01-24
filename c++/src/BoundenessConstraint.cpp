@@ -50,6 +50,13 @@ namespace cps
     grad[n_ - 1] -= alpha_ / (2 * y_[n_]);
   }
 
+  double BoundenessConstraint::compute(const VectorConstRef & x) const
+  {
+    double v;
+    compute(v, x);
+    return v;
+  }
+
   void BoundenessConstraint::setAlpha(double alpha)
   {
     alpha_ = alpha;
