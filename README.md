@@ -57,8 +57,10 @@ Use
 
 The C++ code is mainly intended to work as a library.
 
-The main class is `cps::SQP` which provides the solver and is used through its method `solve` to which a `cps::Problem` instance is passed.
+The main class is `cps::CaptureSolver` which provides the solver and is used through its method `solve` to which a `cps::Problem` instance is passed.
 A simple example of use can be found in `main.cpp`.
+
+`cps::CaptureSolver` is a thin wrapper around `cps::SQP` where the real work is done. `cps::SQP` is used the same way.
 
 As an alternative, the compilation of the project `main` generates an executable that takes as arguments the paths of files describing capture problem.
 Example of such files can be found in `c++\tests\data\`.
