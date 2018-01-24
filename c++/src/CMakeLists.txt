@@ -18,6 +18,7 @@
 
 set(CPS_SOURCES
   BoundenessConstraint.cpp
+  CaptureSolver.cpp
   CondensedOrthogonalMatrix.cpp
   Givens.cpp
   GivensSequence.cpp
@@ -33,6 +34,7 @@ set(CPS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 set(CPS_HEADERS
   ${CPS_INCLUDE_DIR}/cps/cps_api.h
   ${CPS_INCLUDE_DIR}/cps/BoundenessConstraint.h
+  ${CPS_INCLUDE_DIR}/cps/CaptureSolver.h
   ${CPS_INCLUDE_DIR}/cps/CondensedOrthogonalMatrix.h
   ${CPS_INCLUDE_DIR}/cps/defs.h
   ${CPS_INCLUDE_DIR}/cps/Givens.h

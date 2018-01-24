@@ -17,7 +17,7 @@
  */
 
 #include <cps/Problem.h>
-#include <cps/SQP.h>
+#include <cps/CaptureSolver.h>
 
 #include "misc.h"
 #include "SQPTestCommon.h"
@@ -27,7 +27,7 @@ using namespace Eigen;
 using namespace cps;
 
 /** Solve the problem specified by filepath (relatively to TEST_DIR) and display some statistics.*/
-void SQPSolveTest(const std::string& filepath)
+void solveProblem(const std::string& filepath)
 {
   //reading a problem from file
   RawProblem raw;
@@ -36,20 +36,20 @@ void SQPSolveTest(const std::string& filepath)
 
   //creating Problem and SQP objects
   Problem pb(raw);
-  SQP sqp(static_cast<int>(raw.delta.size()));
+  CaptureSolver solver(static_cast<int>(raw.delta.size()));
 
   //solving and displaying
   std::cout << "Solving problem " << filepath << "\n" <<std::endl;
-  auto s = sqp.solve(pb);
+  auto s = solver.solve(pb);
   std::cout << "  solver status:          " << static_cast<int>(s) << std::endl;
-  std::cout << "  boundenednes violation: " << pb.nonLinearConstraint().compute(sqp.x()) << std::endl;
-  std::cout << "  linear constraint:      " << (pb.linearConstraints().checkPrimal(sqp.x())?"":"not ") << "satisfied" << std::endl;
-  std::cout << "  sqp solution:           " << sqp.x().transpose() << std::endl;
+  std::cout << "  boundenednes violation: " << pb.nonLinearConstraint().compute(solver.x()) << std::endl;
+  std::cout << "  linear constraint:      " << (pb.linearConstraints().checkPrimal(solver.x())?"":"not ") << "satisfied" << std::endl;
+  std::cout << "  sqp solution:           " << solver.x().transpose() << std::endl;
   if (raw.Phi_.size())
-    std::cout << "  raw solution:         " << raw.Phi_.tail(raw.Phi_.size()-1).transpose() << "\n" << std::endl;
+    std::cout << "  raw solution:           " << raw.Phi_.tail(raw.Phi_.size()-1).transpose() << "\n" << std::endl;
 
 #ifdef USE_STATS
-  auto statistics = sqp.statistics();
+  auto statistics = solver.statistics();
   std::cout << " (iter,\tact,\tdeact,\t#actCstr)" << std::endl;
   for (size_t i = 0; i < statistics.lsStats.size(); ++i)
   {
@@ -67,12 +67,12 @@ int main(int argc, char* argv[])
   {
     for (int i = 1; i < argc; ++i)
     {
-      SQPSolveTest(argv[i]);
+      solveProblem(argv[i]);
     }
   }
   else
   {
-    SQPSolveTest("data/Problem01.txt");
+    solveProblem("data/Problem01.txt");
   }
 
 #ifdef WIN32

@@ -34,6 +34,7 @@ namespace cps
     MaxIteration,                   /** The maximum number of iteration was reached*/
     LineSearchFailed,               /** Step in the line search became too small*/
     NoLinearlyFeasiblePoint,        /** Linear inequality constraints are incompatible*/
+    Unfeasible,                     /** The constraints (linear and non-linear) are not compatible*/
     NumericallyEquivalentIterates,  /** Previous and new iterates are equal*/
     Fail
   };
