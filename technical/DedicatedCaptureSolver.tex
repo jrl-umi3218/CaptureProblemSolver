@@ -36,7 +36,6 @@
 %\newcommand{\mdiff1}[1]{\frac{\partial}{\partial #1}}
 \newcommand{\diff}[2]{\dfrac{\partial #1}{\partial #2}}
 \newcommand{\norm}[1]{\left\| #1 \right\|}
-\newcommand{\SC}[1]{\begin{flushleft}{\color{red} SC: #1}\end{flushleft}}
 
 \DeclareMathOperator*{\minimize}{\min.}
 \newcommand{\st}{\mbox{s.t.}}
@@ -69,7 +68,6 @@ The idea we want to explore here is to pass the equality constraint in the objec
         & l_j \leq \Phi_j - \Phi_{j-1} \leq u_j, \quad j=1..n \nonumber\\
         & \Phi_n^- \leq \Phi_n \leq \Phi_n^+ \nonumber
 \end{align}
-\SC{commented the nonlinear equality constraint}
 This is an inexact method, but by paying attention to the order of operations
 we can have $w$ high. The above problem is a non-linear least square
 optimization with linear constraints. It can be solved with an SQP. The idea is
@@ -102,7 +100,7 @@ The whole linear constraints writes
 \end{equation}
 where $e_n$ is the $n$-th column of the $n\times n$ identity matrix.
 
-\subsection{Expression as a zonope}
+\subsection{Expression as a zonotope}
 Let's define $H = \left\{x \in \mathbb{R}^n \vert\ l \leq C_Z x \leq u\right\}$, 
 \begin{equation}
 L = \BIN 1 & 0 & \ldots & 0 \\ 1 & 1 &\ldots & 0 \\ & & \ddots & \\ 1 & 1 &\ldots & 1\BOUT, \qquad D = \BIN u_1 - l_1 & & 0 \\ & \ddots & \\ 0 & & u_n - l_n\BOUT
