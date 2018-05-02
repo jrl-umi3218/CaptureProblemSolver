@@ -139,7 +139,19 @@ namespace cps
     if (ptranspose_)
       const_cast<Eigen::MatrixBase<Derived>&>(M) = transpositions_*M;
     else
+    {
+#if EIGEN_VERSION_AT_LEAST(3, 2, 90)
+      /** Work around https://stackoverflow.com/questions/49637702/applying-inverse-transposition-in-eigen */
+      const auto & indices = transpositions_.indices();
+      auto & M_ = const_cast<Eigen::MatrixBase<Derived>&>(M);
+      for(Eigen::Index i = indices.size(); i > 0; --i)
+      {
+        M_.row(i-1).swap(M_.row(indices(i-1)));
+      }
+#else
       const_cast<Eigen::MatrixBase<Derived>&>(M) = transpositions_.transpose()*M;
+#endif
+    }
     Qh_.applyTo(M);
   }
 
@@ -149,7 +161,19 @@ namespace cps
     for (const auto& Q : sequences_)
       Q.applyOnTheRightTo(M);
     if (ptranspose_)
+    {
+#if EIGEN_VERSION_AT_LEAST(3, 2, 90)
+      /** Work around https://stackoverflow.com/questions/49637702/applying-inverse-transposition-in-eigen */
+      const auto & indices = transpositions_.indices();
+      auto & M_ = const_cast<Eigen::MatrixBase<Derived>&>(M);
+      for(Eigen::Index i = indices.size(); i > 0; --i)
+      {
+        M_.col(i-1).swap(M_.col(indices(i-1)));
+      }
+#else
       const_cast<Eigen::MatrixBase<Derived>&>(M) = M*transpositions_.transpose();
+#endif
+    }
     else
       const_cast<Eigen::MatrixBase<Derived>&>(M) = M*transpositions_;
     Qh_.applyOnTheRightTo(M);
