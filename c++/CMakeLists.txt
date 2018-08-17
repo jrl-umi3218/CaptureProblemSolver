@@ -25,7 +25,7 @@ INCLUDE(cmake/msvc-specific.cmake)
 
 SET(PROJECT_NAME CaptureProblemSolver)
 SET(PROJECT_DESCRIPTION "...")
-SET(PROJECT_URL "https://gite.lirmm.fr/adrien_escande_at_gmail_com/BoundednessMPCSolver")
+SET(PROJECT_URL "https://github.com/jrl-umi3218/CaptureProblemSolver")
 SET(PROJECT_DEBUG_POSTFIX "_d")
 
 # Disable -Werror on Unix for now.
