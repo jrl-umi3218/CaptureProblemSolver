@@ -24,7 +24,7 @@ INCLUDE(cmake/eigen.cmake)
 INCLUDE(cmake/msvc-specific.cmake)
 
 SET(PROJECT_NAME CaptureProblemSolver)
-SET(PROJECT_DESCRIPTION "...")
+SET(PROJECT_DESCRIPTION "Solver for capture problems when walking with variable height")
 SET(PROJECT_URL "https://github.com/jrl-umi3218/CaptureProblemSolver")
 SET(PROJECT_DEBUG_POSTFIX "_d")
 
