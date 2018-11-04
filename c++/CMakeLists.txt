@@ -74,7 +74,6 @@ PKG_CONFIG_APPEND_LIBS(CaptureProblemSolver)
 IF(PYTHON_BINDINGS)
     # Add dependency towards the python bindings in the pkg-config file.
     add_subdirectory(bindings)
-    PKG_CONFIG_APPEND_LIBS(PyCaptureProblemSolver)
 ENDIF()
 
 SETUP_PROJECT_FINALIZE()
