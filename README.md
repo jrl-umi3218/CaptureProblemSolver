@@ -46,7 +46,7 @@ make && make install
 ```
 
 where the main options are:
- * `-DCMAKE_BUIlD_TYPE=Release` Build in Release mode
+ * `-DCMAKE_BUILD_TYPE=Release` Build in Release mode
  * `-DCMAKE_INSTALL_PREFIX=some/path/to/install` default is `/usr/local`
  * `-DPYTHON_BINDINGS=ON` Build Python bindings
 
