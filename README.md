@@ -5,7 +5,7 @@ A dedicated solver in C++ for the capture problem presented initially in
 [S. Caron, B. Mallein, "Balance control using both ZMP and COM height variations: A convex boundedness approach", ICRA 2018](https://hal.archives-ouvertes.fr/hal-01590509/document).
 
 The solver itself is presented in
-[S. Caron, A. Escande, L. Lanari, B. Mallein, "Capturability-based Analysis, Optimization and Control of 3D Bipedal Walking", under review](https://hal.archives-ouvertes.fr/hal-01689331/document).
+[S. Caron, A. Escande, L. Lanari, B. Mallein, "Capturability-based Pattern Generation for Walking with Variable Height", IEEE Transactions on Robotics, 2019](https://hal.archives-ouvertes.fr/hal-01689331/document).
 
 This repository contains three folders:
  - the C++ code of the solver
